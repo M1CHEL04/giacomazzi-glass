@@ -12,21 +12,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="{{ asset('css/interno.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
 
     @yield('css')
 </head>
 
 <body class="internal-body d-flex flex-column min-vh-100">
     @php
-    $currentUser = auth()->user();
-    $userName = $currentUser->name ?? session('user_name', 'Usuario');
+    $fullName = trim(session('user_name', 'Usuario'));
+    $nameParts = preg_split('/\s+/', $fullName);
+    $userName = $nameParts[0] ?? 'Usuario';
     $userInitial = mb_substr($userName, 0, 1);
     @endphp
 
     <header class="internal-topbar">
         <div class="container-fluid py-3 px-3 px-xl-4">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                <a href="#" class="internal-brand" aria-label="Inicio del panel interno">
+                <a href="{{ route('home-interno') }}" class="internal-brand" aria-label="Inicio del panel interno">
                     <span class="internal-brand-mark">
                         <i class="bi bi-building-fill"></i>
                     </span>
@@ -47,10 +49,10 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end internal-user-menu">
                         <li>
-                            <a class="dropdown-item internal-user-item" href="#">Mi perfil</a>
+                            <a class="dropdown-item internal-user-item" href="{{ route('profile') }}">Mi perfil</a>
                         </li>
                         <li>
-                            <form method="POST" action="}">
+                            <form method="POST" action="{{ route('logout') }}">
                                 @csrf
                                 <button type="submit" class="dropdown-item internal-user-item">
                                     Cerrar sesión
@@ -62,6 +64,8 @@
             </div>
         </div>
     </header>
+
+    @include('layouts.partials.toast')
 
     <div class="container-fluid flex-grow-1 px-3 px-xl-4">
         <div class="internal-layout">
@@ -106,7 +110,7 @@
 
         <div class="container-fluid px-3 px-xl-4 internal-footer-bottom">
             <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
-                <span>© {{ date('Y') }} Giacomazzi Cotizador</span>
+                <span>© {{ date('Y') }} Giacomazzi Glass</span>
                 <span>Interfaz interna para gestión administrativa</span>
             </div>
         </div>
@@ -115,6 +119,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <script src="{{ asset('js/toast.js') }}"></script>
 
     @yield('script')
 </body>

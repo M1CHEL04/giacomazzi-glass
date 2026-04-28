@@ -1,0 +1,55 @@
+.auth-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .auth-panel {
+            border-radius: 1.25rem;
+            background: var(--internal-white);
+            border: 1px solid var(--internal-border);
+            box-shadow: var(--internal-shadow);
+        }
+
+        .auth-visual {
+            background: radial-gradient(circle at 30% 35%, rgba(138, 185, 165, 0.35), transparent 55%),
+                linear-gradient(140deg, rgba(27, 45, 33, 0.95) 0%, rgba(40, 116, 82, 0.9) 55%, rgba(138, 185, 165, 0.7) 100%);
+            color: var(--internal-white);
+            border-radius: 1.25rem;
+            min-height: 360px;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .auth-visual small {
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .auth-cta {
+            border-left: 2px solid rgba(255, 255, 255, 0.35);
+            padding-left: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .password-toggle {
+            border-color: rgba(63, 63, 63, 0.12);
+            color: #287452;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover,
+        .password-toggle:focus {
+            background: rgba(40, 116, 82, 0.08);
+            color: #287452;
+        }
+
+        .password-toggle svg {
+            width: 1rem;
+            height: 1rem;
+        }
