@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('verification_code')->nullable();
             $table->boolean('cambio_contraseña')->default(false);
             $table->timestamps();
         });

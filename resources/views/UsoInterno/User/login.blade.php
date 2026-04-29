@@ -65,7 +65,7 @@
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <a href="{{ route('change-password-view') }}" class="text-success text-decoration-none small">¿Olvidaste tu contrasena?</a>
+                                    <a href="{{ route('forgot-password-view') }}" class="text-success text-decoration-none small">¿Olvidaste tu contrasena?</a>
                                 </div>
                                 <button type="submit" class="btn btn-success w-100 fw-semibold">
                                     Iniciar sesion

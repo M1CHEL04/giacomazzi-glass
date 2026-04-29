@@ -16,6 +16,15 @@ Route::post('/cambiar-contrasena-form', [\App\Http\Controllers\AccountsControlle
 Route::get('/cambiar-contraseña', function () {
     return view('UsoInterno.User.changePassword');
 })->name('change-password-view');
+Route::get('/olvido-contrasena', function () {
+    return view('UsoInterno.User.forgotPassword');
+})->name('forgot-password-view');
+Route::post('/enviar-codigo-verificacion', [\App\Http\Controllers\AccountsController::class, 'sendVerifyCode'])
+    ->name('send-verify-code');
+Route::post('/verificar-codigo', [\App\Http\Controllers\AccountsController::class, 'verifyCode'])
+    ->name('verify-code');
+Route::post('/cambiar-contrasena-codigo', [\App\Http\Controllers\AccountsController::class, 'changePasswordAfterCode'])
+    ->name('change-password-after-code');
 
 
 /*
