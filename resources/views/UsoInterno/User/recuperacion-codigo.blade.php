@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Codigo de recuperacion</title>
+    <title>Código de recuperación</title>
 </head>
 
 <body style="margin:0; padding:0; background-color:#f7faf8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color:#3f3f3f;">
@@ -27,21 +27,22 @@
                     </tr>
                     <tr>
                         <td style="padding:0 32px 8px;">
-                            <h1 style="margin:0 0 8px; font-size:22px; font-weight:700; color:#3f3f3f;">Codigo de recuperacion</h1>
-                            <p style="margin:0; font-size:14px; color:rgba(63,63,63,0.72);">Usa el siguiente codigo para restablecer tu contrasena. Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+                            <h1 style="margin:0 0 8px; font-size:22px; font-weight:700; color:#3f3f3f;">Código de recuperación</h1>
+                            <p style="margin:0; font-size:14px; color:rgba(63,63,63,0.72);">Usa el siguiente código para restablecer tu contraseña. Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:20px 32px;">
                             <div style="background:rgba(40,116,82,0.08); border:1px dashed rgba(40,116,82,0.35); border-radius:14px; padding:18px; text-align:center;">
-                                <div style="font-size:12px; color:#287452; letter-spacing:0.16em; text-transform:uppercase; font-weight:700;">Tu codigo</div>
+                                <div style="font-size:12px; color:#287452; letter-spacing:0.16em; text-transform:uppercase; font-weight:700;">Tu código</div>
                                 <div style="font-size:28px; font-weight:800; letter-spacing:0.2em; color:#1f5a40; margin-top:6px;">{{ $verificationCode }}</div>
                             </div>
                         </td>
                     </tr>
                     <tr>
                         <td style="padding:0 32px 28px;">
-                            <p style="margin:0; font-size:13px; color:rgba(63,63,63,0.68);">Este codigo tiene una validez limitada. Te recomendamos completar el proceso lo antes posible.</p>
+                            <p style="margin:0; font-size:13px; color:rgba(63,63,63,0.68);">Este código
+                                tiene una validez limitada. Te recomendamos completar el proceso lo antes posible.</p>
                         </td>
                     </tr>
                     <tr>

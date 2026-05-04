@@ -36,7 +36,7 @@ $userInitial = mb_substr($userName, 0, 1);
 
             <div class="mt-4 d-flex flex-wrap gap-2 justify-content-end">
                 <a href="{{ route('change-password-view') }}" class="btn btn-sm btn-success fw-semibold">
-                    Cambiar contrasena
+                    Cambiar contraseña
                 </a>
             </div>
         </div>
@@ -47,15 +47,15 @@ $userInitial = mb_substr($userName, 0, 1);
             <div class="fw-semibold text-uppercase small text-success-emphasis mb-2">Seguridad</div>
             <h3 class="h5 fw-bold mb-3">Tu acceso protegido</h3>
             <p class="text-secondary mb-4">
-                Mantén tu cuenta segura actualizando tu contrasena con regularidad.
+                Mantén tu cuenta segura actualizando tu contraseña con regularidad.
             </p>
             <div class="d-flex align-items-center gap-3">
                 <div class="internal-brand-mark">
                     <i class="bi bi-shield-lock"></i>
                 </div>
                 <div>
-                    <div class="fw-semibold">Recomendacion</div>
-                    <div class="text-secondary small">Usa una contrasena unica y segura.</div>
+                    <div class="fw-semibold">Recomendación</div>
+                    <div class="text-secondary small">Usa una contraseña unica y segura.</div>
                 </div>
             </div>
         </div>

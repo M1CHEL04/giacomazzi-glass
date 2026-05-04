@@ -54,7 +54,7 @@
                     <div class="col-12 col-lg-6">
                         <div class="auth-visual h-100">
                             <div>
-                                <small class="d-block mb-3">Recuperacion de acceso</small>
+                                <small class="d-block mb-3">Recuperación de acceso</small>
                                 <h2 class="h3 fw-bold mb-3">Vuelve a tu panel</h2>
                                 <p class="mb-0 text-white-50">Recupera tu acceso en tres pasos simples y seguros.</p>
                             </div>
@@ -67,22 +67,22 @@
                         <div class="auth-panel h-100 p-4 p-lg-5">
                             <div class="mb-4">
                                 <p class="text-uppercase small text-success-emphasis mb-2">Acceso seguro</p>
-                                <h1 class="h4 fw-bold text-success mb-1">Recuperar contrasena</h1>
+                                <h1 class="h4 fw-bold text-success mb-1">Recuperar contraseña</h1>
                                 <p class="text-secondary mb-0">Confirma tu identidad para continuar.</p>
                             </div>
 
-                            <div class="auth-stepper" aria-label="Progreso de recuperacion">
+                            <div class="auth-stepper" aria-label="Progreso de recuperación">
                                 <div class="auth-step is-active" data-step-indicator="1">
                                     <span class="auth-step-index">1</span>
                                     <span>Email</span>
                                 </div>
                                 <div class="auth-step" data-step-indicator="2">
                                     <span class="auth-step-index">2</span>
-                                    <span>Codigo</span>
+                                    <span>Código</span>
                                 </div>
                                 <div class="auth-step" data-step-indicator="3">
                                     <span class="auth-step-index">3</span>
-                                    <span>Nueva clave</span>
+                                    <span>Nueva contraseña</span>
                                 </div>
                             </div>
 
@@ -93,11 +93,11 @@
                                     <input type="email" name="email" id="email" class="form-control" required
                                         placeholder="ejemplo@dominio.com">
                                 </div>
-                                <div class="auth-helper">Te enviaremos un codigo de verificacion.</div>
+                                <div class="auth-helper">Te enviaremos un código de verificación.</div>
                                 <div class="auth-action">
                                     <button type="submit" class="btn btn-sm btn-success fw-semibold" data-submit>
                                         <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" data-spinner></span>
-                                        Enviar codigo
+                                        Enviar código
                                     </button>
                                     <a href="{{ route('login-view') }}" class="auth-muted-link">Volver al login</a>
                                 </div>
@@ -106,15 +106,15 @@
                             <form id="verify-code-form" class="auth-section is-hidden" data-url="{{ route('verify-code') }}">
                                 @csrf
                                 <div>
-                                    <label for="verification_code" class="form-label fw-semibold">Codigo de verificacion</label>
+                                    <label for="verification_code" class="form-label fw-semibold">Código de verificación</label>
                                     <input type="text" name="verification_code" id="verification_code" class="form-control" required
-                                        placeholder="Ingresa el codigo recibido">
+                                        placeholder="Ingresa el código recibido">
                                 </div>
-                                <div class="auth-helper">El codigo expira en pocos minutos.</div>
+                                <div class="auth-helper">El código expira en pocos minutos.</div>
                                 <div class="auth-action">
                                     <button type="submit" class="btn btn-sm btn-success fw-semibold" data-submit>
                                         <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" data-spinner></span>
-                                        Verificar codigo
+                                        Verificar código
                                     </button>
                                 </div>
                             </form>
@@ -122,12 +122,12 @@
                             <form id="reset-password-form" class="auth-section is-hidden" data-url="{{ route('change-password-after-code') }}">
                                 @csrf
                                 <div>
-                                    <label for="new_password" class="form-label fw-semibold">Nueva contrasena</label>
+                                    <label for="new_password" class="form-label fw-semibold">Nueva contraseña</label>
                                     <div class="input-group">
                                         <input type="password" name="new_password" id="new_password" class="form-control" required
-                                            placeholder="Ingresa tu nueva contrasena">
+                                            placeholder="Ingresa tu nueva contraseña">
                                         <button class="btn btn-outline-secondary password-toggle" type="button" data-toggle="password"
-                                            data-target="new_password" aria-label="Mostrar contrasena">
+                                            data-target="new_password" aria-label="Mostrar contraseña">
                                             <span data-eye="open">
                                                 <x-fluentui-eye-20-o />
                                             </span>
@@ -138,12 +138,12 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label for="new_password_confirmation" class="form-label fw-semibold">Confirmar contrasena</label>
+                                    <label for="new_password_confirmation" class="form-label fw-semibold">Confirmar contraseña</label>
                                     <div class="input-group">
                                         <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="form-control" required
-                                            placeholder="Repite la nueva contrasena">
+                                            placeholder="Repite la nueva contraseña">
                                         <button class="btn btn-outline-secondary password-toggle" type="button" data-toggle="password"
-                                            data-target="new_password_confirmation" aria-label="Mostrar contrasena">
+                                            data-target="new_password_confirmation" aria-label="Mostrar contraseña">
                                             <span data-eye="open">
                                                 <x-fluentui-eye-20-o />
                                             </span>
@@ -156,7 +156,7 @@
                                 <div class="auth-action">
                                     <button type="submit" class="btn btn-sm btn-success fw-semibold" data-submit>
                                         <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" data-spinner></span>
-                                        Guardar nueva clave
+                                        Guardar nueva contraseña
                                     </button>
                                 </div>
                             </form>
@@ -171,7 +171,7 @@
                 <div class="internal-footer-bottom border-0 p-0">
                     <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
                         <span>© {{ date('Y') }} Giacomazzi Glass</span>
-                        <span>Interfaz interna para gestion administrativa</span>
+                        <span>Interfaz interna para gestión administrativa</span>
                     </div>
                 </div>
             </div>

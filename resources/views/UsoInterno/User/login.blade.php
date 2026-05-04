@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Iniciar sesion</title>
+    <title>Iniciar sesión</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -49,12 +49,12 @@
                                         placeholder="ejemplo@dominio.com">
                                 </div>
                                 <div>
-                                    <label for="password" class="form-label fw-semibold">Contrasena</label>
+                                    <label for="password" class="form-label fw-semibold">Contraseña</label>
                                     <div class="input-group">
                                         <input type="password" name="password" id="password" class="form-control" required
-                                            placeholder="Ingresa tu contrasena">
+                                            placeholder="Ingresa tu contraseña">
                                         <button class="btn btn-outline-secondary password-toggle" type="button" data-toggle="password"
-                                            data-target="password" aria-label="Mostrar contrasena">
+                                            data-target="password" aria-label="Mostrar contraseña">
                                             <span data-eye="open">
                                                 <x-fluentui-eye-20-o />
                                             </span>
@@ -65,10 +65,10 @@
                                     </div>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
-                                    <a href="{{ route('forgot-password-view') }}" class="text-success text-decoration-none small">¿Olvidaste tu contrasena?</a>
+                                    <a href="{{ route('forgot-password-view') }}" class="text-success text-decoration-none small">¿Olvidaste tu contraseña?</a>
                                 </div>
                                 <button type="submit" class="btn btn-success w-100 fw-semibold">
-                                    Iniciar sesion
+                                    Iniciar sesión
                                 </button>
                             </form>
                         </div>
@@ -82,7 +82,7 @@
                 <div class="internal-footer-bottom border-0 p-0">
                     <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
                         <span>© {{ date('Y') }} Giacomazzi Glass</span>
-                        <span>Interfaz interna para gestion administrativa</span>
+                        <span>Interfaz interna para gestión administrativa</span>
                     </div>
                 </div>
             </div>
