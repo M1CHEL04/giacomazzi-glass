@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UsoInternoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -38,3 +39,9 @@ Route::get('/panel-interno', function () {
 Route::get('/mi-perfil', function () {
     return view('UsoInterno.User.myProfile');
 })->name('profile');
+
+Route::get('/categorias', [UsoInternoController::class, 'indexCategorias'])->name('categorias.index');
+Route::get('/create-categoria', [UsoInternoController::class, 'createCategoria'])->name('categorias.create');
+Route::get('/edit-categoria/{id}', [UsoInternoController::class, 'editCategoria'])->name('categorias.edit');
+Route::post('/store-categoria', [UsoInternoController::class, 'storeCategoria'])->name('categorias.store');
+Route::post('/update-categoria/{id}', [UsoInternoController::class, 'updateCategoria'])->name('categorias.update');
