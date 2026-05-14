@@ -1,7 +1,7 @@
 @extends('layouts.app-interno')
 @php
 $isEdit = isset($categoria);
-$formAction = $isEdit ? route('categorias.update', $categoria) : route('categorias.store');
+$formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : route('uso-interno.categorias.store');
 @endphp
 
 @section('title', 'Panel Interno - Giacomazzi Glass')
@@ -23,7 +23,7 @@ $formAction = $isEdit ? route('categorias.update', $categoria) : route('categori
 
 <div class="d-flex flex-column gap-3">
     <div>
-        <a href="{{ route('categorias.index') }}" class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-decoration-none" style="font-size: 13px;">
+        <a href="{{ route('uso-interno.categorias.index') }}" class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-decoration-none" style="font-size: 13px;">
             <x-fluentui-arrow-left-20-o class="me-1" style="width:14px;height:14px;" />
             Volver
         </a>

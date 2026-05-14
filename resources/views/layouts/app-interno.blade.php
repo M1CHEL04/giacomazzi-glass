@@ -28,7 +28,7 @@
     <header class="internal-topbar">
         <div class="container-fluid py-3 px-3 px-xl-4">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                <a href="{{ route('home-interno') }}" class="internal-brand" aria-label="Inicio del panel interno">
+                <a href="{{ route('uso-interno.home-interno') }}" class="internal-brand" aria-label="Inicio del panel interno">
                     <span class="internal-brand-mark">
                         <i class="bi bi-building-fill"></i>
                     </span>
@@ -49,7 +49,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end internal-user-menu">
                         <li>
-                            <a class="dropdown-item internal-user-item" href="{{ route('profile') }}">Mi perfil</a>
+                            <a class="dropdown-item internal-user-item" href="{{ route('uso-interno.profile') }}">Mi perfil</a>
                         </li>
                         <li>
                             <form method="POST" action="{{ route('logout') }}">
@@ -81,7 +81,7 @@
                         <i class="bi bi-window-stack"></i>
                         <span>Productos</span>
                     </a>
-                    <a href="{{ route('categorias.index') }}"
+                    <a href="{{ route('uso-interno.categorias.index') }}"
                         class="internal-sidebar-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">
                         <i class="bi bi-grid-3x3-gap"></i>
                         <span>Categorías</span>

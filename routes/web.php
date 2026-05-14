@@ -7,10 +7,14 @@ Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
 
+/*
+* 
+* Login y Manejo de cuenta 
+*
+*/
 Route::get('/login', function () {
     return view('UsoInterno.User.login');
 })->name('login-view');
-
 Route::post('/login-form', [\App\Http\Controllers\AccountsController::class, 'login'])->name('login');
 Route::post('/logout', [\App\Http\Controllers\AccountsController::class, 'logout'])->name('logout');
 Route::post('/cambiar-contrasena-form', [\App\Http\Controllers\AccountsController::class, 'changePassword'])->name('change-password');
@@ -33,15 +37,22 @@ Route::post('/cambiar-contrasena-codigo', [\App\Http\Controllers\AccountsControl
 * Uso Interno
 *
 */
-Route::get('/panel-interno', function () {
-    return view('UsoInterno.index');
-})->name('home-interno');
-Route::get('/mi-perfil', function () {
-    return view('UsoInterno.User.myProfile');
-})->name('profile');
+Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group(function () {
 
-Route::get('/categorias', [UsoInternoController::class, 'indexCategorias'])->name('categorias.index');
-Route::get('/create-categoria', [UsoInternoController::class, 'createCategoria'])->name('categorias.create');
-Route::get('/edit-categoria/{id}', [UsoInternoController::class, 'editCategoria'])->name('categorias.edit');
-Route::post('/store-categoria', [UsoInternoController::class, 'storeCategoria'])->name('categorias.store');
-Route::post('/update-categoria/{id}', [UsoInternoController::class, 'updateCategoria'])->name('categorias.update');
+    //Home interno
+    Route::get('/panel-interno', function () {
+        return view('UsoInterno.index');
+    })->name('home-interno');
+
+    //Mi perfil
+    Route::get('/mi-perfil', function () {
+        return view('UsoInterno.User.myProfile');
+    })->name('profile');
+
+    //Categorias
+    Route::get('/categorias', [UsoInternoController::class, 'indexCategorias'])->name('categorias.index');
+    Route::get('/create-categoria', [UsoInternoController::class, 'createCategoria'])->name('categorias.create');
+    Route::get('/edit-categoria/{id}', [UsoInternoController::class, 'editCategoria'])->name('categorias.edit');
+    Route::post('/store-categoria', [UsoInternoController::class, 'storeCategoria'])->name('categorias.store');
+    Route::post('/update-categoria/{id}', [UsoInternoController::class, 'updateCategoria'])->name('categorias.update');
+});

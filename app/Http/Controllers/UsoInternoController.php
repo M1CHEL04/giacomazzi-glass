@@ -60,7 +60,7 @@ class UsoInternoController extends Controller
                 'activo' => true,
             ]);
 
-            return redirect()->route('categorias.index')->with('success', 'Categoría creada exitosamente.');
+            return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría creada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al crear categoría: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al crear la categoría.');
@@ -73,7 +73,7 @@ class UsoInternoController extends Controller
         return view('UsoInterno.categorias.createCategoria', [
             'categoria' => $categoria,
             'isEdit' => true,
-            'formAction' => route('categorias.update', $categoria),
+            'formAction' => route('uso-interno.categorias.update', $categoria),
         ]);
     }
 
@@ -97,7 +97,7 @@ class UsoInternoController extends Controller
                 'activo' => (bool) $request->input('activo', 0),
             ]);
 
-            return redirect()->route('categorias.index')->with('success', 'Categoría actualizada exitosamente.');
+            return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar categoría: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al actualizar la categoría.');

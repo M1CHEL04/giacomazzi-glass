@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function searchCategories(search) {
-        const url = new URL(window.location.origin + '/categorias');
+        const url = new URL(window.location.origin + '/uso-interno/categorias');
         if (search) {
             url.searchParams.append('search', search);
         }
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                     <div class="text-end" style="width: 60px;">
                         <a
-                            href="/categorias/${categoria.id}/edit"
+                            href="/uso-interno/edit-categoria/${categoria.id}"
                             class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"
                             aria-label="Editar categoria"
                             title="Editar">

@@ -16,7 +16,7 @@
                 id="searchCategory">
             <x-fluentui-search-20-o class="position-absolute text-secondary" style="width:18px;height:18px;left:10px;top:50%;transform:translateY(-50%);" />
         </div>
-        <a href="{{ route('categorias.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
+        <a href="{{ route('uso-interno.categorias.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
             <x-fluentui-add-20-o class="me-1" style="width:14px;height:14px;" />
             Crear categoría
         </a>
@@ -59,7 +59,7 @@
                 </div>
                 <div class="text-end" style="width: 60px;">
                     <a
-                        href="{{ route('categorias.edit', $categoria) }}"
+                        href="{{ route('uso-interno.categorias.edit', $categoria) }}"
                         class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"
                         aria-label="Editar categoria"
                         title="Editar">

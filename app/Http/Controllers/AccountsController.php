@@ -87,7 +87,7 @@ class AccountsController extends Controller
                 ]);
 
                 if ($user->cambio_contraseña) {
-                    return redirect()->route('home-interno')->with('success', 'Bienvenido/a, ' . $user->name . '!');
+                    return redirect()->route('uso-interno.home-interno')->with('success', 'Bienvenido/a, ' . $user->name . '!');
                 } else {
                     return redirect()->route('change-password-view')->with('success', 'Bienvenido, ' . $user->name . '! Por favor, cambia tu contraseña.');
                 }
@@ -155,7 +155,7 @@ class AccountsController extends Controller
             $user->cambio_contraseña = true;
             $user->save();
 
-            return redirect()->route('home-interno')->with('success', 'Contraseña cambiada exitosamente.');
+            return redirect()->route('uso-interno.home-interno')->with('success', 'Contraseña cambiada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al cambiar contraseña: ' . $e->getMessage());
             if ($request->expectsJson()) {
@@ -234,7 +234,7 @@ class AccountsController extends Controller
                 return response()->json(['message' => 'Código de verificación correcto.']);
             }
 
-            return redirect()->route('home-interno')->with('success', 'Código de verificación correcto. Bienvenido, ' . $user->name . '!');
+            return redirect()->route('uso-interno.home-interno')->with('success', 'Código de verificación correcto. Bienvenido, ' . $user->name . '!');
         } catch (\Exception $e) {
             Log::error('Error al verificar código: ' . $e->getMessage());
             if ($request->expectsJson()) {
