@@ -8,11 +8,32 @@ use Illuminate\Support\Facades\Log;
 
 class UsoInternoController extends Controller
 {
-    public function indexCategorias()
+    public function indexCategorias(Request $request)
     {
+        $search = $request->input('search');
+
         $categorias = Categoria::withCount('productos')
+            ->when($search, function ($query, $search) {
+                return $query->where('nombre', 'like', '%' . $search . '%');
+            })
             ->orderBy('nombre')
-            ->paginate(12);
+            ->paginate(12)
+            ->appends(['search' => $search]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'categorias' => $categorias->items(),
+                'pagination' => [
+                    'current_page' => $categorias->currentPage(),
+                    'last_page' => $categorias->lastPage(),
+                    'total' => $categorias->total(),
+                    'from' => $categorias->firstItem(),
+                    'to' => $categorias->lastItem(),
+                    'links' => $categorias->links()->render()
+                ]
+            ]);
+        }
+
         return view('UsoInterno.categorias.indexCategoria', compact('categorias'));
     }
 

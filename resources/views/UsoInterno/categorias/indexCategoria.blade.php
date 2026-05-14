@@ -9,8 +9,10 @@
         <div class="position-relative flex-grow-1">
             <input
                 type="text"
+                name="search"
                 class="form-control form-control-sm ps-5 py-2 rounded-2 border"
-                placeholder="Buscar por nombre o ID..."
+                placeholder="Buscar por nombre..."
+                value="{{ request('search') }}"
                 id="searchCategory">
             <x-fluentui-search-20-o class="position-absolute text-secondary" style="width:18px;height:18px;left:10px;top:50%;transform:translateY(-50%);" />
         </div>
@@ -20,14 +22,24 @@
         </a>
     </div>
 
-    <div class="border rounded-3 bg-white">
+    <div class="border rounded-3 bg-white position-relative">
+        <!-- Spinner de carga -->
+        <div class="d-none position-absolute w-100 h-100 d-flex align-items-center justify-content-center bg-white bg-opacity-75 rounded-3" id="loading-spinner" style="min-height: 200px; z-index: 10;">
+            <div class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <div class="mt-2 text-secondary small">Buscando categorías...</div>
+            </div>
+        </div>
+
         <div class="d-none d-md-flex align-items-center text-uppercase small fw-semibold text-secondary border-bottom px-3 py-2" style="font-size: 11px;">
             <div class="flex-grow-1">Nombre</div>
             <div style="width: 140px;">Estado</div>
             <div class="text-end" style="width: 60px;">Acciones</div>
         </div>
 
-        <div class="d-flex flex-column">
+        <div class="d-flex flex-column" id="categorias-list">
             @forelse ($categorias as $categoria)
             @php
             $estadoRaw = data_get($categoria, 'activo', data_get($categoria, 'activa', data_get($categoria, 'estado')));
@@ -60,16 +72,18 @@
             @endforelse
         </div>
 
-        @if ($categorias->hasPages())
-        <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 px-3 py-2 border-top">
-            <div class="text-secondary" style="font-size: 12px;">
-                Mostrando {{ $categorias->firstItem() }}-{{ $categorias->lastItem() }} de {{ $categorias->total() }} categorías
+        <div id="categorias-pagination">
+            @if ($categorias->hasPages())
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 px-3 py-2 border-top">
+                <div class="text-secondary" style="font-size: 12px;">
+                    Mostrando {{ $categorias->firstItem() }}-{{ $categorias->lastItem() }} de {{ $categorias->total() }} categorías
+                </div>
+                <div>
+                    {{ $categorias->links() }}
+                </div>
             </div>
-            <div>
-                {{ $categorias->links() }}
-            </div>
+            @endif
         </div>
-        @endif
     </div>
 </div>
 @endsection
