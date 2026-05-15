@@ -34,10 +34,31 @@
                 <div class="collapse navbar-collapse" id="externalNavbar">
                     <ul class="navbar-nav mx-auto external-menu gap-lg-2">
                         <li class="nav-item">
-                            <a class="nav-link external-menu-btn" href="#">Inicio</a>
+                            <a class="nav-link external-menu-btn" href="{{ route('welcome') }}">Inicio</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link external-menu-btn" href="#">Productos</a>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link external-menu-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Productos
+                            </a>
+                            <ul class="dropdown-menu external-dropdown-menu">
+                                @if(isset($categoriasMenu) && $categoriasMenu->count() > 0)
+                                @foreach($categoriasMenu as $categoria)
+                                <li>
+                                    <a class="dropdown-item external-dropdown-item" href="#">
+                                        {{ $categoria->nombre }}
+                                    </a>
+                                </li>
+                                @endforeach
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                @endif
+                                <li>
+                                    <a class="dropdown-item external-dropdown-item fw-semibold" href="#">
+                                        Ver todos los productos
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link external-menu-btn" href="#">Contacto</a>
@@ -63,15 +84,16 @@
             <div class="row align-items-center gy-4">
                 <div class="col-12 col-lg-4">
                     <h6 class="external-footer-title mb-3">Contacto</h6>
-                    <div class="external-contact-block mb-2">
-                        <strong>Sucursal 1</strong><br>
-                        Dirección: Calle Ejemplo 123<br>
-                        Tel: +54 9 11 1234-5678
+                    <div class="external-contact-block mb-3">
+                        <strong>Fábrica</strong><br>
+                        San Juan 1978 entre Av. La Plata y Madame Curie<br>
+                        Quilmes Oeste, Buenos Aires<br>
+                        <i class="bi bi-telephone-fill"></i> 011 6445-7059
                     </div>
                     <div class="external-contact-block">
-                        <strong>Sucursal 2</strong><br>
-                        Dirección: Avenida Ejemplo 456<br>
-                        Tel: +54 9 11 8765-4321
+                        <strong>Local al público</strong><br>
+                        Au Dr. Ricardo Balbín Km 30 - Local 03B<br>
+                        Guillermo Enrique Hudson, Buenos Aires<br>
                     </div>
                 </div>
 
@@ -85,7 +107,7 @@
                     <a href="#" class="external-social-link" aria-label="WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                     </a>
-                    <a href="#" class="external-social-link" aria-label="Instagram">
+                    <a href="https://www.instagram.com/giacomazzi_srl/" target="_blank" class="external-social-link" aria-label="Instagram">
                         <i class="bi bi-instagram"></i>
                     </a>
                 </div>
@@ -97,6 +119,40 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
     <script src="{{ asset('js/toast.js') }}"></script>
+
+    <script>
+        // Dropdown con hover en desktop
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropdownElement = document.querySelector('.dropdown');
+            const dropdownToggle = document.querySelector('.dropdown-toggle');
+            const dropdownMenu = document.querySelector('.dropdown-menu');
+            let hideTimeout;
+
+            if (dropdownElement && window.innerWidth >= 992) {
+                dropdownElement.addEventListener('mouseenter', function() {
+                    clearTimeout(hideTimeout);
+                    dropdownToggle.classList.add('show');
+                    dropdownMenu.classList.add('show');
+                });
+
+                dropdownElement.addEventListener('mouseleave', function() {
+                    hideTimeout = setTimeout(function() {
+                        dropdownToggle.classList.remove('show');
+                        dropdownMenu.classList.remove('show');
+                    }, 150); // Delay de 150ms antes de ocultar
+                });
+            }
+
+            // Recalcular en resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth < 992) {
+                    clearTimeout(hideTimeout);
+                    dropdownToggle.classList.remove('show');
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        });
+    </script>
 
     @yield('script')
 </body>

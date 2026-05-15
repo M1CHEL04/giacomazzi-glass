@@ -16,13 +16,12 @@ class CheckAdminRole
     public function handle(Request $request, Closure $next): Response
     {
         // Verificar si el usuario tiene sesión activa
-        if (!session()->has('user')) {
+        if (!session()->has('user_email')) {
             return redirect()->route('login-view')->with('error', 'Debes iniciar sesión para acceder.');
         }
 
-        // Verificar si el rol es Admin
-        $user = session('user');
-        if (!isset($user['Rol']) || $user['Rol'] !== 'Admin') {
+
+        if (!session()->has('rol') || session('rol') !== 'Admin') {
             return redirect()->route('uso-interno.home-interno')->with('error', 'No tienes permisos para acceder a esta sección.');
         }
 
