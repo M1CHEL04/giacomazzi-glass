@@ -4,6 +4,7 @@
 @section('content')
 <!-- Hero Section -->
 <section class="hero-section">
+    <img src="{{ asset('images/homehero.jpg') }}" alt="Giacomazzi Glass" class="hero-section-bg">
     <div class="hero-overlay"></div>
     <div class="container hero-content">
         <div class="row align-items-center min-vh-75">
