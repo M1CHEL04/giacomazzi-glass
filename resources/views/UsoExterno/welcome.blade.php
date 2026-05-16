@@ -116,7 +116,7 @@
                         <li><i class="bi bi-check2"></i> Presupuesto sin compromiso</li>
                         <li><i class="bi bi-check2"></i> Instalación disponible</li>
                     </ul>
-                    <a href="#" class="btn-custom-contact">Solicitar Presupuesto</a>
+                    <a href="{{ route('contacto') }}" class="btn-custom-contact">Solicitar Presupuesto</a>
                 </div>
             </div>
         </div>
@@ -131,7 +131,7 @@
             <p class="cta-text">Explorá nuestro catálogo de productos estándar o contactános para una solución personalizada</p>
             <div class="cta-buttons">
                 <a href="#productos" class="btn-cta-primary">Ver Catálogo</a>
-                <a href="#" class="btn-cta-secondary">Contacto</a>
+                <a href="{{ route('contacto') }}" class="btn-cta-secondary">Contacto</a>
             </div>
         </div>
     </div>

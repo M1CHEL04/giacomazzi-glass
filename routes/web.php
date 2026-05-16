@@ -4,8 +4,12 @@ use App\Http\Controllers\UsoInternoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('UsoExterno.welcome');
 })->name('welcome');
+
+Route::get('/contacto', function () {
+    return view('UsoExterno.contacto');
+})->name('contacto');
 
 /*
 * 

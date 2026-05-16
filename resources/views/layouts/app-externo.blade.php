@@ -61,7 +61,7 @@
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link external-menu-btn" href="#">Contacto</a>
+                            <a class="nav-link external-menu-btn" href="{{ route('contacto') }}">Contacto</a>
                         </li>
                     </ul>
 
