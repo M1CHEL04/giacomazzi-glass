@@ -5,10 +5,22 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .contact-hero {
-        background: linear-gradient(135deg, #2d5a3f 0%, #1a2e1f 100%);
         padding: 4rem 0 3rem;
+        margin-top: calc(-1.5rem - 1px);
+        /* Compensa el padding del main y el borde del navbar */
         position: relative;
         overflow: hidden;
+    }
+
+    .contact-hero-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center 92%;
+        z-index: 0;
     }
 
     .contact-hero::before {
@@ -18,8 +30,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.03"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
-        opacity: 0.4;
+        background: linear-gradient(135deg, rgba(45, 90, 63, 0.85) 0%, rgba(26, 46, 31, 0.9) 100%);
+        z-index: 0;
     }
 
     .contact-hero-content {
@@ -189,6 +201,7 @@
 
 <!-- Hero Section -->
 <section class="contact-hero">
+    <img src="{{ asset('images/contactohero.jpg') }}" alt="Contacto" class="contact-hero-bg">
     <div class="contact-hero-content">
         <div class="container text-center">
             <h1>Contacto</h1>
