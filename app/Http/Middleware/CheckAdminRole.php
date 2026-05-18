@@ -17,11 +17,16 @@ class CheckAdminRole
     {
         // Verificar si el usuario tiene sesión activa
         if (!session()->has('user_email')) {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'No autenticado'], 401);
+            }
             return redirect()->route('login-view')->with('error', 'Debes iniciar sesión para acceder.');
         }
 
-
         if (!session()->has('rol') || session('rol') !== 'Admin') {
+            if ($request->expectsJson()) {
+                return response()->json(['error' => 'Sin permisos'], 403);
+            }
             return redirect()->route('uso-interno.home-interno')->with('error', 'No tienes permisos para acceder a esta sección.');
         }
 

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Categoria;
+use App\Models\Variante;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,14 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('productos', function (Blueprint $table) {
+        Schema::create('categorias_variantes', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Categoria::class);
-            $table->string('nombre');
-            $table->string('descripcion');
-            $table->string('descripcion_tecnica')->nullable();
-            $table->string('codigo')->unique();
-            $table->boolean('activo')->default(true);
+            $table->foreignIdFor(Variante::class);
+            $table->unique(['categoria_id', 'variante_id']);
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('productos');
+        Schema::dropIfExists('categorias_variantes');
     }
 };

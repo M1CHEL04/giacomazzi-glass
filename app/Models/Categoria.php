@@ -17,4 +17,9 @@ class Categoria extends Model
     {
         return $this->hasMany(Producto::class, 'categoria_id');
     }
+
+    public function variantes()
+    {
+        return $this->belongsToMany(Variante::class, 'categorias_variantes', 'categoria_id', 'variante_id');
+    }
 }

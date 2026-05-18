@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="internal-sidebar-menu">
-                    <a href="#"
+                    <a href="{{route('uso-interno.productos.index')}}"
                         class="internal-sidebar-link {{ request()->routeIs('home-interno') ? 'active' : '' }}">
                         <i class="bi bi-window-stack"></i>
                         <span>Productos</span>

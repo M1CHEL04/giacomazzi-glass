@@ -59,4 +59,12 @@ Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group
     Route::get('/edit-categoria/{id}', [UsoInternoController::class, 'editCategoria'])->name('categorias.edit');
     Route::post('/store-categoria', [UsoInternoController::class, 'storeCategoria'])->name('categorias.store');
     Route::post('/update-categoria/{id}', [UsoInternoController::class, 'updateCategoria'])->name('categorias.update');
+
+    //Productos
+    Route::get('/productos', [UsoInternoController::class, 'indexProductos'])->name('productos.index');
+    Route::get('/show-producto/{id}', [UsoInternoController::class, 'showProducto'])->name('productos.show');
+    Route::get('/create-producto', [UsoInternoController::class, 'createProducto'])->name('productos.create');
+    Route::get('/edit-producto/{id}', [UsoInternoController::class, 'editProducto'])->name('productos.edit');
+    Route::post('/store-producto', [UsoInternoController::class, 'storeProducto'])->name('productos.store');
+    Route::post('/update-producto/{id}', [UsoInternoController::class, 'updateProducto'])->name('productos.update');
 });
