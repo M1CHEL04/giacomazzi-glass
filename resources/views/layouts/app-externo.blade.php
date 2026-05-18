@@ -67,7 +67,7 @@
 
                     <div class="external-cart-wrapper d-lg-flex justify-content-end">
                         <a href="#" class="external-cart-link" aria-label="Carrito de compras">
-                            <x-fluentui-cart-24-o />
+                            <x-heroicon-o-shopping-cart />
                         </a>
                     </div>
                 </div>
