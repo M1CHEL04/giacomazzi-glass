@@ -1,0 +1,331 @@
+ /* ── Galería compacta ─────────────────────────────────────── */
+    .prod-photos-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.45rem;
+    }
+
+    .prod-photo-thumb {
+        aspect-ratio: 1;
+        object-fit: cover;
+        border-radius: 0.5rem;
+        border: 1.5px solid var(--internal-border);
+        cursor: zoom-in;
+        width: 100%;
+        display: block;
+        transition: opacity .15s, border-color .15s, transform .12s;
+    }
+
+    .prod-photo-thumb:hover {
+        opacity: .82;
+        border-color: var(--internal-primary-soft);
+        transform: scale(1.03);
+    }
+
+    /* ── Estado vacío de imágenes ─────────────────────────────── */
+    .prod-photos-empty {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.55rem 0.75rem;
+        border-radius: 0.5rem;
+        background: rgba(63, 63, 63, 0.04);
+        color: var(--internal-secondary-soft);
+        font-size: 13px;
+    }
+
+    .prod-photos-empty svg {
+        opacity: .32;
+        flex-shrink: 0;
+    }
+
+    /* ── Secciones de info ────────────────────────────────────── */
+    .info-section {
+        border: 1px solid var(--internal-border);
+        border-radius: 0.75rem;
+        background: var(--internal-surface);
+        padding: 1rem 1.1rem;
+    }
+
+    .info-section-title {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--internal-secondary-soft);
+        margin-bottom: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .info-section-title svg {
+        color: var(--internal-primary);
+        flex-shrink: 0;
+    }
+
+    .info-field-label {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        color: var(--internal-secondary-soft);
+        margin-bottom: 0.2rem;
+    }
+
+    /* ── Tabla de variantes ───────────────────────────────────── */
+    .variante-row {
+        display: grid;
+        grid-template-columns: 105px 1fr;
+        gap: 0.75rem;
+        align-items: baseline;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--internal-border);
+    }
+
+    .variante-row:first-child {
+        padding-top: 0;
+    }
+
+    .variante-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .variante-name {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--internal-secondary);
+    }
+
+    .variante-values {
+        font-size: 13px;
+        color: var(--internal-secondary);
+        line-height: 1.5;
+    }
+
+    .variante-sep {
+        color: var(--internal-secondary-soft);
+        margin: 0 0.25rem;
+        font-size: 9px;
+        vertical-align: middle;
+    }
+
+    /* ── Lightbox ─────────────────────────────────────────────── */
+    #imgLightbox .modal-content {
+        background: rgba(15, 20, 15, 0.88);
+        backdrop-filter: blur(6px);
+    }
+
+    #imgLightbox .btn-close {
+        filter: invert(1);
+        opacity: .75;
+    }
+
+    #imgLightbox .btn-close:hover {
+        opacity: 1;
+    }
+
+       .form-check-input:checked {
+        background-color: #287452;
+        border-color: #287452;
+    }
+
+    .form-check-input:focus {
+        border-color: #287452;
+        box-shadow: 0 0 0 .2rem rgba(40, 116, 82, .25);
+    }
+
+    /* ── Imágenes existentes (edición) ── */
+    .imagen-thumb {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .imagen-existente-card {
+        position: relative;
+        display: inline-block;
+    }
+
+    .imagen-eliminar-overlay {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+    }
+
+    .imagen-existente-card.marcada-eliminar {
+        opacity: .35;
+    }
+
+    /* ── Tarjetas de nueva imagen ── */
+    .imagen-input-card {
+        width: 100px;
+        height: 100px;
+        border: 2px dashed #ced4da;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        flex-shrink: 0;
+        transition: border-color .15s;
+    }
+
+    .imagen-dropzone {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+        background: #f8f9fa;
+        margin: 0;
+        transition: background .15s;
+    }
+
+    .imagen-dropzone:hover {
+        background: #e9ecef;
+    }
+
+    .imagen-file-input {
+        display: none;
+    }
+
+    .imagen-dropzone-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: #adb5bd;
+        font-size: 11px;
+        text-align: center;
+        padding: 8px;
+        user-select: none;
+    }
+
+    .imagen-preview-box {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+
+    .imagen-preview-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    /* Botón quitar tarjeta (×, top-right): visible en estado vacío y con preview.
+       Ausente en la primera tarjeta. */
+    .imagen-remove-card-btn {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(220, 53, 69, .85);
+        color: #fff;
+        border: none;
+        font-size: 13px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        z-index: 3;
+        transition: background .1s;
+    }
+
+    .imagen-remove-card-btn:hover {
+        background: #dc3545;
+    }
+
+    /* Botón limpiar imagen (↩, top-left): solo visible cuando hay preview.
+       Descarta el archivo y vuelve al estado vacío sin eliminar el input. */
+    .imagen-clear-btn {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: rgba(108, 117, 125, .75);
+        color: #fff;
+        border: none;
+        font-size: 12px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        z-index: 2;
+        transition: background .1s;
+    }
+
+    .imagen-clear-btn:hover {
+        background: #6c757d;
+    }
+
+    /* ── Tags de variante ── */
+    .variante-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: #fff;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 3px 6px 3px 8px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #495057;
+    }
+
+    .variante-tag-label {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .variante-tag-sep {
+        color: #adb5bd;
+        margin: 0 1px;
+    }
+
+    .variante-tag-value {
+        color: #495057;
+    }
+
+    .variante-tag-remove {
+        background: none;
+        border: none;
+        color: #adb5bd;
+        font-size: 15px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 0 0 4px;
+        display: flex;
+        align-items: center;
+    }
+
+    .variante-tag-remove:hover {
+        color: #dc3545;
+    }
+
+    /* Tamaño de iconos SVG dentro de botones de imagen y variante */
+    .imagen-remove-card-btn svg,
+    .imagen-clear-btn svg {
+        width: 12px;
+        height: 12px;
+        display: block;
+    }
+
+    .variante-tag-remove svg {
+        width: 13px;
+        height: 13px;
+        display: block;
+    }

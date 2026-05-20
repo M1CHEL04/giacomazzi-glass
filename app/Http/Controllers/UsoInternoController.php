@@ -134,11 +134,12 @@ class UsoInternoController extends Controller
         if ($request->ajax()) {
             return response()->json([
                 'productos' => $productos->map(fn($p) => [
-                    'id'        => $p->id,
-                    'nombre'    => $p->nombre,
-                    'codigo'    => $p->codigo,
-                    'categoria' => $p->categoria ? $p->categoria->nombre : '—',
-                    'activo'    => (bool) $p->activo,
+                    'id'          => $p->id,
+                    'nombre'      => $p->nombre,
+                    'codigo'      => $p->codigo,
+                    'descripcion' => $p->descripcion,
+                    'categoria'   => $p->categoria ? $p->categoria->nombre : '—',
+                    'activo'      => (bool) $p->activo,
                 ]),
                 'pagination' => [
                     'current_page' => $productos->currentPage(),
