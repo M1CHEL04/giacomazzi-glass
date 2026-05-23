@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\UploadImagen;
 use App\Models\Categoria;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
@@ -184,6 +185,7 @@ class UsoInternoController extends Controller
             'imagenes'          => 'nullable|array|max:5',
             'imagenes.*'        => 'image|max:5120',
             'variantes_json'    => 'nullable|string',
+            'imagen_portada'    => 'nullable|string',
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
@@ -208,17 +210,17 @@ class UsoInternoController extends Controller
                 'activo'             => true,
             ]);
 
-            // Imágenes
-            /* if ($request->hasFile('imagenes')) {
-                foreach ($request->file('imagenes') as $imagen) {
-                    $ruta = $imagen->store('productos', 'public');
-                    ImagenProducto::create([
-                        'producto_id'   => $producto->id,
-                        'ruta'          => $ruta,
-                        'nombre_imagen' => $imagen->getClientOriginalName(),
-                    ]);
+            // Imagenes
+            $imagenesRequest = array_values(array_filter($request->file('imagenes', [])));
+            if (!empty($imagenesRequest)) {
+                $portadaField = $request->input('imagen_portada', '');
+                $portadaIdx   = str_starts_with($portadaField, 'nueva:')
+                    ? (int) substr($portadaField, 6) : 0;
+                foreach ($imagenesRequest as $idx => $imagen) {
+                    $this->guardarImagenes($producto, $imagen, $idx === $portadaIdx);
                 }
-            } */
+            }
+
 
             // Variantes
             $this->procesarVariantes($producto, $request);
@@ -266,6 +268,7 @@ class UsoInternoController extends Controller
             'imagenes_eliminar' => 'nullable|array',
             'imagenes_eliminar.*' => 'exists:imagenes_producto,id',
             'variantes_json'    => 'nullable|string',
+            'imagen_portada'    => 'nullable|string',
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
@@ -298,20 +301,37 @@ class UsoInternoController extends Controller
                 }
             }
 
+            // Cambio de portada en imagen existente
+            $portadaField = $request->input('imagen_portada', '');
+            if (str_starts_with($portadaField, 'existente:')) {
+                $portadaId = (int) substr($portadaField, 10);
+                if (ImagenProducto::where('id', $portadaId)->where('producto_id', $producto->id)->exists()) {
+                    $producto->imagenes()->update(['es_principal' => false]);
+                    ImagenProducto::where('id', $portadaId)->update(['es_principal' => true]);
+                }
+            }
+
             // Agregar nuevas imágenes
-            /*  if ($request->hasFile('imagenes')) {
-                $remaining = 5 - $producto->imagenes()->count();
-                foreach ($request->file('imagenes') as $imagen) {
+            $imagenesNuevas = array_values(array_filter($request->file('imagenes', [])));
+            if (!empty($imagenesNuevas)) {
+                $remaining  = 5 - $producto->fresh()->imagenes()->count();
+                $portadaIdx = str_starts_with($portadaField, 'nueva:')
+                    ? (int) substr($portadaField, 6) : null;
+                if ($portadaIdx !== null) {
+                    $producto->imagenes()->update(['es_principal' => false]);
+                }
+                foreach ($imagenesNuevas as $idx => $imagen) {
                     if ($remaining <= 0) break;
-                    $ruta = $imagen->store('productos', 'public');
-                    ImagenProducto::create([
-                        'producto_id'   => $producto->id,
-                        'ruta'          => $ruta,
-                        'nombre_imagen' => $imagen->getClientOriginalName(),
-                    ]);
+                    $this->guardarImagenes($producto, $imagen, $portadaIdx !== null && $idx === $portadaIdx);
                     $remaining--;
                 }
-            } */
+            }
+
+            // Si ninguna imagen tiene es_principal, asignar la primera
+            $producto->load('imagenes');
+            if ($producto->imagenes->isNotEmpty() && $producto->imagenes->where('es_principal', true)->isEmpty()) {
+                $producto->imagenes->first()->update(['es_principal' => true]);
+            }
 
             // Variantes: diff eficiente — adjunta nuevas, desasocia las quitadas, no toca las que no cambiaron
             $producto->valoresVariantes()->sync($this->resolverIdsVariantes($request));
@@ -384,5 +404,22 @@ class UsoInternoController extends Controller
         if (!empty($ids)) {
             $producto->valoresVariantes()->syncWithoutDetaching($ids);
         }
+    }
+
+    private function guardarImagenes(Producto $producto, $imagen, bool $esPrincipal = false): ImagenProducto
+    {
+        if (!$imagen->isValid()) {
+            throw new \Exception('Imagen no válida: ' . $imagen->getClientOriginalName());
+        }
+
+        $ruta = $imagen->store('productos', 'public');
+
+
+        return ImagenProducto::create([
+            'producto_id'   => $producto->id,
+            'ruta'          => $ruta,
+            'nombre_imagen' => $imagen->getClientOriginalName(),
+            'es_principal'  => $esPrincipal,
+        ]);
     }
 }

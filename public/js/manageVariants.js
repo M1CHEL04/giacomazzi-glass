@@ -47,6 +47,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // al construir botones dinámicamente.
     const iconXMark     = document.getElementById('tpl-icon-x-mark')?.innerHTML     || '×';
     const iconArrowBack = document.getElementById('tpl-icon-arrow-uturn-left')?.innerHTML || '↩';
+    const iconStarFill    = document.getElementById('tpl-icon-star-fill')?.innerHTML    || '★';
+    const iconStarOutline = document.getElementById('tpl-icon-star-outline')?.innerHTML || '☆';
 
     // ═════════════════════════════════════════════════════════════
     // MÓDULO 1: IMÁGENES
@@ -60,6 +62,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // existingImgCount: imágenes ya guardadas que NO están marcadas para eliminar
     let newImgCount      = 0;
     let existingImgCount = cfg.existingImgCount;
+    // portadaCard:        referencia al DOM card de nueva imagen marcada como portada
+    // portadaExistenteId: ID (string) de imagen guardada marcada como portada
+    let portadaCard        = null;
+    let portadaExistenteId = cfg.portadaExistenteId ? String(cfg.portadaExistenteId) : null;
 
     /** Suma de imágenes activas (ya guardadas + nuevas tarjetas) */
     function totalImagenes() {
@@ -90,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         wrapper.innerHTML = `
             ${!isFirst ? `<button type="button" class="imagen-remove-card-btn" title="Quitar">${iconXMark}</button>` : ''}
+            <button type="button" class="imagen-portada-btn d-none" title="Marcar como portada">${iconStarOutline}</button>
             <label class="imagen-dropzone">
                 <input type="file" name="imagenes[]" accept="image/*" class="imagen-file-input">
                 <div class="imagen-dropzone-placeholder">
@@ -127,6 +134,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 previewBox.classList.remove('d-none');
             };
             reader.readAsDataURL(file);
+            // Mostrar botón de portada y auto-seleccionar si no hay ninguna aún
+            portadaBtn.classList.remove('d-none');
+            if (portadaCard === null && portadaExistenteId === null) {
+                portadaCard = wrapper;
+                updatePortadaVisuals();
+            }
         });
 
         // Limpiar imagen: descarta el archivo y vuelve al estado vacío
@@ -135,14 +148,29 @@ document.addEventListener('DOMContentLoaded', function () {
             previewImg.src  = '';
             previewBox.classList.add('d-none');
             dropzone.classList.remove('d-none');
+            portadaBtn.classList.add('d-none');
+            if (portadaCard === wrapper) {
+                portadaCard = null;
+                autoSelectPortadaIfOnlyOne();
+            }
+        });
+
+        // Marcar como portada
+        const portadaBtn = wrapper.querySelector('.imagen-portada-btn');
+        portadaBtn.addEventListener('click', () => {
+            portadaCard = wrapper;
+            portadaExistenteId = null;
+            updatePortadaVisuals();
         });
 
         // Quitar tarjeta: elimina el input completo (ausente en la primera tarjeta)
         if (removeCardBtn) {
             removeCardBtn.addEventListener('click', () => {
+                if (portadaCard === wrapper) portadaCard = null;
                 wrapper.remove();
                 newImgCount--;
                 syncAddImagenBtn();
+                autoSelectPortadaIfOnlyOne();
             });
         }
 
@@ -178,6 +206,10 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.innerHTML = iconArrowBack;
             btn.classList.replace('btn-danger', 'btn-secondary');
             btn.title = 'Deshacer';
+            if (String(id) === portadaExistenteId) {
+                portadaExistenteId = null;
+                updatePortadaVisuals();
+            }
             existingImgCount--;
         } else {
             // Desmarcar
@@ -190,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
             existingImgCount++;
         }
         syncAddImagenBtn();
+        autoSelectPortadaIfOnlyOne();
     };
 
     syncAddImagenBtn();
@@ -479,6 +512,70 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;');
+    }
+
+    // ─── Funciones de portada ────────────────────────────────────
+
+    /** Marca una imagen existente como portada */
+    window.setPortadaExistente = function (btn) {
+        portadaExistenteId = btn.dataset.imagenId;
+        portadaCard = null;
+        updatePortadaVisuals();
+    };
+
+    /** Actualiza los botones estrella en todas las tarjetas */
+    function updatePortadaVisuals() {
+        // Imágenes guardadas
+        document.querySelectorAll('.imagen-portada-btn[data-imagen-id]').forEach(b => {
+            const active = b.dataset.imagenId === portadaExistenteId;
+            b.classList.toggle('activa', active);
+            b.innerHTML = active ? iconStarFill : iconStarOutline;
+        });
+        // Nuevas tarjetas
+        imagenesContainer.querySelectorAll('.imagen-input-card').forEach(card => {
+            const b = card.querySelector('.imagen-portada-btn');
+            if (!b) return;
+            const active = card === portadaCard;
+            b.classList.toggle('activa', active);
+            b.innerHTML = active ? iconStarFill : iconStarOutline;
+        });
+    }
+
+    /** Auto-selecciona la única imagen disponible como portada */
+    function autoSelectPortadaIfOnlyOne() {
+        if (portadaCard !== null || portadaExistenteId !== null) return;
+        const cardsConArchivo = Array.from(imagenesContainer.querySelectorAll('.imagen-input-card'))
+            .filter(c => !c.querySelector('.imagen-portada-btn')?.classList.contains('d-none'));
+        const totalActivo = existingImgCount + cardsConArchivo.length;
+        if (totalActivo !== 1) return;
+        if (existingImgCount === 1) {
+            const existCard = document.querySelector('.imagen-existente-card:not(.marcada-eliminar)');
+            const btn = existCard?.querySelector('.imagen-portada-btn[data-imagen-id]');
+            if (btn) { portadaExistenteId = btn.dataset.imagenId; updatePortadaVisuals(); }
+        } else if (cardsConArchivo.length === 1) {
+            portadaCard = cardsConArchivo[0];
+            updatePortadaVisuals();
+        }
+    }
+
+    // Escribe el valor de portada en el hidden input justo antes del envío
+    const _prodForm = document.querySelector('form[enctype="multipart/form-data"]');
+    if (_prodForm) {
+        _prodForm.addEventListener('submit', function () {
+            const hiddenPortada = document.getElementById('imagen-portada');
+            if (!hiddenPortada) return;
+            if (portadaExistenteId) {
+                hiddenPortada.value = 'existente:' + portadaExistenteId;
+            } else if (portadaCard) {
+                // Indexar solo entre tarjetas que tienen archivo (coincide con array_filter del servidor)
+                const allCards = Array.from(imagenesContainer.querySelectorAll('.imagen-input-card'))
+                    .filter(c => { const inp = c.querySelector('.imagen-file-input'); return inp && inp.files && inp.files.length > 0; });
+                const idx = allCards.indexOf(portadaCard);
+                hiddenPortada.value = idx >= 0 ? 'nueva:' + idx : '';
+            } else {
+                hiddenPortada.value = '';
+            }
+        });
     }
 
     // En modo edición, cargar las variantes de la categoría ya seleccionada

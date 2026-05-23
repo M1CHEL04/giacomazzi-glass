@@ -168,6 +168,17 @@ $formAction = $isEdit
                             <x-heroicon-m-x-mark style="width:12px;height:12px;" />
                         </button>
                     </div>
+                    <button type="button"
+                        class="imagen-portada-btn {{ $imagen->es_principal ? 'activa' : '' }}"
+                        data-imagen-id="{{ $imagen->id }}"
+                        onclick="setPortadaExistente(this)"
+                        title="Marcar como portada">
+                        @if($imagen->es_principal)
+                        <x-heroicon-s-star style="width:12px;height:12px;" />
+                        @else
+                        <x-heroicon-o-star style="width:12px;height:12px;" />
+                        @endif
+                    </button>
                     <input type="hidden" name="imagenes_eliminar[]"
                         id="eliminar-{{ $imagen->id }}" value="" disabled>
                 </div>
@@ -265,6 +276,8 @@ $formAction = $isEdit
         {{-- Hidden: JSON de variantes --}}
         <input type="hidden" name="variantes_json" id="variantes-json"
             value="{{ old('variantes_json', '[]') }}">
+        {{-- Hidden: portada de imagen --}}
+        <input type="hidden" name="imagen_portada" id="imagen-portada" value="">
 
         {{-- Submit --}}
         <div class="d-flex justify-content-end border rounded-3 bg-white p-3">
@@ -279,11 +292,15 @@ $formAction = $isEdit
 
 @section('script')
 @php
+$portadaExistenteId = $isEdit
+? ($producto->imagenes->firstWhere('es_principal', true)?->id ?? $producto->imagenes->first()?->id)
+: null;
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
 'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
 'initialVariantes' => $initialVariantes ?? [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
+'portadaExistenteId' => $portadaExistenteId,
 ], JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 @endphp
 {{-- data-config es inmune al formatter; JSON_HEX_* evita conflictos con htmlspecialchars --}}
@@ -291,5 +308,7 @@ $prodConfigJson = json_encode([
 {{-- Iconos Heroicons renderizados server-side; JS los lee vía innerHTML --}}
 <div id="tpl-icon-x-mark" class="d-none" aria-hidden="true"><x-heroicon-m-x-mark /></div>
 <div id="tpl-icon-arrow-uturn-left" class="d-none" aria-hidden="true"><x-heroicon-m-arrow-uturn-left /></div>
+<div id="tpl-icon-star-fill" class="d-none" aria-hidden="true"><x-heroicon-s-star /></div>
+<div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
 <script src="{{ asset('js/manageVariants.js') }}"></script>
 @endsection
