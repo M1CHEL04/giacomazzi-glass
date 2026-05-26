@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Variante;
+use App\Models\Producto;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,12 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('valores_variante', function (Blueprint $table) {
+        Schema::create('productos_variantes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Variante::class);
-            $table->string('valor');
-            $table->string('codigo');
-            $table->unique(['variante_id', 'valor']);
+            $table->foreignIdFor(Producto::class);
+            $table->string('sku')->unique();
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('valores_variante');
+        Schema::dropIfExists('productos_variantes');
     }
 };

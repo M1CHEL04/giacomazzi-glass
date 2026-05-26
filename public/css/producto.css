@@ -358,3 +358,47 @@
     .imagen-portada-btn.activa {
         background: #eab308;
     }
+
+    /* ── Código editable dentro del tag de variante ── */
+    .variante-tag-code-wrap {
+        display: inline-flex;
+        align-items: center;
+        margin-left: 5px;
+        background: #edf7f2;
+        border: 1px solid #b2dfc8;
+        border-radius: 4px;
+        padding: 0 4px;
+    }
+
+    .variante-tag-code-input {
+        width: 56px;
+        border: none;
+        background: transparent;
+        font-size: 11px;
+        font-family: monospace;
+        color: #287452;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 1px 2px;
+        outline: none;
+        text-align: center;
+    }
+
+    .variante-tag-code-input::placeholder {
+        color: #adb5bd;
+        font-weight: 400;
+    }
+
+    /* ── Badges de SKU en el preview ── */
+    .sku-preview-item {
+        display: inline-block;
+        background: #fff;
+        border: 1px solid #c3e6d0;
+        border-radius: 5px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-family: monospace;
+        color: #287452;
+        font-weight: 600;
+        letter-spacing: .03em;
+    }

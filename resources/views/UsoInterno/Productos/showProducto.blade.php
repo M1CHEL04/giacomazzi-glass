@@ -140,6 +140,30 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                 @endif
             </div>
 
+            {{-- SKUs / Combinaciones --}}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <x-heroicon-m-rectangle-stack style="width:14px;height:14px;" />
+                    Combinaciones de SKU
+                    @if($producto->variantes->isNotEmpty())
+                    <span class="badge bg-success-subtle text-success ms-auto"
+                        style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0;">
+                        {{ $producto->variantes->count() }}
+                    </span>
+                    @endif
+                </div>
+
+                @if($producto->variantes->isNotEmpty())
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach($producto->variantes->sortBy('sku') as $pv)
+                    <code class="sku-preview-item">{{ $pv->sku }}</code>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-secondary mb-0" style="font-size:13px;">Sin combinaciones de SKU generadas.</p>
+                @endif
+            </div>
+
             {{-- Metadatos --}}
             <div class="info-section">
                 <div class="info-section-title">

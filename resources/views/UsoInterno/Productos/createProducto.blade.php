@@ -213,6 +213,14 @@ $formAction = $isEdit
                     <p id="variantes-empty-msg" class="mb-0 fst-italic" style="font-size:12px;color:#adb5bd;">Sin variantes agregadas aún.</p>
                 </div>
 
+                {{-- Preview de SKUs generados --}}
+                <div id="sku-preview" class="d-none border rounded-2 p-3" style="background:#f0f7f3;">
+                    <p class="small fw-semibold mb-2" style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#287452;">
+                        SKUs que se generarán
+                    </p>
+                    <div id="sku-combinations-list" class="d-flex flex-wrap gap-2"></div>
+                </div>
+
                 {{-- Formulario agregar variante --}}
                 <div class="border rounded-2 p-3 bg-light">
                     <p class="small fw-semibold text-secondary mb-2" style="font-size:11px;">Agregar variante al producto</p>
@@ -234,28 +242,61 @@ $formAction = $isEdit
                             </select>
                         </div>
 
-                        {{-- Input nuevo valor (para variante existente) --}}
-                        <div class="col-12 col-md-4 d-none" id="nuevo-valor-section">
-                            <label class="form-label small mb-1" style="font-size:11px;">Nuevo valor</label>
-                            <input type="text" id="nuevo-valor-input"
+                        {{-- Código editable del valor existente seleccionado --}}
+                        <div class="col-auto d-none" id="valor-codigo-section">
+                            <label class="form-label small mb-1" style="font-size:11px;">Código</label>
+                            <input type="text" id="valor-codigo-input"
                                 class="form-control form-control-sm"
-                                placeholder="Ej: Transparente">
+                                placeholder="Cód" maxlength="10"
+                                style="width:75px;text-transform:uppercase;font-family:monospace;"
+                                title="Código del valor (editable)">
+                        </div>
+
+                        {{-- Input nuevo valor (para variante existente) —— lado a lado --}}
+                        <div class="col-12 col-md-4 d-none" id="nuevo-valor-section">
+                            <div class="d-flex gap-1 align-items-end">
+                                <div class="flex-grow-1">
+                                    <label class="form-label small mb-1" style="font-size:11px;">Nuevo valor</label>
+                                    <input type="text" id="nuevo-valor-input"
+                                        class="form-control form-control-sm"
+                                        placeholder="Ej: Transparente">
+                                    <div class="text-danger d-none mt-1" id="nuevo-valor-input-feedback" style="font-size:0.8em;"></div>
+                                </div>
+                                <div>
+                                    <label class="form-label small mb-1" style="font-size:11px;">Cód.</label>
+                                    <input type="text" id="nuevo-valor-codigo"
+                                        class="form-control form-control-sm"
+                                        placeholder="TRNS" maxlength="10"
+                                        style="width:62px;text-transform:uppercase;font-family:monospace;"
+                                        title="Código del valor (auto)">
+                                </div>
+                            </div>
                         </div>
 
                         {{-- Nueva variante --}}
                         <div class="col-12 d-none" id="nueva-variante-section">
                             <div class="row g-2">
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-4">
                                     <label class="form-label small mb-1" style="font-size:11px;">Nombre de la variante</label>
                                     <input type="text" id="nueva-variante-nombre"
                                         class="form-control form-control-sm"
                                         placeholder="Ej: Material">
+                                    <div class="text-danger d-none mt-1" id="nueva-variante-nombre-feedback" style="font-size:0.8em;"></div>
                                 </div>
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-4">
                                     <label class="form-label small mb-1" style="font-size:11px;">Valor</label>
                                     <input type="text" id="nueva-variante-valor"
                                         class="form-control form-control-sm"
                                         placeholder="Ej: Aluminio">
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label class="form-label small mb-1" style="font-size:11px;">
+                                        Código del valor <span class="text-secondary fw-normal">(auto)</span>
+                                    </label>
+                                    <input type="text" id="nueva-variante-codigo"
+                                        class="form-control form-control-sm"
+                                        placeholder="Ej: ALM" maxlength="10"
+                                        style="text-transform:uppercase;font-family:monospace;">
                                 </div>
                             </div>
                         </div>
@@ -310,5 +351,5 @@ $prodConfigJson = json_encode([
 <div id="tpl-icon-arrow-uturn-left" class="d-none" aria-hidden="true"><x-heroicon-m-arrow-uturn-left /></div>
 <div id="tpl-icon-star-fill" class="d-none" aria-hidden="true"><x-heroicon-s-star /></div>
 <div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
-<script src="{{ asset('js/manageVariants.js') }}"></script>
+<script type="module" src="{{ asset('js/manageVariants.js') }}"></script>
 @endsection

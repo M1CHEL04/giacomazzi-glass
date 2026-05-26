@@ -11,6 +11,7 @@ class ValorVariante extends Model
     protected $fillable = [
         'variante_id',
         'valor',
+        'codigo',
     ];
 
     public function variante()
