@@ -51,25 +51,27 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                     Imágenes
                 </div>
 
-                @php
-                $demoImgs = [
-                ['src' => asset('images/homehero.jpg'), 'alt' => 'Vista frontal'],
-                ['src' => asset('images/contactohero.jpg'),'alt' => 'Detalle lateral'],
-                ['src' => asset('images/homehero.jpg'), 'alt' => 'Vista trasera'],
-                ['src' => asset('images/contactohero.jpg'),'alt' => 'Detalle interior'],
-                ['src' => asset('images/homehero.jpg'), 'alt' => 'Medidas'],
-                ];
-                @endphp
+                @if($imagenes->isNotEmpty())
                 <div class="prod-photos-grid">
-                    @foreach($demoImgs as $demo)
-                    <img src="{{ $demo['src'] }}"
-                        alt="{{ $demo['alt'] }}"
-                        class="prod-photo-thumb"
-                        data-src="{{ $demo['src'] }}"
-                        data-alt="{{ $demo['alt'] }}"
-                        onclick="openLightbox(this.dataset.src, this.dataset.alt)">
+                    @foreach($imagenes->sortByDesc('es_principal') as $img)
+                    <div class="prod-photo-wrap{{ $img->es_principal ? ' is-portada' : '' }}">
+                        <img src="{{ $img->ruta }}"
+                            alt="{{ $img->nombre_imagen }}"
+                            class="prod-photo-thumb"
+                            data-src="{{ $img->ruta }}"
+                            data-alt="{{ $img->nombre_imagen }}"
+                            onclick="openLightbox(this.dataset.src, this.dataset.alt)">
+                        @if($img->es_principal)
+                        <span class="portada-badge">
+                            <x-heroicon-s-star style="width:11px;height:11px;" />
+                        </span>
+                        @endif
+                    </div>
                     @endforeach
                 </div>
+                @else
+                <p class="text-secondary mb-0" style="font-size:13px;">Sin imágenes cargadas.</p>
+                @endif
             </div>
         </div>
 

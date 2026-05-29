@@ -28,7 +28,7 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     function addImagenRow() {
         if (totalImagenes() >= MAX_IMG) return;
 
-        const isFirst = newImgCount === 0;
+        const isFirst = totalImagenes() === 0;
 
         const wrapper = document.createElement('div');
         wrapper.className = 'imagen-input-card';
@@ -114,7 +114,7 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     }
 
     if (addImagenBtn) addImagenBtn.addEventListener('click', addImagenRow);
-    addImagenRow();
+    if (existingImgCount === 0) addImagenRow();
 
     // ── Funciones globales (llamadas desde onclick en el blade) ──
 

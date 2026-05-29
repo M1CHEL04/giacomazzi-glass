@@ -10,6 +10,8 @@ use App\Models\ProductoVariante;
 use App\Models\ValorVariante;
 use App\Models\Variante;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -295,14 +297,11 @@ class UsoInternoController extends Controller
                 'activo'             => (bool) $request->input('activo', 0),
             ]);
 
-            // Eliminar imágenes marcadas (verificando que pertenecen al producto)
+            // Desactivar imágenes marcadas (verificando que pertenecen al producto)
             if ($request->filled('imagenes_eliminar')) {
-                $imgs = ImagenProducto::whereIn('id', $request->imagenes_eliminar)
-                    ->where('producto_id', $producto->id)->get();
-                foreach ($imgs as $img) {
-                    Storage::disk('public')->delete($img->ruta);
-                    $img->delete();
-                }
+                ImagenProducto::whereIn('id', $request->imagenes_eliminar)
+                    ->where('producto_id', $producto->id)
+                    ->update(['activa' => false, 'es_principal' => false]);
             }
 
             // Cambio de portada en imagen existente
@@ -554,20 +553,51 @@ class UsoInternoController extends Controller
         return preg_match('/[BCDFGHJKLMNPQRSTVWXYZ]/', $s, $m) ? $m[0] : strtoupper(substr($s, 0, 1));
     }
 
-    private function guardarImagenes(Producto $producto, $imagen, bool $esPrincipal = false): ImagenProducto
+    private function guardarImagenes(Producto $producto, UploadedFile $imagen, bool $esPrincipal = false): ImagenProducto
     {
         if (!$imagen->isValid()) {
+            Log::error('Archivo de imagen invalido en el request', [
+                'producto_id'   => $producto->id,
+                'error_message' => $imagen->getErrorMessage(),
+            ]);
             throw new \Exception('Imagen no válida: ' . $imagen->getClientOriginalName());
         }
 
-        $ruta = $imagen->store('productos', 'public');
-
-
-        return ImagenProducto::create([
-            'producto_id'   => $producto->id,
-            'ruta'          => $ruta,
-            'nombre_imagen' => $imagen->getClientOriginalName(),
-            'es_principal'  => $esPrincipal,
+        $imagenProducto = ImagenProducto::create([
+            'producto_id'  => $producto->id,
+            'es_principal' => $esPrincipal,
         ]);
+
+        $imagenProducto->update([
+            'nombre_imagen' => $imagenProducto->id . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $imagen->getClientOriginalName()),
+        ]);
+
+        // Almacenamiento temporal en disco público (IMAGE_DISK=public)
+        if (config('filesystems.image_disk', 'sftp') === 'public') {
+            $carpeta = 'imagenes_producto/' . $producto->id;
+            $imagen->storeAs($carpeta, $imagenProducto->nombre_imagen, 'public');
+            $imagenProducto->update([
+                'ruta' => asset('storage/' . $carpeta . '/' . $imagenProducto->nombre_imagen),
+            ]);
+            return $imagenProducto;
+        }
+
+        $path = $imagen->store('imagenes_producto_temp', 'local');
+        $pathAbsoluto = storage_path('app/' . $path);
+
+        $job = new UploadImagen($imagenProducto, $pathAbsoluto);
+        Bus::dispatchSync($job);
+        $url = $job->getUrl();
+
+        if (empty($url)) {
+            $imagenProducto->delete();
+            throw new \Exception('No se pudo obtener la URL de la imagen subida: ' . $imagen->getClientOriginalName());
+        }
+
+        $imagenProducto->update([
+            'ruta' => $url,
+        ]);
+
+        return $imagenProducto;
     }
 }

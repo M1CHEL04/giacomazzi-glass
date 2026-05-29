@@ -150,12 +150,12 @@ $formAction = $isEdit
                 </button>
             </div>
 
-            {{-- Imágenes existentes (edición) --}}
-            @if ($isEdit && $producto->imagenes->count() > 0)
-            <div class="d-flex flex-wrap gap-3 mb-3">
-                @foreach ($producto->imagenes as $imagen)
+            {{-- Imágenes existentes + inputs nuevos en el mismo flex row --}}
+            <div class="d-flex flex-wrap gap-3">
+                @if ($isEdit && $producto->imagenes->where('activa', true)->count() > 0)
+                @foreach ($producto->imagenes->where('activa', true) as $imagen)
                 <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
-                    <img src="{{ Storage::url($imagen->ruta) }}"
+                    <img src="{{ $imagen->ruta }}"
                         alt="{{ $imagen->nombre_imagen }}"
                         class="imagen-thumb">
                     <div class="imagen-eliminar-overlay">
@@ -183,11 +183,11 @@ $formAction = $isEdit
                         id="eliminar-{{ $imagen->id }}" value="" disabled>
                 </div>
                 @endforeach
-            </div>
-            @endif
+                @endif
 
-            {{-- Inputs nuevas imágenes --}}
-            <div id="imagenes-container" class="d-flex flex-wrap gap-3"></div>
+                {{-- Inputs nuevas imágenes (JS appends here) --}}
+                <div id="imagenes-container" style="display:contents;"></div>
+            </div>
 
             @error('imagenes.*')
             <div class="text-danger small mt-1">{{ $message }}</div>
@@ -338,7 +338,7 @@ $portadaExistenteId = $isEdit
 : null;
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
-'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
+'existingImgCount' => $isEdit ? $producto->imagenes->where('activa', true)->count() : 0,
 'initialVariantes' => $initialVariantes ?? [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
 'portadaExistenteId' => $portadaExistenteId,

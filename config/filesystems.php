@@ -4,6 +4,14 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Disk used for product images.
+    | Set IMAGE_DISK=public for local/temp storage, IMAGE_DISK=sftp for production.
+    |--------------------------------------------------------------------------
+    */
+    'image_disk' => env('IMAGE_DISK', 'sftp'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Filesystem Disk
     |--------------------------------------------------------------------------
     |
@@ -41,10 +49,22 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/') . '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
+        ],
+
+        'sftp' => [
+            'driver'   => 'sftp',
+            'host'     => env('SFTP_HOST'),
+            'port'     => (int) env('SFTP_PORT', 22),
+            'username' => env('SFTP_USERNAME'),
+            'password' => env('SFTP_PASSWORD'),
+            'root'     => env('SFTP_ROOT', '/'),
+            'url'      => env('SFTP_URL'),
+            'timeout'  => 30,
+            'throw'    => true,
         ],
 
         's3' => [
