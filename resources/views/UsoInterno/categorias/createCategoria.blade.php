@@ -30,7 +30,7 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
     </div>
 
     <div class="border rounded-3 bg-white p-3">
-        <form method="POST" action="{{ $formAction }}" class="d-flex flex-column gap-3">
+        <form method="POST" action="{{ $formAction }}" enctype="multipart/form-data" class="d-flex flex-column gap-3">
             @csrf
 
             <div class="row g-3">
@@ -69,7 +69,61 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
                     </div>
                 </div>
                 @endif
-            </div>
+
+                {{-- Imagen hero --}}
+                <div class="col-12">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label class="form-label small mb-0">Imagen del hero</label>
+                        <button type="button" id="btn-seleccionar-hero"
+                            class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
+                            style="font-size:12px;">
+                            <i class="bi bi-image me-1" style="font-size:11px;"></i>
+                            Seleccionar imagen
+                        </button>
+                    </div>
+
+                    <input type="file"
+                        id="imagen_hero"
+                        name="imagen_hero"
+                        accept="image/*"
+                        class="d-none @error('imagen_hero') is-invalid @enderror">
+                    @error('imagen_hero')
+                    <div class="text-danger" style="font-size:12px;">{{ $message }}</div>
+                    @enderror
+
+                    <div class="d-flex flex-wrap gap-2">
+                        {{-- Imagen existente (solo edición) --}}
+                        @if($isEdit && $categoria->imagen_hero)
+                        <div id="hero-preview-existente" class="position-relative" style="display:inline-block;">
+                            <img src="{{ asset($categoria->imagen_hero) }}"
+                                alt="Hero actual"
+                                class="rounded-2 border"
+                                style="width:80px;height:80px;object-fit:cover;display:block;">
+                            <button type="button" id="btn-quitar-hero"
+                                class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center position-absolute"
+                                style="width:20px;height:20px;top:4px;right:4px;"
+                                title="Quitar imagen">
+                                <i class="bi bi-x" style="font-size:12px;line-height:1;"></i>
+                            </button>
+                        </div>
+                        <input type="hidden" name="eliminar_imagen_hero" id="eliminar-imagen-hero-input" value="0">
+                        @endif
+
+                        {{-- Preview nueva imagen --}}
+                        <div id="hero-new-preview" class="position-relative" style="display:none;">
+                            <img id="hero-new-img" src="" alt=""
+                                class="rounded-2 border"
+                                style="width:80px;height:80px;object-fit:cover;display:block;">
+                            <button type="button" id="btn-quitar-hero-new"
+                                class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center position-absolute"
+                                style="width:20px;height:20px;top:4px;right:4px;"
+                                title="Quitar">
+                                <i class="bi bi-x" style="font-size:12px;line-height:1;"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>{{-- /row --}}
 
             <div class="d-flex justify-content-end pt-2 border-top">
                 <button type="submit" class="btn btn-success btn-sm px-3 py-1 rounded-2" style="font-size: 13px;">
@@ -79,4 +133,9 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
         </form>
     </div>
 </div>
+
+@endsection
+
+@section('script')
+<script src="{{ asset('js/modules/hero-imagen.js') }}"></script>
 @endsection

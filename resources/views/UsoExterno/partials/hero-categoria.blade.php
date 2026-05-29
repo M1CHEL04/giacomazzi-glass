@@ -1,6 +1,6 @@
 <section class="categoria-hero">
     @if($categoria->imagen_hero)
-    <img src="{{ asset('storage/' . $categoria->imagen_hero) }}"
+    <img src="{{ asset($categoria->imagen_hero) }}"
         alt="{{ $categoria->nombre }}"
         class="categoria-hero-bg">
     @endif

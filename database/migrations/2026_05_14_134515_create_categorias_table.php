@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre')->unique();
             $table->boolean('activo')->default(true);
+            $table->string('imagen_hero')->nullable();
             $table->timestamps();
         });
     }

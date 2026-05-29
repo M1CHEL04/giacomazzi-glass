@@ -56,19 +56,27 @@ class UsoInternoController extends Controller
     public function storeCategoria(Request $request)
     {
         $request->validate([
-            'nombre' => 'required|string|max:255|unique:categorias,nombre',
+            'nombre'      => 'required|string|max:255|unique:categorias,nombre',
+            'imagen_hero' => 'nullable|image|max:4096',
         ], [
-            'nombre.required' => 'El nombre de la categoria es obligatorio.',
-            'nombre.string' => 'El nombre de la categoria debe ser un texto.',
-            'nombre.max' => 'El nombre de la categoria no puede superar los 255 caracteres.',
-            'nombre.unique' => 'Ya existe una categoria con ese nombre.',
+            'nombre.required'     => 'El nombre de la categoria es obligatorio.',
+            'nombre.string'       => 'El nombre de la categoria debe ser un texto.',
+            'nombre.max'          => 'El nombre de la categoria no puede superar los 255 caracteres.',
+            'nombre.unique'       => 'Ya existe una categoria con ese nombre.',
+            'imagen_hero.image'   => 'El archivo debe ser una imagen.',
+            'imagen_hero.max'     => 'La imagen no puede superar los 4 MB.',
         ]);
 
         try {
+            $rutaHero = null;
+            if ($request->hasFile('imagen_hero')) {
+                $rutaHero = $this->guardarImagenHero($request->file('imagen_hero'));
+            }
 
             Categoria::create([
-                'nombre' => $request->nombre,
-                'activo' => true,
+                'nombre'      => $request->nombre,
+                'activo'      => true,
+                'imagen_hero' => $rutaHero,
             ]);
 
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría creada exitosamente.');
@@ -93,20 +101,38 @@ class UsoInternoController extends Controller
         $categoria = Categoria::findOrFail($id);
 
         $request->validate([
-            'nombre' => 'required|string|max:255|unique:categorias,nombre,' . $categoria->id,
-            'activo' => 'nullable|in:0,1',
+            'nombre'      => 'required|string|max:255|unique:categorias,nombre,' . $categoria->id,
+            'activo'      => 'nullable|in:0,1',
+            'imagen_hero' => 'nullable|image|max:4096',
         ], [
-            'nombre.required' => 'El nombre de la categoria es obligatorio.',
-            'nombre.string' => 'El nombre de la categoria debe ser un texto.',
-            'nombre.max' => 'El nombre de la categoria no puede superar los 255 caracteres.',
-            'nombre.unique' => 'Ya existe una categoria con ese nombre.',
+            'nombre.required'   => 'El nombre de la categoria es obligatorio.',
+            'nombre.string'     => 'El nombre de la categoria debe ser un texto.',
+            'nombre.max'        => 'El nombre de la categoria no puede superar los 255 caracteres.',
+            'nombre.unique'     => 'Ya existe una categoria con ese nombre.',
+            'imagen_hero.image' => 'El archivo debe ser una imagen.',
+            'imagen_hero.max'   => 'La imagen no puede superar los 4 MB.',
         ]);
 
         try {
-            $categoria->update([
+            $datos = [
                 'nombre' => $request->nombre,
                 'activo' => (bool) $request->input('activo', 0),
-            ]);
+            ];
+
+            if ($request->hasFile('imagen_hero')) {
+                // Borrar la imagen anterior si existe
+                if ($categoria->imagen_hero) {
+                    $this->eliminarImagenHero($categoria->imagen_hero);
+                }
+                $datos['imagen_hero'] = $this->guardarImagenHero($request->file('imagen_hero'));
+            } elseif ($request->boolean('eliminar_imagen_hero')) {
+                if ($categoria->imagen_hero) {
+                    $this->eliminarImagenHero($categoria->imagen_hero);
+                }
+                $datos['imagen_hero'] = null;
+            }
+
+            $categoria->update($datos);
 
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría actualizada exitosamente.');
         } catch (\Exception $e) {
@@ -551,6 +577,25 @@ class UsoInternoController extends Controller
         ];
         $s = strtoupper(strtr($nombre, $map));
         return preg_match('/[BCDFGHJKLMNPQRSTVWXYZ]/', $s, $m) ? $m[0] : strtoupper(substr($s, 0, 1));
+    }
+
+    private function guardarImagenHero(UploadedFile $imagen): string
+    {
+        $destino  = public_path('images/heros');
+        if (! is_dir($destino)) {
+            mkdir($destino, 0755, true);
+        }
+        $nombre = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $imagen->getClientOriginalName());
+        $imagen->move($destino, $nombre);
+        return 'images/heros/' . $nombre;
+    }
+
+    private function eliminarImagenHero(string $ruta): void
+    {
+        $path = public_path($ruta);
+        if (file_exists($path)) {
+            @unlink($path);
+        }
     }
 
     private function guardarImagenes(Producto $producto, UploadedFile $imagen, bool $esPrincipal = false): ImagenProducto
