@@ -73,7 +73,7 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
                 {{-- Imagen hero --}}
                 <div class="col-12">
                     <div class="d-flex align-items-center justify-content-between mb-2">
-                        <label class="form-label small mb-0">Imagen del hero</label>
+                        <label class="form-label small mb-0">Imagen de portada</label>
                         <button type="button" id="btn-seleccionar-hero"
                             class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
                             style="font-size:12px;">
@@ -87,6 +87,9 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
                         name="imagen_hero"
                         accept="image/*"
                         class="d-none @error('imagen_hero') is-invalid @enderror">
+                    <p class="text-muted mb-2" style="font-size:11px;">
+                        Tamaño recomendado: <strong>1920 × 600 px</strong> &mdash; relación 16:5, formato apaisado. JPG o PNG, máx. 4 MB.
+                    </p>
                     @error('imagen_hero')
                     <div class="text-danger" style="font-size:12px;">{{ $message }}</div>
                     @enderror
