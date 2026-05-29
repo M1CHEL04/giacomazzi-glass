@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\UsoInternoController;
+use App\Http\Controllers\UsoExternoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,6 +11,8 @@ Route::get('/', function () {
 Route::get('/contacto', function () {
     return view('UsoExterno.contacto');
 })->name('contacto');
+
+Route::get('/productos/categoria/{id}', [UsoExternoController::class, 'indexCategoria'])->name('productos.categoria');
 
 /*
 * 

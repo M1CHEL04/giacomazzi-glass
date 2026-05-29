@@ -76,7 +76,7 @@
                     <div class="product-category-content">
                         <h3 class="product-category-title">{{ $categoria->nombre }}</h3>
                         <p class="product-category-count">{{ $categoria->productos_count ?? 0 }} productos disponibles</p>
-                        <a href="#" class="product-category-link">Ver productos <i class="bi bi-arrow-right"></i></a>
+                        <a href="{{ route('productos.categoria', $categoria->id) }}" class="product-category-link">Ver productos <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>

@@ -44,7 +44,7 @@
                                 @if(isset($categoriasMenu) && $categoriasMenu->count() > 0)
                                 @foreach($categoriasMenu as $categoria)
                                 <li>
-                                    <a class="dropdown-item external-dropdown-item" href="#">
+                                    <a class="dropdown-item external-dropdown-item" href="{{ route('productos.categoria', $categoria->id) }}">
                                         {{ $categoria->nombre }}
                                     </a>
                                 </li>
