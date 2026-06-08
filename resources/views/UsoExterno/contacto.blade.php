@@ -5,49 +5,85 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     .contact-hero {
-        padding: 4rem 0 3rem;
-        margin-top: calc(-1.5rem - 1px);
-        /* Compensa el padding del main y el borde del navbar */
         position: relative;
+        min-height: 42vh;
+        display: flex;
+        align-items: center;
         overflow: hidden;
+        background: #111;
+        margin-top: calc(-1.5rem - 1px);
     }
 
     .contact-hero-bg {
         position: absolute;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
         object-position: center 92%;
         z-index: 0;
+        opacity: 0.85;
     }
 
+    /* Dark scrim */
     .contact-hero::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(135deg, rgba(45, 90, 63, 0.85) 0%, rgba(26, 46, 31, 0.9) 100%);
-        z-index: 0;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.38) 100%);
+        z-index: 1;
+    }
+
+    /* Dot grid texture */
+    .contact-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(circle, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 22px 22px;
+        z-index: 2;
+        pointer-events: none;
     }
 
     .contact-hero-content {
         position: relative;
-        z-index: 1;
+        z-index: 3;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
     }
 
-    .contact-hero h1 {
-        color: var(--external-white);
-        font-size: 2.75rem;
+    .contact-hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.72rem;
         font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(138, 185, 165, 0.9);
         margin-bottom: 0.75rem;
     }
 
+    .contact-hero-eyebrow::before {
+        content: '';
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--external-primary-soft);
+        border-radius: 2px;
+    }
+
+    .contact-hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 0.75rem;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+    }
+
     .contact-hero p {
-        color: rgba(255, 255, 255, 0.9);
+        color: rgba(255, 255, 255, 0.82);
         font-size: 1.1rem;
         margin: 0;
     }
@@ -167,10 +203,16 @@
     @media (max-width: 767.98px) {
         .contact-hero h1 {
             font-size: 2rem;
+            letter-spacing: -0.02em;
         }
 
         .contact-hero p {
             font-size: 1rem;
+        }
+
+        .contact-hero-content {
+            padding-top: 3rem;
+            padding-bottom: 3rem;
         }
 
         .contact-section {
@@ -202,10 +244,13 @@
 <!-- Hero Section -->
 <section class="contact-hero">
     <img src="{{ asset('images/contactohero.jpg') }}" alt="Contacto" class="contact-hero-bg">
-    <div class="contact-hero-content">
-        <div class="container text-center">
-            <h1>Contacto</h1>
-            <p>Estamos para ayudarte. Visitanos o comunicate con nosotros.</p>
+    <div class="container contact-hero-content">
+        <div class="row">
+            <div class="col-lg-8 col-xl-7">
+                <p class="contact-hero-eyebrow">Giacomazzi Glass</p>
+                <h1>Contacto</h1>
+                <p>Estamos para ayudarte. Visitanos o comunicate con nosotros.</p>
+            </div>
         </div>
     </div>
 </section>
