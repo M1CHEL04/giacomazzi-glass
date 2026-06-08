@@ -314,7 +314,7 @@
             <strong style="color: #287452; font-size: 1rem;">Fábrica</strong><br>
             San Juan 1978<br>
             Quilmes Oeste, Buenos Aires<br>
-            <a href="tel:01164457059" style="color: #287452; text-decoration: none;">📞 011 6445-7059</a>
+            <a href="tel:01164457059" style="color: #287452; text-decoration: none;"> 011 6445-7059</a>
         </div>
     `);
 
@@ -327,7 +327,8 @@
             <strong style="color: #287452; font-size: 1rem;">Local al público</strong><br>
             Au Dr. Ricardo Balbín Km 30<br>
             Local 03B - Polo Hudson<br>
-            Guillermo Enrique Hudson, Buenos Aires
+            Guillermo Enrique Hudson, Buenos Aires<br>
+            <a href="tel:01192683417" style="color: #287452; text-decoration: none;"> 011 9268-3417</a>
         </div>
     `);
 </script>

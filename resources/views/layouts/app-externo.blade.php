@@ -88,12 +88,13 @@
                         <strong>Fábrica</strong><br>
                         San Juan 1978 entre Av. La Plata y Madame Curie<br>
                         Quilmes Oeste, Buenos Aires<br>
-                        <i class="bi bi-telephone-fill"></i> 011 6445-7059
+                        011 6445-7059
                     </div>
                     <div class="external-contact-block">
                         <strong>Local al público</strong><br>
                         Au Dr. Ricardo Balbín Km 30 - Local 03B<br>
                         Guillermo Enrique Hudson, Buenos Aires<br>
+                        011 9268-3417
                     </div>
                 </div>
 
