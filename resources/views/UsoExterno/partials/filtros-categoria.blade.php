@@ -1,6 +1,11 @@
 @if($variantes->count() > 0)
 <aside class="filtros-sidebar">
 
+    <div class="filtros-loading" id="filtros-loading" aria-hidden="true" aria-label="Cargando filtros">
+        <div class="filtros-loading-spinner"></div>
+        <span class="filtros-loading-text">Filtrando…</span>
+    </div>
+
     {{-- Encabezado sólo visible en móvil --}}
     <button class="filtros-mobile-close" id="filtros-cerrar-btn" type="button" aria-label="Cerrar filtros">
         <span>Filtros</span>
@@ -10,14 +15,12 @@
     {{-- Encabezado con badge y limpiar --}}
     <div class="filtros-header">
         <h2 class="filtros-title">Filtros</h2>
-        @php
-        $totalFiltros = collect($filtros)->flatten()->filter()->count();
-        @endphp
-        @if($totalFiltros > 0)
-        <a href="{{ route('productos.categoria', $categoria->id) }}" class="filtros-limpiar">
-            Limpiar <span class="filtros-badge">{{ $totalFiltros }}</span>
+        @php $totalFiltros = collect($filtros)->flatten()->filter()->count(); @endphp
+        <a href="{{ route('productos.categoria', $categoria->id) }}"
+            class="filtros-limpiar"
+            style="{{ $totalFiltros > 0 ? '' : 'display:none' }}">
+            Limpiar <span class="filtros-badge">{{ $totalFiltros ?: '' }}</span>
         </a>
-        @endif
     </div>
 
     <form id="filtros-form" method="GET" action="{{ route('productos.categoria', $categoria->id) }}">
@@ -45,7 +48,6 @@
         </div>
         @endforeach
 
-        <button type="submit" class="btn-aplicar-filtros">Aplicar filtros</button>
     </form>
 
 </aside>

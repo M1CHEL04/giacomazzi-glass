@@ -5,15 +5,23 @@
         initFiltroGrupoToggle();
         initAutoSubmit();
         initMobileFiltros();
+        initDelegatedLinks();
+        initLimpiarLink();
     });
+
+    function getForm() {
+        return document.getElementById('filtros-form');
+    }
+
+    function getContainer() {
+        return document.getElementById('productos-container');
+    }
 
     /**
      * Colapsa/expande cada grupo de filtros al hacer clic en el encabezado.
      */
     function initFiltroGrupoToggle() {
-        var toggles = document.querySelectorAll('.filtro-grupo-toggle');
-
-        toggles.forEach(function (toggle) {
+        document.querySelectorAll('.filtro-grupo-toggle').forEach(function (toggle) {
             toggle.addEventListener('click', function () {
                 var targetId = this.getAttribute('data-target');
                 var content = document.getElementById(targetId);
@@ -29,17 +37,128 @@
         });
     }
 
+    function buildUrlFromForm() {
+        var f = getForm();
+        if (!f) return window.location.pathname;
+        var params = new URLSearchParams(new FormData(f));
+        var str = params.toString();
+        return window.location.pathname + (str ? '?' + str : '');
+    }
+
+    function fetchProductos(url, scrollGrid) {
+        var container      = getContainer();
+        var loadingOverlay = document.getElementById('filtros-loading');
+
+        if (loadingOverlay) {
+            loadingOverlay.classList.add('show');
+            loadingOverlay.removeAttribute('aria-hidden');
+        }
+        if (container) container.classList.add('loading');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (container) container.innerHTML = data.html;
+                history.pushState(null, '', url);
+                syncCheckboxesFromUrl(url);
+                updateSidebarBadge();
+                if (scrollGrid && container) {
+                    var top = container.getBoundingClientRect().top + window.scrollY - 20;
+                    window.scrollTo({ top: top, behavior: 'smooth' });
+                }
+            })
+            .catch(function () {
+                window.location.href = url;
+            })
+            .finally(function () {
+                if (loadingOverlay) {
+                    loadingOverlay.classList.remove('show');
+                    loadingOverlay.setAttribute('aria-hidden', 'true');
+                }
+                if (container) container.classList.remove('loading');
+            });
+    }
+
+    /**
+     * Sincroniza los checkboxes del sidebar con los params de la URL cargada.
+     */
+    function syncCheckboxesFromUrl(urlStr) {
+        var f = getForm();
+        if (!f) return;
+        var url;
+        try { url = new URL(urlStr, window.location.origin); } catch (e) { return; }
+
+        f.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+
+        url.searchParams.forEach(function (value, key) {
+            var cb = f.querySelector('input[type="checkbox"][name="' + key + '"][value="' + value + '"]');
+            if (cb) cb.checked = true;
+        });
+    }
+
+    /**
+     * Actualiza el badge de filtros activos en el encabezado del sidebar.
+     */
+    function updateSidebarBadge() {
+        var f = getForm();
+        if (!f) return;
+        var count     = f.querySelectorAll('input[type="checkbox"]:checked').length;
+        var limpiarEl = document.querySelector('.filtros-limpiar');
+        var badgeEl   = document.querySelector('.filtros-limpiar .filtros-badge');
+        if (!limpiarEl) return;
+        if (count > 0) {
+            limpiarEl.style.display = '';
+            if (badgeEl) badgeEl.textContent = count;
+        } else {
+            limpiarEl.style.display = 'none';
+        }
+    }
+
     /**
      * Envía el formulario automáticamente al cambiar cualquier checkbox.
      */
     function initAutoSubmit() {
-        var form = document.getElementById('filtros-form');
-        if (!form) return;
+        var f = getForm();
+        if (!f) return;
 
-        form.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
+        f.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
             checkbox.addEventListener('change', function () {
-                form.submit();
+                fetchProductos(buildUrlFromForm());
             });
+        });
+    }
+
+    /**
+     * Intercepta clics en chips y paginación dentro del grid de productos.
+     */
+    function initDelegatedLinks() {
+        var container = getContainer();
+        if (!container) return;
+
+        container.addEventListener('click', function (e) {
+            var link = e.target.closest('a[href]');
+            if (!link) return;
+            var href = link.getAttribute('href');
+            if (!href || href.charAt(0) === '#') return;
+            try {
+                var url = new URL(href, window.location.origin);
+                if (url.origin !== window.location.origin) return;
+            } catch (err) { return; }
+            e.preventDefault();
+            var isPagination = !!link.closest('.productos-pagination');
+            fetchProductos(href, isPagination);
+        });
+    }
+
+    /**
+     * Intercepta el enlace "Limpiar" del encabezado del sidebar.
+     */
+    function initLimpiarLink() {
+        var limpiarEl = document.querySelector('.filtros-limpiar');
+        if (!limpiarEl) return;
+        limpiarEl.addEventListener('click', function (e) {
+            e.preventDefault();
+            fetchProductos(this.getAttribute('href'));
         });
     }
 
@@ -66,20 +185,12 @@
             document.body.style.overflow = '';
         }
 
-        if (mobileBtn) {
-            mobileBtn.addEventListener('click', openFiltros);
-        }
-
-        if (cerrarBtn) {
-            cerrarBtn.addEventListener('click', closeFiltros);
-        }
-
+        if (mobileBtn) mobileBtn.addEventListener('click', openFiltros);
+        if (cerrarBtn) cerrarBtn.addEventListener('click', closeFiltros);
         overlay.addEventListener('click', closeFiltros);
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') {
-                closeFiltros();
-            }
+            if (e.key === 'Escape') closeFiltros();
         });
     }
 })();

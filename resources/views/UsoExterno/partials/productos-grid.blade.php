@@ -37,6 +37,11 @@ $chipsActivos[] = [
     <span class="productos-count">
         {{ $productos->total() }} {{ $productos->total() === 1 ? 'resultado' : 'resultados' }}
     </span>
+    @if($productos->hasPages())
+    <span class="productos-pagina-info">
+        Mostrando {{ $productos->firstItem() }}–{{ $productos->lastItem() }} de {{ $productos->total() }}
+    </span>
+    @endif
 </div>
 
 <div class="row g-4">
@@ -72,9 +77,9 @@ $chipsActivos[] = [
 </div>
 
 @if($productos->hasPages())
-<div class="mt-5 d-flex justify-content-center">
+<nav class="productos-pagination" aria-label="Paginación de productos">
     {{ $productos->links('pagination::bootstrap-5') }}
-</div>
+</nav>
 @endif
 
 @else

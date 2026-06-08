@@ -25,14 +25,17 @@ class UsoExternoController extends Controller
         foreach ($filtros as $varianteId => $valores) {
             $valores = array_filter((array) $valores);
             if (!empty($valores)) {
-                $query->whereHas('valoresVariantes', function ($q) use ($varianteId, $valores) {
-                    $q->where('variante_id', $varianteId)
-                        ->whereIn('id', $valores);
+                $query->whereIn('productos.id', function ($sub) use ($varianteId, $valores) {
+                    $sub->select('pvv.producto_id')
+                        ->from('productos_valores_variantes as pvv')
+                        ->join('valores_variante as vv', 'vv.id', '=', 'pvv.valor_variante_id')
+                        ->where('vv.variante_id', $varianteId)
+                        ->whereIn('vv.id', $valores);
                 });
             }
         }
 
-        $productos = $query->paginate(12)->withQueryString();
+        $productos = $query->paginate(2)->withQueryString();
 
         // Sólo cargar las variantes que tienen valores usados en productos de esta categoría
         $variantes = $categoria->variantes()
@@ -43,6 +46,12 @@ class UsoExternoController extends Controller
             ->get()
             ->filter(fn($v) => $v->valores->count() > 0)
             ->values();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('UsoExterno.partials.productos-grid', compact('productos', 'variantes', 'filtros', 'categoria'))->render(),
+            ]);
+        }
 
         return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros'));
     }
