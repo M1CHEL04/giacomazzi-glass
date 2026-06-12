@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categoria;
 use App\Models\Producto;
+use App\Models\Variante;
 use Illuminate\Http\Request;
 
 class UsoExternoController extends Controller
@@ -16,6 +17,63 @@ class UsoExternoController extends Controller
     public function contacto()
     {
         return view('UsoExterno.contacto');
+    }
+
+    public function indexTodos(Request $request)
+    {
+        $todasCategorias = Categoria::where('activo', true)->orderBy('nombre')->get(['id', 'nombre']);
+
+        $query = Producto::with([
+            'categoria:id,nombre',
+            'imagenes' => fn($q) => $q->where('activa', true)->where('es_principal', true)->select(['id', 'producto_id', 'ruta']),
+        ])
+            ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
+            ->where('activo', true)
+            ->whereHas('categoria', fn($q) => $q->where('activo', true));
+
+        // Filtro por categorías
+        $categoriasFiltro = array_values(array_filter((array) $request->input('categorias', [])));
+        if (!empty($categoriasFiltro)) {
+            $query->whereIn('categoria_id', $categoriasFiltro);
+        }
+
+        // Filtros por variantes
+        $filtros = $request->input('variantes', []);
+        foreach ($filtros as $varianteId => $valores) {
+            $valores = array_filter((array) $valores);
+            if (!empty($valores)) {
+                $query->whereIn('productos.id', function ($sub) use ($varianteId, $valores) {
+                    $sub->select('pvv.producto_id')
+                        ->from('productos_valores_variantes as pvv')
+                        ->join('valores_variante as vv', 'vv.id', '=', 'pvv.valor_variante_id')
+                        ->where('vv.variante_id', $varianteId)
+                        ->whereIn('vv.id', $valores);
+                });
+            }
+        }
+
+        $productos = $query->latest()->paginate(12)->withQueryString();
+
+        $variantes = Variante::with(['valores' => fn($q) => $q->whereHas(
+            'productos',
+            fn($qp) => $qp->where('activo', true)
+                           ->whereHas('categoria', fn($qc) => $qc->where('activo', true))
+        )])
+            ->get()
+            ->filter(fn($v) => $v->valores->count() > 0)
+            ->values();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'html' => view('UsoExterno.partials.productos-grid-todos', compact(
+                    'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro'
+                ))->render(),
+            ]);
+        }
+
+        return view('UsoExterno.Indexs.todos', compact(
+            'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro'
+        ));
     }
 
     public function indexCategoria(Request $request, int $id)

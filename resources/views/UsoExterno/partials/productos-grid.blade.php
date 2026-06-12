@@ -1,22 +1,41 @@
 @php
 // Construir chips de filtros activos con URL para eliminar cada uno
 $chipsActivos = [];
-foreach (($filtros ?? []) as $varianteId => $valores) {
-$variante = $variantes->firstWhere('id', (int) $varianteId);
-if (! $variante) continue;
-foreach ((array) $valores as $valorId) {
-$valor = $variante->valores->firstWhere('id', (int) $valorId);
-if (! $valor) continue;
-$sinEste = $filtros;
-$sinEste[$varianteId] = array_values(
-array_filter((array) $sinEste[$varianteId], fn ($v) => (int) $v !== (int) $valorId)
-);
-if (empty($sinEste[$varianteId])) unset($sinEste[$varianteId]);
-$chipsActivos[] = [
-'label' => $variante->nombre . ': ' . $valor->valor,
-'url' => route('productos.categoria', $categoria->id) . (empty($sinEste) ? '' : '?' . http_build_query(['variantes' => $sinEste])),
-];
+
+// Chips de categorías (sólo en "todos los productos", cuando $categoriasFiltro está definido)
+foreach (($categoriasFiltro ?? []) as $catId) {
+    $cat = ($todasCategorias ?? collect())->firstWhere('id', (int) $catId);
+    if (!$cat) continue;
+    $sinEsta = array_values(array_filter($categoriasFiltro, fn($c) => (int) $c !== (int) $catId));
+    $params = [];
+    if (!empty($filtros)) $params['variantes'] = $filtros;
+    if (!empty($sinEsta)) $params['categorias'] = $sinEsta;
+    $chipsActivos[] = [
+        'label' => $cat->nombre,
+        'url'   => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
+    ];
 }
+
+// Chips de variantes
+foreach (($filtros ?? []) as $varianteId => $valores) {
+    $variante = $variantes->firstWhere('id', (int) $varianteId);
+    if (!$variante) continue;
+    foreach ((array) $valores as $valorId) {
+        $valor = $variante->valores->firstWhere('id', (int) $valorId);
+        if (!$valor) continue;
+        $sinEste = $filtros;
+        $sinEste[$varianteId] = array_values(
+            array_filter((array) $sinEste[$varianteId], fn ($v) => (int) $v !== (int) $valorId)
+        );
+        if (empty($sinEste[$varianteId])) unset($sinEste[$varianteId]);
+        $params = [];
+        if (!empty($sinEste)) $params['variantes'] = $sinEste;
+        if (!empty($categoriasFiltro ?? [])) $params['categorias'] = $categoriasFiltro;
+        $chipsActivos[] = [
+            'label' => $variante->nombre . ': ' . $valor->valor,
+            'url'   => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
+        ];
+    }
 }
 @endphp
 
@@ -27,7 +46,7 @@ $chipsActivos[] = [
         {{ $chip['label'] }} <i class="bi bi-x"></i>
     </a>
     @endforeach
-    <a href="{{ route('productos.categoria', $categoria->id) }}" class="filtro-chip-limpiar">Limpiar todo</a>
+    <a href="{{ $gridBaseUrl }}" class="filtro-chip-limpiar">Limpiar todo</a>
 </div>
 @endif
 
@@ -47,12 +66,10 @@ $chipsActivos[] = [
 <div class="row g-4">
     @foreach($productos as $producto)
     <div class="col-sm-6 col-xl-4">
-        {{-- style var permite el stagger de animación en CSS --}}
         <article class="producto-card" style="--card-delay: {{ $loop->index * 0.055 }}s">
             <div class="producto-card-imagen">
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp
                 @if($imagenPrincipal && $imagenPrincipal->ruta)
-                {{-- ruta almacena URL completa --}}
                 <img src="{{ $imagenPrincipal->ruta }}"
                     alt="{{ $producto->nombre }}"
                     class="producto-img"
@@ -64,6 +81,12 @@ $chipsActivos[] = [
                 @endif
             </div>
             <div class="producto-card-body">
+                {{-- Tag de categoría — sólo en "todos los productos" --}}
+                @isset($todasCategorias)
+                @if($producto->categoria)
+                <span class="producto-categoria-tag">{{ $producto->categoria->nombre }}</span>
+                @endif
+                @endisset
                 <h3 class="producto-nombre">{{ $producto->nombre }}</h3>
                 <p class="producto-descripcion">{{ Str::limit($producto->descripcion, 100) }}</p>
                 <span class="producto-cta">
@@ -100,14 +123,14 @@ $chipsActivos[] = [
     </div>
     <h3 class="productos-empty-title">No se encontraron productos</h3>
     <p class="productos-empty-text">
-        @if(!empty(array_filter($filtros)))
+        @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []))
         Probá ajustando los filtros para ver más resultados.
         @else
-        Todavía no hay productos en esta categoría.
+        Todavía no hay productos en esta sección.
         @endif
     </p>
-    @if(!empty(array_filter($filtros)))
-    <a href="{{ route('productos.categoria', $categoria->id) }}" class="btn-limpiar-filtros">Limpiar filtros</a>
+    @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []))
+    <a href="{{ $gridBaseUrl }}" class="btn-limpiar-filtros">Limpiar filtros</a>
     @endif
 </div>
 

@@ -54,7 +54,7 @@
                                 </li>
                                 @endif
                                 <li>
-                                    <a class="dropdown-item external-dropdown-item fw-semibold" href="#">
+                                    <a class="dropdown-item external-dropdown-item fw-semibold" href="{{ route('productos.todos') }}">
                                         Ver todos los productos
                                     </a>
                                 </li>

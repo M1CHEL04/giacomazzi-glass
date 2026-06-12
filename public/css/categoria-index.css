@@ -1,5 +1,153 @@
 /* ===== CATEGORIA INDEX STYLES ===== */
 
+/* ===== TODOS LOS PRODUCTOS — HERO ===== */
+
+.todos-hero {
+    position: relative;
+    min-height: 42vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    background: linear-gradient(150deg, #f4f9f6 0%, #e8f3ed 55%, #dceee5 100%);
+    margin-top: calc(-1.5rem - 1px);
+    border-bottom: 1px solid rgba(40, 116, 82, 0.1);
+}
+
+/* Dot grid — mismo patrón que el hero de categoría pero sobre fondo claro */
+.todos-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(40, 116, 82, 0.1) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none;
+}
+
+.todos-hero-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+}
+
+.todos-hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--external-primary);
+    margin-bottom: 1rem;
+}
+
+.todos-hero-eyebrow-line {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: var(--external-primary);
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.todos-hero-title {
+    font-size: 3.25rem;
+    font-weight: 800;
+    color: var(--external-secondary);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+}
+
+.todos-hero-accent {
+    font-style: normal;
+    color: var(--external-primary);
+}
+
+.todos-hero-subtitle {
+    font-size: 1rem;
+    color: var(--external-secondary-soft);
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 2rem;
+}
+
+.todos-hero-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.todos-hero-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+}
+
+.todos-hero-stat-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--external-secondary);
+    letter-spacing: -0.02em;
+}
+
+.todos-hero-stat-label {
+    font-size: 0.8rem;
+    color: var(--external-secondary-soft);
+    font-weight: 500;
+}
+
+.todos-hero-stat-sep {
+    color: var(--external-secondary-soft);
+    font-size: 1.1rem;
+    opacity: 0.4;
+}
+
+.todos-hero-stat--filtered {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--external-primary);
+    background: rgba(40, 116, 82, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    border: 1px solid rgba(40, 116, 82, 0.2);
+}
+
+/* ---- Tag de categoría en card (vista todos) ---- */
+.producto-categoria-tag {
+    display: inline-block;
+    font-size: 0.67rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--external-primary);
+    background: rgba(40, 116, 82, 0.08);
+    border: 1px solid rgba(40, 116, 82, 0.15);
+    border-radius: 100px;
+    padding: 0.15rem 0.6rem;
+    margin-bottom: 0.4rem;
+}
+
+/* ---- Responsive todos hero ---- */
+@media (max-width: 991.98px) {
+    .todos-hero-title { font-size: 2.5rem; }
+}
+
+@media (max-width: 767.98px) {
+    .todos-hero { min-height: 30vh; }
+    .todos-hero-content { padding-top: 2.75rem; padding-bottom: 2.75rem; }
+    .todos-hero-title { font-size: 2rem; }
+    .todos-hero-subtitle { font-size: 0.9rem; }
+}
+
+
+
 /* ---- Hero de categoría ---- */
 .categoria-hero {
     position: relative;

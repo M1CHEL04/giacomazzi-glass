@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 // ── Uso Externo ──────────────────────────────────────────────────────────────
 Route::get('/',         [UsoExternoController::class, 'welcome'])->name('welcome');
 Route::get('/contacto', [UsoExternoController::class, 'contacto'])->name('contacto');
+Route::get('/productos',                [UsoExternoController::class, 'indexTodos'])->name('productos.todos');
 Route::get('/productos/categoria/{id}', [UsoExternoController::class, 'indexCategoria'])->name('productos.categoria');
 Route::get('/productos/{id}',           [UsoExternoController::class, 'showProducto'])->whereNumber('id')->name('productos.show');
 

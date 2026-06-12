@@ -44,13 +44,17 @@
             {{-- Sidebar de filtros --}}
             @if($variantes->count() > 0)
             <div class="col-lg-3">
-                @include('UsoExterno.partials.filtros-categoria')
+                @include('UsoExterno.partials.filtros-categoria', [
+                    'filtrosLimpiarUrl' => route('productos.categoria', $categoria->id),
+                ])
             </div>
             @endif
 
             {{-- Grid de productos --}}
             <div class="{{ $variantes->count() > 0 ? 'col-lg-9' : 'col-12' }}" id="productos-container">
-                @include('UsoExterno.partials.productos-grid')
+                @include('UsoExterno.partials.productos-grid', [
+                    'gridBaseUrl' => route('productos.categoria', $categoria->id),
+                ])
             </div>
 
         </div>
