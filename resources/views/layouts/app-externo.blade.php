@@ -19,61 +19,135 @@
 
 <body class="external-body d-flex flex-column min-vh-100">
     @include('layouts.partials.toast')
+
     <header>
-        <nav class="navbar navbar-expand-lg external-navbar py-3">
+        {{-- ── Navbar ──────────────────────────────────────────────────────── --}}
+        <nav class="navbar navbar-expand-lg external-navbar py-2">
             <div class="container external-nav-container">
-                <a class="navbar-brand external-logo" href="#" aria-label="Logo de la marca">
+
+                {{-- Logo --}}
+                <a class="navbar-brand external-logo" href="{{ route('welcome') }}" aria-label="Logo de la marca">
                     LOGO
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#externalNavbar"
-                    aria-controls="externalNavbar" aria-expanded="false" aria-label="Mostrar navegación">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <div class="collapse navbar-collapse" id="externalNavbar">
-                    <ul class="navbar-nav mx-auto external-menu gap-lg-2">
+                {{-- ── Desktop nav (oculto en mobile) ──────────────────────── --}}
+                <div class="d-none d-lg-flex flex-grow-1 align-items-center">
+                    <ul class="navbar-nav mx-auto external-menu gap-2">
                         <li class="nav-item">
-                            <a class="nav-link external-menu-btn" href="{{ route('welcome') }}">Inicio</a>
+                            <a class="nav-link external-menu-btn {{ request()->routeIs('welcome') ? 'active' : '' }}"
+                                href="{{ route('welcome') }}">Inicio</a>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="nav-link external-menu-btn dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link external-menu-btn dropdown-toggle {{ request()->routeIs('productos.*') ? 'active' : '' }}"
+                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Productos
                             </a>
                             <ul class="dropdown-menu external-dropdown-menu">
                                 @if(!empty($categoriasMenu))
                                 @foreach($categoriasMenu as $categoria)
                                 <li>
-                                    <a class="dropdown-item external-dropdown-item" href="{{ route('productos.categoria', $categoria['id']) }}">
+                                    <a class="dropdown-item external-dropdown-item {{ request()->routeIs('productos.categoria') && request()->route('id') == $categoria['id'] ? 'active' : '' }}"
+                                        href="{{ route('productos.categoria', $categoria['id']) }}">
                                         {{ $categoria['nombre'] }}
                                     </a>
                                 </li>
                                 @endforeach
-                                <li>
-                                    <hr class="dropdown-divider">
-                                </li>
+                                <li><hr class="dropdown-divider"></li>
                                 @endif
                                 <li>
-                                    <a class="dropdown-item external-dropdown-item fw-semibold" href="{{ route('productos.todos') }}">
+                                    <a class="dropdown-item external-dropdown-item fw-semibold {{ request()->routeIs('productos.todos') ? 'active' : '' }}"
+                                        href="{{ route('productos.todos') }}">
                                         Ver todos los productos
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link external-menu-btn" href="{{ route('contacto') }}">Contacto</a>
+                            <a class="nav-link external-menu-btn {{ request()->routeIs('contacto') ? 'active' : '' }}"
+                                href="{{ route('contacto') }}">Contacto</a>
                         </li>
                     </ul>
 
-                    <div class="external-cart-wrapper d-lg-flex justify-content-end">
+                    <div class="external-cart-wrapper d-flex">
                         <a href="#" class="external-cart-link" aria-label="Carrito de compras">
                             <x-heroicon-o-shopping-cart />
                         </a>
                     </div>
                 </div>
+
+                {{-- ── Mobile controls (ocultos en desktop) ────────────────── --}}
+                <div class="d-flex d-lg-none align-items-center gap-2">
+                    <a href="#" class="external-cart-link" aria-label="Carrito de compras">
+                        <x-heroicon-o-shopping-cart />
+                    </a>
+                    <button class="mobile-menu-btn" id="mobile-menu-btn"
+                        aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-nav-drawer">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+
             </div>
         </nav>
+
     </header>
+
+    {{-- ── Mobile drawer (fuera del header para que position:fixed sea relativo al viewport) --}}
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer" aria-hidden="true">
+        <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop"></div>
+
+        <div class="mobile-drawer-panel" role="dialog" aria-modal="true" aria-label="Menú de navegación">
+
+            {{-- Header del drawer --}}
+            <div class="mobile-drawer-header">
+                <a href="{{ route('welcome') }}" class="mobile-drawer-logo" aria-label="Inicio">LOGO</a>
+                <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Cerrar menú">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            {{-- Navegación --}}
+            <nav class="mobile-drawer-nav" aria-label="Navegación principal">
+                <a href="{{ route('welcome') }}" class="mobile-nav-link">Inicio</a>
+
+                <div class="mobile-nav-section" id="mobile-products-section">
+                    <button class="mobile-nav-section-toggle" id="mobile-products-toggle"
+                        aria-expanded="false" aria-controls="mobile-products-content">
+                        Productos
+                        <i class="bi bi-chevron-down toggle-chevron"></i>
+                    </button>
+                    <div class="mobile-nav-section-content" id="mobile-products-content">
+                        @if(!empty($categoriasMenu))
+                        <div class="mobile-nav-categories">
+                            @foreach($categoriasMenu as $categoria)
+                            <a href="{{ route('productos.categoria', $categoria['id']) }}"
+                                class="mobile-nav-category-pill">
+                                {{ $categoria['nombre'] }}
+                            </a>
+                            @endforeach
+                        </div>
+                        @endif
+                        <a href="{{ route('productos.todos') }}" class="mobile-nav-todos">
+                            Ver todos los productos
+                            <i class="bi bi-arrow-right-short"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ route('contacto') }}" class="mobile-nav-link">Contacto</a>
+            </nav>
+
+            {{-- Footer del drawer — CTA carrito --}}
+            <div class="mobile-drawer-footer">
+                <a href="#" class="mobile-nav-cart-btn" aria-label="Ver carrito y cotizar">
+                    <x-heroicon-o-shopping-cart />
+                    Ver carrito y cotizar
+                </a>
+            </div>
+
+        </div>
+    </div>
 
     <main class="external-main flex-grow-1">
         @yield('content')
@@ -99,16 +173,15 @@
                 </div>
 
                 <div class="col-12 col-lg-4 text-center">
-                    <div class="external-footer-logo mx-auto" aria-label="Logo en footer">
-                        LOGO
-                    </div>
+                    <div class="external-footer-logo mx-auto" aria-label="Logo en footer">LOGO</div>
                 </div>
 
                 <div class="col-12 col-lg-4 d-flex justify-content-lg-end justify-content-center align-items-center gap-3">
                     <a href="#" class="external-social-link" aria-label="WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                     </a>
-                    <a href="https://www.instagram.com/giacomazzi_srl/" target="_blank" class="external-social-link" aria-label="Instagram">
+                    <a href="https://www.instagram.com/giacomazzi_srl/" target="_blank"
+                        class="external-social-link" aria-label="Instagram">
                         <i class="bi bi-instagram"></i>
                     </a>
                 </div>
@@ -122,37 +195,76 @@
     <script src="{{ asset('js/toast.js') }}"></script>
 
     <script>
-        // Dropdown con hover en desktop
-        document.addEventListener('DOMContentLoaded', function() {
-            const dropdownElement = document.querySelector('.dropdown');
-            const dropdownToggle = document.querySelector('.dropdown-toggle');
-            const dropdownMenu = document.querySelector('.dropdown-menu');
-            let hideTimeout;
+    (function () {
+        // ── Desktop dropdown hover ────────────────────────────────────────────
+        var dropdownEl     = document.querySelector('.dropdown');
+        var dropdownToggle = document.querySelector('.dropdown-toggle');
+        var dropdownMenu   = document.querySelector('.dropdown-menu');
+        var hideTimeout;
 
-            if (dropdownElement && window.innerWidth >= 992) {
-                dropdownElement.addEventListener('mouseenter', function() {
-                    clearTimeout(hideTimeout);
-                    dropdownToggle.classList.add('show');
-                    dropdownMenu.classList.add('show');
-                });
-
-                dropdownElement.addEventListener('mouseleave', function() {
-                    hideTimeout = setTimeout(function() {
-                        dropdownToggle.classList.remove('show');
-                        dropdownMenu.classList.remove('show');
-                    }, 150); // Delay de 150ms antes de ocultar
-                });
-            }
-
-            // Recalcular en resize
-            window.addEventListener('resize', function() {
-                if (window.innerWidth < 992) {
-                    clearTimeout(hideTimeout);
+        if (dropdownEl && window.innerWidth >= 992) {
+            dropdownEl.addEventListener('mouseenter', function () {
+                clearTimeout(hideTimeout);
+                dropdownToggle.classList.add('show');
+                dropdownMenu.classList.add('show');
+            });
+            dropdownEl.addEventListener('mouseleave', function () {
+                hideTimeout = setTimeout(function () {
                     dropdownToggle.classList.remove('show');
                     dropdownMenu.classList.remove('show');
-                }
+                }, 150);
             });
+        }
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth < 992) {
+                clearTimeout(hideTimeout);
+                if (dropdownToggle) dropdownToggle.classList.remove('show');
+                if (dropdownMenu)   dropdownMenu.classList.remove('show');
+            }
         });
+
+        // ── Mobile drawer ─────────────────────────────────────────────────────
+        var menuBtn   = document.getElementById('mobile-menu-btn');
+        var drawer    = document.getElementById('mobile-nav-drawer');
+        var closeBtn  = document.getElementById('mobile-drawer-close');
+        var backdrop  = document.getElementById('mobile-drawer-backdrop');
+
+        function openDrawer() {
+            drawer.classList.add('open');
+            menuBtn.classList.add('open');
+            menuBtn.setAttribute('aria-expanded', 'true');
+            drawer.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            menuBtn.classList.remove('open');
+            menuBtn.setAttribute('aria-expanded', 'false');
+            drawer.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (menuBtn)  menuBtn.addEventListener('click', openDrawer);
+        if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+        if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeDrawer();
+        });
+
+        // ── Acordeón de Productos ─────────────────────────────────────────────
+        var productsToggle  = document.getElementById('mobile-products-toggle');
+        var productsSection = document.getElementById('mobile-products-section');
+
+        if (productsToggle && productsSection) {
+            productsToggle.addEventListener('click', function () {
+                var isOpen = productsSection.classList.toggle('open');
+                productsToggle.setAttribute('aria-expanded', String(isOpen));
+            });
+        }
+    })();
     </script>
 
     @yield('script')
