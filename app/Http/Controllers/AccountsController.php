@@ -12,6 +12,21 @@ use Symfony\Component\HttpFoundation\Session\Session;
 
 class AccountsController extends Controller
 {
+    public function loginView()
+    {
+        return view('UsoInterno.User.login');
+    }
+
+    public function changePasswordView()
+    {
+        return view('UsoInterno.User.changePassword');
+    }
+
+    public function forgotPasswordView()
+    {
+        return view('UsoInterno.User.forgotPassword');
+    }
+
     public function storeUser(Request $request)
     {
         try {

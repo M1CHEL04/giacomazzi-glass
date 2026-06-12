@@ -64,13 +64,13 @@ $chipsActivos[] = [
                 @endif
             </div>
             <div class="producto-card-body">
-                <span class="producto-codigo">{{ $producto->codigo }}</span>
                 <h3 class="producto-nombre">{{ $producto->nombre }}</h3>
                 <p class="producto-descripcion">{{ Str::limit($producto->descripcion, 100) }}</p>
-                <a href="#" class="producto-cta">
+                <span class="producto-cta">
                     Ver detalles <i class="bi bi-arrow-right"></i>
-                </a>
+                </span>
             </div>
+            <a href="{{ route('productos.show', $producto->id) }}" class="stretched-link" aria-label="{{ $producto->nombre }}"></a>
         </article>
     </div>
     @endforeach
@@ -81,6 +81,16 @@ $chipsActivos[] = [
     {{ $productos->links('pagination::bootstrap-5') }}
 </nav>
 @endif
+
+{{-- Énfasis personalización --}}
+<div class="grid-personalizar-banner">
+    <span class="grid-personalizar-icono"><i class="bi bi-stars"></i></span>
+    <p>
+        <strong>Todos nuestros productos pueden ser fabricados a medida.</strong>
+        ¿Necesitás otras medidas, colores o terminaciones?
+        <a href="{{ route('contacto') }}">Consultanos</a> y lo producimos especialmente para vos.
+    </p>
+</div>
 
 @else
 

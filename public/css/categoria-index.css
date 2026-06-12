@@ -511,6 +511,7 @@
 
 /* ---- Tarjeta de producto ---- */
 .producto-card {
+    position: relative;
     background: #ffffff;
     border-radius: 0.875rem;
     overflow: hidden;
@@ -617,6 +618,30 @@
     flex: 1;
 }
 
+.producto-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    gap: 0.5rem;
+}
+
+.producto-badge-medida {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--external-primary);
+    opacity: 0.75;
+}
+
+.producto-badge-medida i {
+    font-size: 0.7rem;
+}
+
 .producto-cta {
     display: inline-flex;
     align-items: center;
@@ -626,13 +651,53 @@
     font-weight: 700;
     text-decoration: none;
     transition: gap 0.2s ease, color 0.2s;
-    margin-top: auto;
     letter-spacing: 0.01em;
 }
 
-.producto-cta:hover {
+.producto-card:hover .producto-cta {
     gap: 0.6rem;
     color: #1f5c3e;
+}
+
+/* ---- Banner personalización en grid ---- */
+.grid-personalizar-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-top: 2.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(40, 116, 82, 0.04);
+    border: 1px solid rgba(40, 116, 82, 0.14);
+    border-radius: 0.65rem;
+}
+
+.grid-personalizar-icono {
+    font-size: 1.05rem;
+    color: var(--external-primary);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.grid-personalizar-banner p {
+    font-size: 0.83rem;
+    color: var(--external-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.grid-personalizar-banner strong {
+    color: var(--external-secondary);
+}
+
+.grid-personalizar-banner a {
+    color: var(--external-primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.grid-personalizar-banner a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 /* ---- Estado vacío ---- */

@@ -130,6 +130,8 @@
 
     /**
      * Intercepta clics en chips y paginación dentro del grid de productos.
+     * Solo intercepta navegación a la misma ruta (con distintos query params);
+     * links a páginas de producto u otras rutas los deja pasar normalmente.
      */
     function initDelegatedLinks() {
         var container = getContainer();
@@ -140,10 +142,13 @@
             if (!link) return;
             var href = link.getAttribute('href');
             if (!href || href.charAt(0) === '#') return;
+            var url;
             try {
-                var url = new URL(href, window.location.origin);
+                url = new URL(href, window.location.origin);
                 if (url.origin !== window.location.origin) return;
             } catch (err) { return; }
+            // Solo interceptar navegación dentro de la misma ruta (filtros, chips, paginación)
+            if (url.pathname !== window.location.pathname) return;
             e.preventDefault();
             var isPagination = !!link.closest('.productos-pagination');
             fetchProductos(href, isPagination);

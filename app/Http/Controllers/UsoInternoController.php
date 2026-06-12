@@ -12,6 +12,7 @@ use App\Models\Variante;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +20,16 @@ use Illuminate\Support\Str;
 
 class UsoInternoController extends Controller
 {
+    public function homeInterno()
+    {
+        return view('UsoInterno.index');
+    }
+
+    public function miPerfil()
+    {
+        return view('UsoInterno.User.myProfile');
+    }
+
     public function indexCategorias(Request $request)
     {
         $search = $request->input('search');
@@ -79,6 +90,7 @@ class UsoInternoController extends Controller
                 'imagen_hero' => $rutaHero,
             ]);
 
+            Cache::forget('categorias_menu_externo');
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría creada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al crear categoría: ' . $e->getMessage());
@@ -134,6 +146,7 @@ class UsoInternoController extends Controller
 
             $categoria->update($datos);
 
+            Cache::forget('categorias_menu_externo');
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría actualizada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al actualizar categoría: ' . $e->getMessage());

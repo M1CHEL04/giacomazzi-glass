@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('ruta')->nullable();
             $table->string('nombre_imagen')->nullable();
             $table->timestamps();
+
+            // Índice compuesto para el eager load filtrado por activa y es_principal
+            $table->index(['producto_id', 'activa', 'es_principal'], 'idx_imagenes_producto_activa_principal');
         });
     }
 

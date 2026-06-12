@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class UsoExternoController extends Controller
 {
+    public function welcome()
+    {
+        return view('UsoExterno.welcome');
+    }
+
+    public function contacto()
+    {
+        return view('UsoExterno.contacto');
+    }
+
     public function indexCategoria(Request $request, int $id)
     {
         $categoria = Categoria::with(['variantes.valores'])
@@ -15,8 +25,12 @@ class UsoExternoController extends Controller
             ->findOrFail($id);
 
         $query = Producto::with([
-            'imagenes' => fn($q) => $q->where('activa', true)->where('es_principal', true),
+            'imagenes' => fn($q) => $q
+                ->where('activa', true)
+                ->where('es_principal', true)
+                ->select(['id', 'producto_id', 'ruta']),
         ])
+            ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
             ->where('categoria_id', $id)
             ->where('activo', true);
 
@@ -35,7 +49,7 @@ class UsoExternoController extends Controller
             }
         }
 
-        $productos = $query->paginate(2)->withQueryString();
+        $productos = $query->paginate(12)->withQueryString();
 
         // Sólo cargar las variantes que tienen valores usados en productos de esta categoría
         $variantes = $categoria->variantes()
@@ -54,5 +68,53 @@ class UsoExternoController extends Controller
         }
 
         return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros'));
+    }
+
+    public function showProducto(int $id)
+    {
+        $producto = Producto::with([
+            'categoria:id,nombre,activo',
+            'imagenes' => fn($q) => $q
+                ->where('activa', true)
+                ->orderByDesc('es_principal')
+                ->select(['id', 'producto_id', 'ruta', 'es_principal']),
+            'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
+            'valoresVariantes.variante:id,nombre',
+        ])
+            ->select(['id', 'categoria_id', 'nombre', 'descripcion', 'descripcion_tecnica'])
+            ->where('activo', true)
+            ->findOrFail($id);
+
+        abort_unless($producto->categoria && $producto->categoria->activo, 404);
+
+        // Agrupar únicamente los valores que tiene ESTE producto, por variante
+        $selectorVariantes = $producto->valoresVariantes
+            ->sortBy(fn($vv) => $vv->variante->nombre)
+            ->groupBy('variante_id')
+            ->map(fn($valores) => [
+                'nombre'   => $valores->first()->variante->nombre,
+                'opciones' => $valores->map(fn($v) => [
+                    'id'    => $v->id,
+                    'valor' => $v->valor,
+                ])->values(),
+            ])
+            ->values();
+
+        // Relacionados: otros productos activos de la misma categoría
+        $relacionados = Producto::with([
+            'imagenes' => fn($q) => $q
+                ->where('activa', true)
+                ->where('es_principal', true)
+                ->select(['id', 'producto_id', 'ruta']),
+        ])
+            ->select(['id', 'categoria_id', 'nombre'])
+            ->where('categoria_id', $producto->categoria_id)
+            ->where('activo', true)
+            ->where('id', '!=', $producto->id)
+            ->latest()
+            ->limit(3)
+            ->get();
+
+        return view('UsoExterno.Shows.producto', compact('producto', 'selectorVariantes', 'relacionados'));
     }
 }

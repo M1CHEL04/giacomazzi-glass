@@ -14,13 +14,16 @@ return new class extends Migration
     {
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Categoria::class);
+            $table->foreignIdFor(Categoria::class)->index();
             $table->string('nombre');
             $table->string('descripcion');
             $table->string('descripcion_tecnica')->nullable();
             $table->string('codigo')->unique();
-            $table->boolean('activo')->default(true);
+            $table->boolean('activo')->default(true)->index();
             $table->timestamps();
+
+            // Índice compuesto para el filtro más frecuente: categoría + activo
+            $table->index(['categoria_id', 'activo'], 'idx_productos_categoria_activo');
         });
     }
 
