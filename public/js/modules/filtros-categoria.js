@@ -3,6 +3,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         initFiltroGrupoToggle();
+        initBuscar();
         initAutoSubmit();
         initMobileFiltros();
         initDelegatedLinks();
@@ -18,21 +19,49 @@
     }
 
     /**
-     * Colapsa/expande cada grupo de filtros al hacer clic en el encabezado.
+     * Colapsa/expande cada grupo usando la altura real del contenido (scrollHeight)
+     * para que la transición CSS sea perfectamente proporcional al contenido.
      */
     function initFiltroGrupoToggle() {
         document.querySelectorAll('.filtro-grupo-toggle').forEach(function (toggle) {
-            toggle.addEventListener('click', function () {
-                var targetId = this.getAttribute('data-target');
-                var content = document.getElementById(targetId);
-                var chevron = this.querySelector('.filtro-chevron');
-                if (!content) return;
+            var targetId = toggle.getAttribute('data-target');
+            var content  = document.getElementById(targetId);
+            if (!content) return;
 
+            // Anclar la altura inicial para que la primera transición tenga punto de partida
+            if (content.classList.contains('collapsed')) {
+                content.style.height = '0';
+            }
+            // Si está abierto, dejamos height sin fijar (auto) —
+            // al colapsar por primera vez lo pineamos a scrollHeight antes de animar.
+
+            toggle.addEventListener('click', function () {
+                var chevron     = this.querySelector('.filtro-chevron');
                 var isCollapsed = content.classList.contains('collapsed');
-                content.classList.toggle('collapsed', !isCollapsed);
-                if (chevron) {
-                    chevron.classList.toggle('rotated', !isCollapsed);
+
+                if (isCollapsed) {
+                    // Expandir: 0 → scrollHeight → auto
+                    content.classList.remove('collapsed');
+                    requestAnimationFrame(function () {
+                        content.style.height = content.scrollHeight + 'px';
+                        content.addEventListener('transitionend', function onEnd() {
+                            content.style.height = 'auto';
+                            content.removeEventListener('transitionend', onEnd);
+                        });
+                    });
+                } else {
+                    // Colapsar: auto → scrollHeight (pinear) → 0
+                    content.style.height = content.scrollHeight + 'px';
+                    requestAnimationFrame(function () {
+                        requestAnimationFrame(function () {
+                            content.classList.add('collapsed');
+                            content.style.height = '0';
+                        });
+                    });
                 }
+
+                if (chevron) chevron.classList.toggle('rotated', !isCollapsed);
+                toggle.setAttribute('aria-expanded', String(isCollapsed));
             });
         });
     }
@@ -60,7 +89,7 @@
             .then(function (data) {
                 if (container) container.innerHTML = data.html;
                 history.pushState(null, '', url);
-                syncCheckboxesFromUrl(url);
+                syncFormFromUrl(url);
                 updateSidebarBadge();
                 if (scrollGrid && container) {
                     var top = container.getBoundingClientRect().top + window.scrollY - 20;
@@ -80,29 +109,50 @@
     }
 
     /**
-     * Sincroniza los checkboxes del sidebar con los params de la URL cargada.
+     * Sincroniza checkboxes Y el input de búsqueda con los params de la URL cargada.
      */
-    function syncCheckboxesFromUrl(urlStr) {
+    function syncFormFromUrl(urlStr) {
         var f = getForm();
         if (!f) return;
         var url;
         try { url = new URL(urlStr, window.location.origin); } catch (e) { return; }
 
+        // Limpiar checkboxes y re-marcar los que estén en la URL
         f.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
-
         url.searchParams.forEach(function (value, key) {
             var cb = f.querySelector('input[type="checkbox"][name="' + key + '"][value="' + value + '"]');
             if (cb) cb.checked = true;
         });
+
+        // Sincronizar input de búsqueda
+        var searchInput = document.getElementById('filtros-buscar-input');
+        if (searchInput) {
+            searchInput.value = url.searchParams.get('buscar') || '';
+            updateClearBtn(searchInput);
+        }
     }
 
     /**
-     * Actualiza el badge de filtros activos en el encabezado del sidebar.
+     * Muestra u oculta el botón de limpiar búsqueda y la clase has-value.
+     */
+    function updateClearBtn(input) {
+        var wrapper = document.getElementById('filtros-buscar-wrapper');
+        if (wrapper && input) {
+            wrapper.classList.toggle('has-value', input.value.trim().length > 0);
+        }
+    }
+
+    /**
+     * Actualiza el badge de filtros activos (checkboxes + búsqueda activa).
      */
     function updateSidebarBadge() {
         var f = getForm();
         if (!f) return;
-        var count     = f.querySelectorAll('input[type="checkbox"]:checked').length;
+        var checkCount  = f.querySelectorAll('input[type="checkbox"]:checked').length;
+        var searchInput = document.getElementById('filtros-buscar-input');
+        var hasSearch   = searchInput && searchInput.value.trim().length > 0;
+        var count       = checkCount + (hasSearch ? 1 : 0);
+
         var limpiarEl = document.querySelector('.filtros-limpiar');
         var badgeEl   = document.querySelector('.filtros-limpiar .filtros-badge');
         if (!limpiarEl) return;
@@ -112,6 +162,39 @@
         } else {
             limpiarEl.style.display = 'none';
         }
+    }
+
+    /**
+     * Input de búsqueda con debounce de 400ms.
+     */
+    function initBuscar() {
+        var input    = document.getElementById('filtros-buscar-input');
+        var clearBtn = document.getElementById('filtros-buscar-clear');
+        if (!input) return;
+
+        var debounceTimer;
+
+        input.addEventListener('input', function () {
+            updateClearBtn(input);
+            updateSidebarBadge();
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                fetchProductos(buildUrlFromForm());
+            }, 400);
+        });
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function () {
+                input.value = '';
+                updateClearBtn(input);
+                updateSidebarBadge();
+                fetchProductos(buildUrlFromForm());
+                input.focus();
+            });
+        }
+
+        // Estado inicial del botón limpiar
+        updateClearBtn(input);
     }
 
     /**
@@ -130,8 +213,6 @@
 
     /**
      * Intercepta clics en chips y paginación dentro del grid de productos.
-     * Solo intercepta navegación a la misma ruta (con distintos query params);
-     * links a páginas de producto u otras rutas los deja pasar normalmente.
      */
     function initDelegatedLinks() {
         var container = getContainer();
@@ -147,7 +228,6 @@
                 url = new URL(href, window.location.origin);
                 if (url.origin !== window.location.origin) return;
             } catch (err) { return; }
-            // Solo interceptar navegación dentro de la misma ruta (filtros, chips, paginación)
             if (url.pathname !== window.location.pathname) return;
             e.preventDefault();
             var isPagination = !!link.closest('.productos-pagination');

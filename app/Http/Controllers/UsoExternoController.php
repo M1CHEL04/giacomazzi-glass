@@ -37,6 +37,15 @@ class UsoExternoController extends Controller
             $query->whereIn('categoria_id', $categoriasFiltro);
         }
 
+        // Filtro por texto
+        $buscar = trim($request->input('buscar', ''));
+        if ($buscar !== '') {
+            $query->where(fn($q) => $q
+                ->where('nombre', 'like', "%{$buscar}%")
+                ->orWhere('descripcion', 'like', "%{$buscar}%")
+            );
+        }
+
         // Filtros por variantes
         $filtros = $request->input('variantes', []);
         foreach ($filtros as $varianteId => $valores) {
@@ -64,15 +73,16 @@ class UsoExternoController extends Controller
             ->values();
 
         if ($request->ajax()) {
+            $gridBaseUrl = route('productos.todos');
             return response()->json([
-                'html' => view('UsoExterno.partials.productos-grid-todos', compact(
-                    'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro'
+                'html' => view('UsoExterno.partials.productos-grid', compact(
+                    'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro', 'gridBaseUrl'
                 ))->render(),
             ]);
         }
 
         return view('UsoExterno.Indexs.todos', compact(
-            'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro'
+            'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro', 'buscar'
         ));
     }
 
@@ -91,6 +101,15 @@ class UsoExternoController extends Controller
             ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
             ->where('categoria_id', $id)
             ->where('activo', true);
+
+        // Filtro por texto
+        $buscar = trim($request->input('buscar', ''));
+        if ($buscar !== '') {
+            $query->where(fn($q) => $q
+                ->where('nombre', 'like', "%{$buscar}%")
+                ->orWhere('descripcion', 'like', "%{$buscar}%")
+            );
+        }
 
         // Aplicar filtros por valores de variante
         $filtros = $request->get('variantes', []);
@@ -120,12 +139,13 @@ class UsoExternoController extends Controller
             ->values();
 
         if ($request->ajax()) {
+            $gridBaseUrl = route('productos.categoria', $id);
             return response()->json([
-                'html' => view('UsoExterno.partials.productos-grid', compact('productos', 'variantes', 'filtros', 'categoria'))->render(),
+                'html' => view('UsoExterno.partials.productos-grid', compact('productos', 'variantes', 'filtros', 'categoria', 'gridBaseUrl'))->render(),
             ]);
         }
 
-        return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros'));
+        return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros', 'buscar'));
     }
 
     public function showProducto(int $id)

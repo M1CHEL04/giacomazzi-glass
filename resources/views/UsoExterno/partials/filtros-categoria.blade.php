@@ -14,7 +14,7 @@
     {{-- Encabezado con badge y limpiar --}}
     <div class="filtros-header">
         <h2 class="filtros-title">Filtros</h2>
-        @php $totalFiltros = collect($filtros)->flatten()->filter()->count() + count($categoriasFiltro ?? []); @endphp
+        @php $totalFiltros = collect($filtros)->flatten()->filter()->count() + count($categoriasFiltro ?? []) + (request('buscar') ? 1 : 0); @endphp
         <a href="{{ $filtrosLimpiarUrl }}"
             class="filtros-limpiar"
             style="{{ $totalFiltros > 0 ? '' : 'display:none' }}">
@@ -23,6 +23,23 @@
     </div>
 
     <form id="filtros-form" method="GET" action="{{ $filtrosLimpiarUrl }}">
+
+        {{-- Búsqueda por texto --}}
+        @php $buscarActual = request('buscar', ''); @endphp
+        <div class="filtros-buscar {{ $buscarActual ? 'has-value' : '' }}" id="filtros-buscar-wrapper">
+            <i class="bi bi-search filtros-buscar-icon"></i>
+            <input type="text"
+                   id="filtros-buscar-input"
+                   name="buscar"
+                   class="filtros-buscar-input"
+                   placeholder="Buscar producto…"
+                   value="{{ $buscarActual }}"
+                   autocomplete="off"
+                   spellcheck="false">
+            <button type="button" class="filtros-buscar-clear" id="filtros-buscar-clear" aria-label="Limpiar búsqueda">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
 
         {{-- Sección categoría — sólo en "todos los productos" --}}
         @isset($todasCategorias)
