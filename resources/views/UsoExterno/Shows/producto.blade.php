@@ -37,20 +37,20 @@
                     <div id="ps-carousel" class="carousel slide ps-carousel" data-bs-ride="false" data-bs-touch="true">
                         <div class="carousel-inner">
                             @if($imagenes->count() > 0)
-                                @foreach($imagenes as $imagen)
-                                <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                    <img src="{{ $imagen->ruta }}"
-                                        alt="{{ $producto->nombre }}"
-                                        class="ps-carousel-img"
-                                        title="Clic para ampliar">
-                                </div>
-                                @endforeach
+                            @foreach($imagenes as $imagen)
+                            <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                                <img src="{{ $imagen->ruta }}"
+                                    alt="{{ $producto->nombre }}"
+                                    class="ps-carousel-img"
+                                    title="Clic para ampliar">
+                            </div>
+                            @endforeach
                             @else
-                                <div class="carousel-item active">
-                                    <div class="ps-galeria-placeholder">
-                                        <x-heroicon-o-photo />
-                                    </div>
+                            <div class="carousel-item active">
+                                <div class="ps-galeria-placeholder">
+                                    <x-heroicon-o-photo />
                                 </div>
+                            </div>
                             @endif
                         </div>
 
@@ -141,29 +141,15 @@
                     @endif
 
                     <div class="ps-acciones">
-                        <a href="#" class="btn-ps-primary">
-                            <x-heroicon-o-shopping-cart />
-                            Agregar al carrito
-                        </a>
-                        <a href="{{ route('contacto', ['producto' => $producto->id]) }}" class="btn-ps-secondary">
-                            <x-heroicon-o-clipboard-document-list />
-                            Cotizar este producto
-                        </a>
-                    </div>
-
-                    <div class="ps-confianza">
-                        <span class="ps-confianza-item">
-                            <x-heroicon-o-wrench-screwdriver />
-                            Fabricación propia
-                        </span>
-                        <span class="ps-confianza-item">
-                            <x-heroicon-o-adjustments-horizontal />
-                            100% personalizable
-                        </span>
-                        <span class="ps-confianza-item">
-                            <x-heroicon-o-chat-bubble-left-right />
-                            Asesoramiento incluido
-                        </span>
+                        <button type="button"
+                            id="btn-agregar-carrito"
+                            class="btn-ps-primary"
+                            data-producto-id="{{ $producto->id }}">
+                            <span id="btn-carrito-icon"><x-heroicon-o-shopping-cart /></span>
+                            <span class="spinner-border spinner-border-sm d-none"
+                                id="btn-carrito-spinner" role="status" aria-hidden="true"></span>
+                            <span id="btn-carrito-text">Agregar al carrito</span>
+                        </button>
                     </div>
 
                 </div>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountsController;
+use App\Http\Controllers\CarritoController;
 use App\Http\Controllers\UsoExternoController;
 use App\Http\Controllers\UsoInternoController;
 use Illuminate\Support\Facades\Route;
@@ -11,6 +12,12 @@ Route::get('/contacto', [UsoExternoController::class, 'contacto'])->name('contac
 Route::get('/productos',                [UsoExternoController::class, 'indexTodos'])->name('productos.todos');
 Route::get('/productos/categoria/{id}', [UsoExternoController::class, 'indexCategoria'])->name('productos.categoria');
 Route::get('/productos/{id}',           [UsoExternoController::class, 'showProducto'])->whereNumber('id')->name('productos.show');
+
+// ── Carrito ───────────────────────────────────────────────────────────────────
+Route::get('/carrito',           [CarritoController::class, 'obtener'])->name('carrito.obtener');
+Route::post('/carrito/agregar',  [CarritoController::class, 'agregar'])->name('carrito.agregar');
+Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+Route::post('/carrito/vaciar',   [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::get('/login',              [AccountsController::class, 'loginView'])->name('login-view');

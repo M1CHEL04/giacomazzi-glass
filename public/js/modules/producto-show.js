@@ -5,6 +5,7 @@
         initCarousel();
         initVariantes();
         initLightbox();
+        initCarrito();
     });
 
     /* ---- Carrusel + sincronización de thumbnails ---- */
@@ -127,6 +128,53 @@
             if (total === 0) return;
             if (e.key === 'ArrowRight') lbThumbs[(currentIndex + 1) % total].click();
             if (e.key === 'ArrowLeft')  lbThumbs[(currentIndex - 1 + total) % total].click();
+        });
+    }
+
+    /* ---- Agregar al carrito ---- */
+    function initCarrito() {
+        var btn     = document.getElementById('btn-agregar-carrito');
+        var icon    = document.getElementById('btn-carrito-icon');
+        var spinner = document.getElementById('btn-carrito-spinner');
+        var textEl  = document.getElementById('btn-carrito-text');
+        if (!btn || !window.Carrito) return;
+
+        function setLoading(loading) {
+            btn.disabled = loading;
+            if (icon)    icon.classList.toggle('d-none', loading);
+            if (spinner) spinner.classList.toggle('d-none', !loading);
+        }
+
+        btn.addEventListener('click', function () {
+            var productoId = parseInt(btn.dataset.productoId, 10);
+            var valorIds   = [];
+
+            document.querySelectorAll('.ps-opcion.active').forEach(function (opcion) {
+                var id = parseInt(opcion.dataset.valorId, 10);
+                if (id) valorIds.push(id);
+            });
+
+            setLoading(true);
+            if (textEl) textEl.textContent = 'Agregando...';
+
+            window.Carrito.agregar(productoId, valorIds)
+                .then(function (data) {
+                    setLoading(false);
+                    if (!data.ok) {
+                        if (textEl) textEl.textContent = 'Agregar al carrito';
+                        return;
+                    }
+                    if (textEl) textEl.textContent = '¡Agregado!';
+                    window.Carrito.abrirPanel();
+                    setTimeout(function () {
+                        if (textEl) textEl.textContent = 'Agregar al carrito';
+                        btn.disabled = false;
+                    }, 1800);
+                })
+                .catch(function () {
+                    setLoading(false);
+                    if (textEl) textEl.textContent = 'Agregar al carrito';
+                });
         });
     }
 })();
