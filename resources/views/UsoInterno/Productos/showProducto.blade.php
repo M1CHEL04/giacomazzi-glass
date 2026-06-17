@@ -5,6 +5,24 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ asset('css/producto.css') }}">
+<style>
+.sku-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    max-height: 168px;
+    overflow-y: auto;
+}
+.sku-chip {
+    font-size: 11px;
+    color: #287452;
+    background: rgba(40, 116, 82, .07);
+    border-radius: 4px;
+    padding: 3px 8px;
+    white-space: nowrap;
+    letter-spacing: .03em;
+}
+</style>
 @endsection
 
 @section('content')
@@ -129,11 +147,7 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                     @foreach($varianteGroups as $nombre => $valores)
                     <div class="variante-row">
                         <span class="variante-name">{{ $nombre }}</span>
-                        <div class="variante-values">
-                            @foreach($valores as $vv)
-                            {{ $vv->valor }}@if(!$loop->last)<span class="variante-sep">&#9632;</span>@endif
-                            @endforeach
-                        </div>
+                        <span class="variante-values">{{ $valores->pluck('valor')->implode(' · ') }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -156,9 +170,9 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                 </div>
 
                 @if($producto->variantes->isNotEmpty())
-                <div class="d-flex flex-wrap gap-2">
+                <div class="sku-grid">
                     @foreach($producto->variantes->sortBy('sku') as $pv)
-                    <code class="sku-preview-item">{{ $pv->sku }}</code>
+                    <code class="sku-chip">{{ $pv->sku }}</code>
                     @endforeach
                 </div>
                 @else
