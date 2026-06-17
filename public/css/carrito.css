@@ -185,9 +185,15 @@
     background: #1ebe5b;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .carrito-offcanvas {
-        --bs-offcanvas-width: 100vw;
+        --bs-offcanvas-width: 86vw;
+        box-shadow: -6px 0 24px rgba(0, 0, 0, .18);
+    }
+
+    /* Backdrop con foco pero dejando el peek distinguible */
+    .offcanvas-backdrop.show {
+        opacity: .4;
     }
 }
 
