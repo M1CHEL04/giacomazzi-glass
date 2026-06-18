@@ -47,6 +47,10 @@ export function initVariantManager({ cfg, iconXMark }) {
     let nuevoValorCodigoManual    = false;
     let nuevaVarianteCodigoManual = false;
     let pendingLocalVarianteName  = null;   // nombre de variante pendiente seleccionada en el dropdown
+    let prevCategoriaId           = cfg.categoriaId || '';
+
+    // Capturar antes de que syncVariantesJson() lo sobreescriba con []
+    const savedVariantesJson = variantesJsonInput?.value || '[]';
 
     // ─── Pre-poblar en modo edición ──────────────────────────────
     cfg.initialVariantes.forEach(item => {
@@ -124,6 +128,22 @@ export function initVariantManager({ cfg, iconXMark }) {
     // ─── Evento: cambio de categoría ────────────────────────────
     categoriaSelect.addEventListener('change', function () {
         const id = this.value;
+
+        if (variantesData.length > 0) {
+            const ok = confirm('Cambiar la categoría eliminará las variantes cargadas del producto. ¿Continuás?');
+            if (!ok) {
+                this.value = prevCategoriaId;
+                return;
+            }
+        }
+        prevCategoriaId = id;
+
+        variantesData = [];
+        variantesLista.querySelectorAll('.variante-tag').forEach(t => t.remove());
+        syncVariantesJson();
+        updateEmptyMsg();
+        updateSkuPreview();
+
         resetAddForm();
         if (!id) {
             variantesAlert.classList.remove('d-none');
@@ -524,10 +544,47 @@ export function initVariantManager({ cfg, iconXMark }) {
             .replace(/"/g, '&quot;');
     }
 
-    // ─── Cargar variantes en modo edición ────────────────────────
-    if (cfg.isEdit && cfg.categoriaId) {
+    // ─── Restaurar variantes desde old('variantes_json') (create tras error de validación) ──
+    function restoreFromJson() {
+        try {
+            const raw = JSON.parse(savedVariantesJson);
+            if (!raw.length) return;
+            raw.forEach(item => {
+                let display = '';
+                if (item.tipo === 'nueva_variante') {
+                    display = item.variante_nombre + ': ' + item.valor;
+                } else if (item.tipo === 'nuevo_valor') {
+                    const v = currentVariantes.find(x => x.id === item.variante_id);
+                    display = (v ? v.nombre : 'Variante') + ': ' + item.valor;
+                } else {
+                    const v  = currentVariantes.find(x => x.id === item.variante_id);
+                    const vl = v?.valores.find(vl => vl.id === item.valor_variante_id);
+                    display  = (v ? v.nombre : 'Variante') + ': ' + (vl ? vl.valor : '—');
+                }
+                const restored = { ...item, display, _lid: uid() };
+                variantesData.push(restored);
+                renderVarianteTag(restored);
+            });
+            injectPendingVariantes();
+            syncVariantesJson();
+            updateEmptyMsg();
+            updateSkuPreview();
+        } catch (_) {}
+    }
+
+    // ─── Cargar variantes al inicio (edición o create con categoría preseleccionada) ─
+    if (cfg.categoriaId) {
         loadVariantes(cfg.categoriaId)
-            .then(data => buildVarianteSelect(data))
-            .catch(() => buildVarianteSelect([]));
+            .then(data => {
+                buildVarianteSelect(data);
+                if (!cfg.isEdit) {
+                    restoreFromJson();
+                }
+            })
+            .catch(() => buildVarianteSelect([]))
+            .finally(() => {
+                variantesAlert.classList.add('d-none');
+                variantesSection.classList.remove('d-none');
+            });
     }
 }

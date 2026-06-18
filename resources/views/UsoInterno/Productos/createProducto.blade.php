@@ -201,12 +201,12 @@ $formAction = $isEdit
             </p>
 
             <div id="variantes-alert"
-                class="alert alert-light border small py-2 mb-0 {{ $isEdit ? 'd-none' : '' }}"
+                class="alert alert-light border small py-2 mb-0 {{ ($isEdit || old('categoria_id')) ? 'd-none' : '' }}"
                 style="font-size:12px;">
                 Seleccioná primero una categoría para cargar las variantes disponibles.
             </div>
 
-            <div id="variantes-section" class="d-flex flex-column gap-3 {{ $isEdit ? '' : 'd-none' }}">
+            <div id="variantes-section" class="d-flex flex-column gap-3 {{ ($isEdit || old('categoria_id')) ? '' : 'd-none' }}">
 
                 {{-- Tags seleccionados --}}
                 <div id="variantes-lista" class="d-flex flex-wrap gap-2 align-items-center" style="min-height:32px;">
@@ -222,8 +222,10 @@ $formAction = $isEdit
                 </div>
 
                 {{-- Formulario agregar variante --}}
-                <div class="border rounded-2 p-3 bg-light">
-                    <p class="small fw-semibold text-secondary mb-2" style="font-size:11px;">Agregar variante al producto</p>
+                <div class="border rounded-2 p-3 bg-light d-flex flex-column gap-2">
+                    <p class="small fw-semibold text-secondary mb-0" style="font-size:11px;">Agregar variante al producto</p>
+
+                    {{-- Fila principal: variante + valor/código --}}
                     <div class="row g-2 align-items-end">
 
                         {{-- Select variante --}}
@@ -242,7 +244,7 @@ $formAction = $isEdit
                             </select>
                         </div>
 
-                        {{-- Código editable del valor existente seleccionado --}}
+                        {{-- Código editable del valor existente --}}
                         <div class="col-auto d-none" id="valor-codigo-section">
                             <label class="form-label small mb-1" style="font-size:11px;">Código</label>
                             <input type="text" id="valor-codigo-input"
@@ -252,7 +254,7 @@ $formAction = $isEdit
                                 title="Código del valor (editable)">
                         </div>
 
-                        {{-- Input nuevo valor (para variante existente) —— lado a lado --}}
+                        {{-- Input nuevo valor --}}
                         <div class="col-12 col-md-4 d-none" id="nuevo-valor-section">
                             <div class="d-flex gap-1 align-items-end">
                                 <div class="flex-grow-1">
@@ -272,43 +274,43 @@ $formAction = $isEdit
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {{-- Nueva variante --}}
-                        <div class="col-12 d-none" id="nueva-variante-section">
-                            <div class="row g-2">
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label small mb-1" style="font-size:11px;">Nombre de la variante</label>
-                                    <input type="text" id="nueva-variante-nombre"
-                                        class="form-control form-control-sm"
-                                        placeholder="Ej: Material">
-                                    <div class="text-danger d-none mt-1" id="nueva-variante-nombre-feedback" style="font-size:0.8em;"></div>
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label small mb-1" style="font-size:11px;">Valor</label>
-                                    <input type="text" id="nueva-variante-valor"
-                                        class="form-control form-control-sm"
-                                        placeholder="Ej: Aluminio">
-                                </div>
-                                <div class="col-12 col-md-4">
-                                    <label class="form-label small mb-1" style="font-size:11px;">
-                                        Código del valor <span class="text-secondary fw-normal">(auto)</span>
-                                    </label>
-                                    <input type="text" id="nueva-variante-codigo"
-                                        class="form-control form-control-sm"
-                                        placeholder="Ej: ALM" maxlength="10"
-                                        style="text-transform:uppercase;font-family:monospace;">
-                                </div>
+                    {{-- Nueva variante: ocupa ancho completo, separada del row --}}
+                    <div class="d-none" id="nueva-variante-section">
+                        <div class="row g-2">
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small mb-1" style="font-size:11px;">Nombre de la variante</label>
+                                <input type="text" id="nueva-variante-nombre"
+                                    class="form-control form-control-sm"
+                                    placeholder="Ej: Material">
+                                <div class="text-danger d-none mt-1" id="nueva-variante-nombre-feedback" style="font-size:0.8em;"></div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small mb-1" style="font-size:11px;">Valor</label>
+                                <input type="text" id="nueva-variante-valor"
+                                    class="form-control form-control-sm"
+                                    placeholder="Ej: Aluminio">
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <label class="form-label small mb-1" style="font-size:11px;">
+                                    Código del valor <span class="text-secondary fw-normal">(auto)</span>
+                                </label>
+                                <input type="text" id="nueva-variante-codigo"
+                                    class="form-control form-control-sm"
+                                    placeholder="Ej: ALM" maxlength="10"
+                                    style="text-transform:uppercase;font-family:monospace;">
                             </div>
                         </div>
+                    </div>
 
-                        {{-- Botón agregar --}}
-                        <div class="col-auto">
-                            <button type="button" id="add-variante-btn"
-                                class="btn btn-success btn-sm px-3 py-1 rounded-2"
-                                style="font-size:12px;">
-                                Agregar
-                            </button>
-                        </div>
+                    {{-- Botón siempre abajo a la derecha --}}
+                    <div class="d-flex justify-content-end">
+                        <button type="button" id="add-variante-btn"
+                            class="btn btn-success btn-sm px-3 py-1 rounded-2"
+                            style="font-size:12px;">
+                            Agregar
+                        </button>
                     </div>
                 </div>
             </div>
