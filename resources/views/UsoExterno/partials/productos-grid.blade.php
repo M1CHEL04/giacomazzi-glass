@@ -65,7 +65,7 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
 
 <div class="row g-4">
     @foreach($productos as $producto)
-    <div class="col-sm-6 col-xl-4">
+    <div class="col-6 col-xl-4">
         <article class="producto-card" style="--card-delay: {{ $loop->index * 0.055 }}s">
             <div class="producto-card-imagen">
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp

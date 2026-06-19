@@ -97,9 +97,7 @@ class UsoExternoController extends Controller
     public function indexCategoria(Request $request, int $id)
     {
         try {
-            $categoria = Categoria::with(['variantes.valores'])
-                ->where('activo', true)
-                ->findOrFail($id);
+            $categoria = Categoria::where('activo', true)->findOrFail($id);
 
             $query = Producto::with([
                 'imagenes' => fn($q) => $q
@@ -135,8 +133,7 @@ class UsoExternoController extends Controller
 
             $productos = $query->paginate(12)->withQueryString();
 
-            $variantes = $categoria->variantes()
-                ->with(['valores' => fn($q) => $q->whereHas(
+            $variantes = Variante::with(['valores' => fn($q) => $q->whereHas(
                     'productos',
                     fn($qp) => $qp->where('categoria_id', $id)->where('activo', true)
                 )])
