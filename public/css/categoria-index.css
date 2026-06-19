@@ -352,6 +352,7 @@
     position: sticky;
     top: 1.5rem;
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
 }
 
 .filtros-mobile-close {
@@ -605,9 +606,7 @@
     display: none;
     position: absolute;
     inset: 0;
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(2px);
-    -webkit-backdrop-filter: blur(2px);
+    background: rgba(255, 255, 255, 0.93);
     border-radius: 0.75rem;
     z-index: 10;
     align-items: center;
@@ -641,10 +640,39 @@
     to { transform: rotate(360deg); }
 }
 
+#productos-container {
+    position: relative;
+}
+
 #productos-container.loading {
-    opacity: 0.45;
+    opacity: 0.55;
     pointer-events: none;
-    transition: opacity 0.15s;
+    transition: opacity 0.2s;
+}
+
+#productos-container.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--external-primary) 50%,
+        transparent 100%
+    );
+    background-size: 45% 100%;
+    background-repeat: no-repeat;
+    background-position: -45% 0;
+    animation: productos-shimmer 1.4s ease-in-out infinite;
+    z-index: 5;
+}
+
+@keyframes productos-shimmer {
+    0%   { background-position: -45% 0; }
+    100% { background-position: 145% 0; }
 }
 
 /* ---- Mobile: botón y panel deslizante ---- */

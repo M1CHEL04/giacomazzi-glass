@@ -1,8 +1,11 @@
 (function () {
     'use strict';
 
+    var updateVarianteVisibility = null;
+
     document.addEventListener('DOMContentLoaded', function () {
         initFiltroGrupoToggle();
+        initVariantesCondicionales();
         initBuscar();
         initAutoSubmit();
         initMobileFiltros();
@@ -130,6 +133,8 @@
             searchInput.value = url.searchParams.get('buscar') || '';
             updateClearBtn(searchInput);
         }
+
+        if (updateVarianteVisibility) updateVarianteVisibility();
     }
 
     /**
@@ -165,6 +170,47 @@
     }
 
     /**
+     * En la vista "todos los productos", oculta los grupos de variantes hasta que
+     * haya al menos una categoría seleccionada o texto en el buscador.
+     */
+    function initVariantesCondicionales() {
+        if (!document.getElementById('filtro-grupo-categorias')) return;
+
+        var varianteGroups = Array.from(document.querySelectorAll('.filtro-grupo')).filter(function (group) {
+            var toggle = group.querySelector('.filtro-grupo-toggle');
+            return toggle && toggle.getAttribute('data-target') !== 'filtro-grupo-categorias';
+        });
+
+        if (!varianteGroups.length) return;
+
+        function hasActiveBaseFilter() {
+            var hasCat = !!document.querySelector('#filtro-grupo-categorias input[type="checkbox"]:checked');
+            var searchInput = document.getElementById('filtros-buscar-input');
+            return hasCat || (searchInput && searchInput.value.trim().length > 0);
+        }
+
+        updateVarianteVisibility = function () {
+            var show = hasActiveBaseFilter();
+            if (!show) {
+                varianteGroups.forEach(function (group) {
+                    group.querySelectorAll('input[type="checkbox"]').forEach(function (cb) { cb.checked = false; });
+                });
+            }
+            varianteGroups.forEach(function (group) {
+                group.style.display = show ? '' : 'none';
+            });
+            updateSidebarBadge();
+        };
+
+        // Attach to category checkboxes BEFORE initAutoSubmit so visibility updates first
+        document.querySelectorAll('#filtro-grupo-categorias input[type="checkbox"]').forEach(function (cb) {
+            cb.addEventListener('change', updateVarianteVisibility);
+        });
+
+        updateVarianteVisibility();
+    }
+
+    /**
      * Input de búsqueda con debounce de 400ms.
      */
     function initBuscar() {
@@ -176,7 +222,7 @@
 
         input.addEventListener('input', function () {
             updateClearBtn(input);
-            updateSidebarBadge();
+            if (updateVarianteVisibility) updateVarianteVisibility();
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(function () {
                 fetchProductos(buildUrlFromForm());
@@ -187,7 +233,7 @@
             clearBtn.addEventListener('click', function () {
                 input.value = '';
                 updateClearBtn(input);
-                updateSidebarBadge();
+                if (updateVarianteVisibility) updateVarianteVisibility();
                 fetchProductos(buildUrlFromForm());
                 input.focus();
             });
