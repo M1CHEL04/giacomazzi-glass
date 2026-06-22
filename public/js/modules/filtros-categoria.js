@@ -9,6 +9,7 @@
         initBuscar();
         initAutoSubmit();
         initMobileFiltros();
+        initStickyFilterBtn();
         initDelegatedLinks();
         initLimpiarLink();
     });
@@ -94,6 +95,7 @@
                 history.pushState(null, '', url);
                 syncFormFromUrl(url);
                 updateSidebarBadge();
+                syncStickyCount();
                 if (scrollGrid && container) {
                     var top = container.getBoundingClientRect().top + window.scrollY - 20;
                     window.scrollTo({ top: top, behavior: 'smooth' });
@@ -160,12 +162,23 @@
 
         var limpiarEl = document.querySelector('.filtros-limpiar');
         var badgeEl   = document.querySelector('.filtros-limpiar .filtros-badge');
-        if (!limpiarEl) return;
-        if (count > 0) {
-            limpiarEl.style.display = '';
-            if (badgeEl) badgeEl.textContent = count;
-        } else {
-            limpiarEl.style.display = 'none';
+        if (limpiarEl) {
+            if (count > 0) {
+                limpiarEl.style.display = '';
+                if (badgeEl) badgeEl.textContent = count;
+            } else {
+                limpiarEl.style.display = 'none';
+            }
+        }
+
+        var stickyBadge = document.getElementById('filtros-sticky-badge');
+        if (stickyBadge) {
+            if (count > 0) {
+                stickyBadge.textContent = count;
+                stickyBadge.classList.add('show');
+            } else {
+                stickyBadge.classList.remove('show');
+            }
         }
     }
 
@@ -255,6 +268,50 @@
                 fetchProductos(buildUrlFromForm());
             });
         });
+    }
+
+    function syncStickyCount() {
+        var countEl     = document.querySelector('#productos-container .productos-count');
+        var stickyCount = document.getElementById('filtros-sticky-count');
+        if (stickyCount) {
+            stickyCount.textContent = countEl ? countEl.textContent.trim() : '';
+        }
+    }
+
+    /**
+     * Barra sticky en la parte superior (mobile): aparece cuando el botón
+     * original de filtros sale del viewport. Muestra el conteo de resultados
+     * y un botón de filtros con badge de filtros activos.
+     */
+    function initStickyFilterBtn() {
+        var bar       = document.getElementById('filtros-sticky-bar');
+        var stickyBtn = document.getElementById('filtros-sticky-btn');
+        var origBtn   = document.getElementById('filtros-mobile-btn');
+
+        if (!bar || !stickyBtn) return;
+
+        syncStickyCount();
+
+        stickyBtn.addEventListener('click', function () {
+            var sidebar = document.querySelector('.filtros-sidebar');
+            var overlay = document.getElementById('filtros-overlay');
+            if (sidebar) sidebar.classList.add('filtros-open');
+            if (overlay) overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+
+        if (!origBtn) return;
+
+        if ('IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries) {
+                bar.classList.toggle('show', !entries[0].isIntersecting);
+            }, { threshold: 0 });
+            observer.observe(origBtn);
+        } else {
+            window.addEventListener('scroll', function () {
+                bar.classList.toggle('show', origBtn.getBoundingClientRect().bottom < 0);
+            }, { passive: true });
+        }
     }
 
     /**

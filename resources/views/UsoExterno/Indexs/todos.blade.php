@@ -93,6 +93,18 @@
     </div>
 </section>
 
+<div class="filtros-sticky-bar" id="filtros-sticky-bar">
+    <div class="container">
+        <div class="filtros-sticky-bar-inner">
+            <span class="filtros-sticky-count" id="filtros-sticky-count"></span>
+            <button type="button" class="filtros-sticky-bar-btn" id="filtros-sticky-btn" aria-label="Abrir filtros">
+                <i class="bi bi-sliders2"></i>
+                <span class="filtros-sticky-badge" id="filtros-sticky-badge"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="filtros-overlay" id="filtros-overlay" aria-hidden="true"></div>
 
 @endsection
