@@ -1,0 +1,103 @@
+networks:
+  proxy_net:
+    driver: bridge
+  prod_net:
+    driver: bridge
+    internal: true   # MySQL prod no accesible desde fuera de Docker
+  test_net:
+    driver: bridge
+    internal: true   # MySQL test no accesible desde fuera de Docker
+
+volumes:
+  mysql_prod_data:
+  mysql_test_data:
+
+services:
+
+  # ── Reverse Proxy ──────────────────────────────────────────────────────────
+  nginx-proxy:
+    image: nginx:1.27-alpine
+    container_name: giacomazzi-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - proxy_net
+    restart: unless-stopped
+
+  # ── PROD ───────────────────────────────────────────────────────────────────
+  app-prod:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: giacomazzi-app-prod
+    env_file: .env.prod
+    volumes:
+      # Imágenes de productos — persiste entre rebuilds (mini file server)
+      - ./volumes/prod/storage:/var/www/html/storage/app/public
+      # Imágenes hero y logos — carpeta public del proyecto
+      - ./volumes/prod/public-images:/var/www/html/public/images
+    networks:
+      - proxy_net
+      - prod_net
+    depends_on:
+      mysql-prod:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql-prod:
+    image: mysql:8.0
+    container_name: giacomazzi-mysql-prod
+    env_file: .env.prod
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"   # Acceso desde gestor de BD: localhost:3307
+    networks:
+      - prod_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+  # ── TEST ───────────────────────────────────────────────────────────────────
+  app-test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: giacomazzi-app-test
+    env_file: .env.test
+    volumes:
+      # Imágenes de productos — persiste entre rebuilds (mini file server)
+      - ./volumes/test/storage:/var/www/html/storage/app/public
+      # Imágenes hero y logos — carpeta public del proyecto
+      - ./volumes/test/public-images:/var/www/html/public/images
+    networks:
+      - proxy_net
+      - test_net
+    depends_on:
+      mysql-test:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql-test:
+    image: mysql:8.0
+    container_name: giacomazzi-mysql-test
+    env_file: .env.test
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3308:3306"   # Acceso desde gestor de BD: localhost:3308
+    networks:
+      - test_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
