@@ -43,7 +43,8 @@ COPY . .
 COPY --from=node-builder /app/public/build ./public/build
 
 # PHP and Laravel dependencies (production only)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && composer install --no-dev --optimize-autoloader --no-interaction --no-progress
 
 # Nginx site config
 COPY docker/nginx/app.conf /etc/nginx/sites-available/default
