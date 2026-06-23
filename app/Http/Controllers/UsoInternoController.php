@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UsoInternoController extends Controller
@@ -499,7 +500,7 @@ class UsoInternoController extends Controller
         }
 
         $path         = $imagen->store('imagenes_producto_temp', 'local');
-        $pathAbsoluto = storage_path('app/' . $path);
+        $pathAbsoluto = Storage::disk('local')->path($path);
 
         $job = new UploadImagen($imagenProducto, $pathAbsoluto);
         Bus::dispatchSync($job);
