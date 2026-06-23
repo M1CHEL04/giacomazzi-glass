@@ -73,10 +73,10 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                 <div class="prod-photos-grid">
                     @foreach($imagenes->sortByDesc('es_principal') as $img)
                     <div class="prod-photo-wrap{{ $img->es_principal ? ' is-portada' : '' }}">
-                        <img src="{{ $img->ruta }}"
+                        <img src="{{ route('imagen.show', $img) }}"
                             alt="{{ $img->nombre_imagen }}"
                             class="prod-photo-thumb"
-                            data-src="{{ $img->ruta }}"
+                            data-src="{{ route('imagen.show', $img) }}"
                             data-alt="{{ $img->nombre_imagen }}"
                             onclick="openLightbox(this.dataset.src, this.dataset.alt)">
                         @if($img->es_principal)

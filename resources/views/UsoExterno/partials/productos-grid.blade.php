@@ -70,7 +70,7 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
             <div class="producto-card-imagen">
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp
                 @if($imagenPrincipal && $imagenPrincipal->ruta)
-                <img src="{{ $imagenPrincipal->ruta }}"
+                <img src="{{ route('imagen.show', $imagenPrincipal) }}"
                     alt="{{ $producto->nombre }}"
                     class="producto-img"
                     loading="lazy">

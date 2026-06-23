@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\AccountsController;
 use App\Http\Controllers\CarritoController;
+use App\Http\Controllers\ImagenController;
 use App\Http\Controllers\UsoExternoController;
 use App\Http\Controllers\UsoInternoController;
 use Illuminate\Support\Facades\Route;
+
+// ── Imágenes (file server) ───────────────────────────────────────────────────
+Route::get('/imagen/{imagenProducto}', [ImagenController::class, 'show'])->name('imagen.show');
 
 // ── Uso Externo ──────────────────────────────────────────────────────────────
 Route::get('/',         [UsoExternoController::class, 'welcome'])->name('welcome');

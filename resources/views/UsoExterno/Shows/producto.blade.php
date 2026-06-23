@@ -39,7 +39,7 @@
                             @if($imagenes->count() > 0)
                             @foreach($imagenes as $imagen)
                             <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
-                                <img src="{{ $imagen->ruta }}"
+                                <img src="{{ route('imagen.show', $imagen) }}"
                                     alt="{{ $producto->nombre }}"
                                     class="ps-carousel-img"
                                     title="Clic para ampliar">
@@ -78,7 +78,7 @@
                             data-bs-target="#ps-carousel"
                             data-bs-slide-to="{{ $loop->index }}"
                             aria-label="Ver imagen {{ $loop->iteration }}">
-                            <img src="{{ $imagen->ruta }}" alt="" loading="lazy">
+                            <img src="{{ route('imagen.show', $imagen) }}" alt="" loading="lazy">
                         </button>
                         @endforeach
                     </div>
@@ -172,8 +172,8 @@
         @if($imagenes->count() > 1)
         <div class="ps-lightbox-thumbs">
             @foreach($imagenes as $imagen)
-            <button type="button" class="ps-lightbox-thumb {{ $loop->first ? 'active' : '' }}" data-index="{{ $loop->index }}" data-src="{{ $imagen->ruta }}">
-                <img src="{{ $imagen->ruta }}" alt="" loading="lazy">
+            <button type="button" class="ps-lightbox-thumb {{ $loop->first ? 'active' : '' }}" data-index="{{ $loop->index }}" data-src="{{ route('imagen.show', $imagen) }}">
+                <img src="{{ route('imagen.show', $imagen) }}" alt="" loading="lazy">
             </button>
             @endforeach
         </div>
@@ -216,7 +216,7 @@
                     <div class="ps-mini-imagen">
                         @php $imagenPrincipal = $relacionado->imagenes->first(); @endphp
                         @if($imagenPrincipal && $imagenPrincipal->ruta)
-                        <img src="{{ $imagenPrincipal->ruta }}" alt="{{ $relacionado->nombre }}" loading="lazy">
+                        <img src="{{ route('imagen.show', $imagenPrincipal) }}" alt="{{ $relacionado->nombre }}" loading="lazy">
                         @else
                         <span class="ps-mini-placeholder">
                             <x-heroicon-o-photo />
