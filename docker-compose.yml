@@ -3,14 +3,22 @@ networks:
     driver: bridge
   prod_net:
     driver: bridge
-    internal: true   # MySQL prod no accesible desde fuera de Docker
+    internal: true        # app-prod ↔ mysql-prod, sin salida a internet
   test_net:
     driver: bridge
-    internal: true   # MySQL test no accesible desde fuera de Docker
+    internal: true        # app-test ↔ mysql-test, sin salida a internet
+  prod_fileserver_net:
+    driver: bridge
+    internal: true        # app-prod ↔ fileserver-prod, sin salida a internet
+  test_fileserver_net:
+    driver: bridge
+    internal: true        # app-test ↔ fileserver-test, sin salida a internet
 
 volumes:
   mysql_prod_data:
   mysql_test_data:
+  fileserver_prod_data:  # imágenes de producto prod — persisten entre reinicios
+  fileserver_test_data:  # imágenes de producto test — persisten entre reinicios
 
 services:
 
@@ -22,8 +30,36 @@ services:
       - "80:80"
     volumes:
       - ./docker/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
+      - fileserver_prod_data:/var/www/files/prod:ro
+      - fileserver_test_data:/var/www/files/test:ro
     networks:
       - proxy_net
+    restart: unless-stopped
+
+  # ── File server PROD ───────────────────────────────────────────────────────
+  fileserver-prod:
+    image: atmoz/sftp:alpine
+    container_name: giacomazzi-fileserver-prod
+    command: "giacomazzi:${FILESERVER_PROD_SFTP_PASSWORD}:1001:::upload"
+    volumes:
+      - fileserver_prod_data:/home/giacomazzi/upload
+    ports:
+      - "127.0.0.1:2223:22"  # solo localhost — admin/backup, nunca público
+    networks:
+      - prod_fileserver_net
+    restart: unless-stopped
+
+  # ── File server TEST ───────────────────────────────────────────────────────
+  fileserver-test:
+    image: atmoz/sftp:alpine
+    container_name: giacomazzi-fileserver-test
+    command: "giacomazzi:${FILESERVER_TEST_SFTP_PASSWORD}:1001:::upload"
+    volumes:
+      - fileserver_test_data:/home/giacomazzi/upload
+    ports:
+      - "127.0.0.1:2222:22"  # solo localhost — dev local conecta aquí
+    networks:
+      - test_fileserver_net
     restart: unless-stopped
 
   # ── PROD ───────────────────────────────────────────────────────────────────
@@ -34,16 +70,16 @@ services:
     container_name: giacomazzi-app-prod
     env_file: .env.prod
     volumes:
-      # Imágenes de productos — persiste entre rebuilds (mini file server)
-      - ./volumes/prod/storage:/var/www/html/storage/app/public
-      # Imágenes hero y logos — carpeta public del proyecto
       - ./volumes/prod/public-images:/var/www/html/public/images
     networks:
       - proxy_net
       - prod_net
+      - prod_fileserver_net
     depends_on:
       mysql-prod:
         condition: service_healthy
+      fileserver-prod:
+        condition: service_started
     restart: unless-stopped
 
   mysql-prod:
@@ -53,7 +89,7 @@ services:
     volumes:
       - mysql_prod_data:/var/lib/mysql
     ports:
-      - "127.0.0.1:3307:3306"   # Acceso desde gestor de BD: localhost:3307
+      - "3307:3306"   # accesible desde cualquier host con credenciales
     networks:
       - prod_net
     healthcheck:
@@ -72,16 +108,16 @@ services:
     container_name: giacomazzi-app-test
     env_file: .env.test
     volumes:
-      # Imágenes de productos — persiste entre rebuilds (mini file server)
-      - ./volumes/test/storage:/var/www/html/storage/app/public
-      # Imágenes hero y logos — carpeta public del proyecto
       - ./volumes/test/public-images:/var/www/html/public/images
     networks:
       - proxy_net
       - test_net
+      - test_fileserver_net
     depends_on:
       mysql-test:
         condition: service_healthy
+      fileserver-test:
+        condition: service_started
     restart: unless-stopped
 
   mysql-test:
@@ -91,7 +127,7 @@ services:
     volumes:
       - mysql_test_data:/var/lib/mysql
     ports:
-      - "127.0.0.1:3308:3306"   # Acceso desde gestor de BD: localhost:3308
+      - "3308:3306"   # accesible desde cualquier host con credenciales
     networks:
       - test_net
     healthcheck:
