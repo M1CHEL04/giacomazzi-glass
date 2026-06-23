@@ -14,7 +14,7 @@ class CategoriasSeeder extends Seeder
     public function run(): void
     {
         $categorias = [
-            ['nombre' => 'Mamparas', 'activo' => true],
+            ['nombre' => 'Mamparas', 'activo' => true, 'imagen_hero' => '/images/heros/mampara.png'],
             ['nombre' => 'Puertas', 'activo' => true],
             ['nombre' => 'Ventanas', 'activo' => true],
             ['nombre' => 'Cortinas', 'activo' => true],
