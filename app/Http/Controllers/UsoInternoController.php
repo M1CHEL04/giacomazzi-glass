@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\UploadImagen;
 use App\Models\Categoria;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -490,30 +488,27 @@ class UsoInternoController extends Controller
             'nombre_imagen' => $imagenProducto->id . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $imagen->getClientOriginalName()),
         ]);
 
-        if (config('filesystems.image_disk', 'sftp') === 'public') {
-            $carpeta = 'imagenes_producto/' . $producto->id;
-            $imagen->storeAs($carpeta, $imagenProducto->nombre_imagen, 'public');
-            $imagenProducto->update([
-                'ruta' => asset('storage/' . $carpeta . '/' . $imagenProducto->nombre_imagen),
-            ]);
-            return $imagenProducto;
-        }
+        $disk        = config('filesystems.image_disk', 'sftp');
+        $rutaDisco   = 'imagenes_producto/' . $producto->id . '/' . $imagenProducto->nombre_imagen;
 
-        $path         = $imagen->store('imagenes_producto_temp', 'local');
-        $pathAbsoluto = Storage::disk('local')->path($path);
+        try {
+            Storage::disk($disk)->put($rutaDisco, $imagen->getContent());
 
-        $job = new UploadImagen($imagenProducto, $pathAbsoluto);
-        Bus::dispatchSync($job);
-        $url = $job->getUrl();
+            if (!Storage::disk($disk)->exists($rutaDisco)) {
+                $imagenProducto->delete();
+                throw new \Exception('La imagen no se encontró en el servidor tras subirla.');
+            }
 
-        if (empty($url)) {
+            $baseUrl = rtrim(config('filesystems.disks.' . $disk . '.url', ''), '/');
+            $url     = $baseUrl ? $baseUrl . '/' . $rutaDisco : asset('storage/' . $rutaDisco);
+
+        } catch (\Exception $e) {
             $imagenProducto->delete();
-            throw new \Exception('No se pudo obtener la URL de la imagen subida: ' . $imagen->getClientOriginalName());
+            Log::error('Error al subir imagen: ' . $e->getMessage());
+            throw new \Exception('Error al subir la imagen al servidor de archivos: ' . $e->getMessage());
         }
 
-        $imagenProducto->update([
-            'ruta' => $url,
-        ]);
+        $imagenProducto->update(['ruta' => $url]);
 
         return $imagenProducto;
     }
