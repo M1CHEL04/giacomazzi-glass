@@ -30,13 +30,26 @@ services:
     container_name: giacomazzi-proxy
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./docker/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
       - fileserver_prod_data:/var/www/files/prod:ro
       - fileserver_test_data:/var/www/files/test:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
     networks:
       - proxy_net
     restart: unless-stopped
+
+  # ── Certbot (Let's Encrypt) ────────────────────────────────────────────────
+  # Solo se usa con: docker compose run --rm certbot certonly ...
+  # La renovación la maneja un cron en el host (ver abajo)
+  certbot:
+    image: certbot/certbot
+    container_name: giacomazzi-certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
 
   # ── File server PROD ───────────────────────────────────────────────────────
   fileserver-prod:
