@@ -13,6 +13,8 @@ networks:
   test_fileserver_net:
     driver: bridge
     internal: true        # app-test ↔ fileserver-test, sin salida a internet
+  db_management_net:
+    driver: bridge        # sin internal — permite que los puertos lleguen al host
 
 volumes:
   mysql_prod_data:
@@ -92,6 +94,7 @@ services:
       - "3307:3306"   # accesible desde cualquier host con credenciales
     networks:
       - prod_net
+      - db_management_net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_prod"]
       interval: 10s
@@ -128,6 +131,7 @@ services:
       - "3308:3306"   # accesible desde cualquier host con credenciales
     networks:
       - test_net
+      - db_management_net
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_test"]
       interval: 10s
