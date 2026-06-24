@@ -21,6 +21,8 @@ volumes:
   mysql_test_data:
   fileserver_prod_data:  # imágenes de producto prod — persisten entre reinicios
   fileserver_test_data:  # imágenes de producto test — persisten entre reinicios
+  certbot_conf:          # certificados SSL — persisten entre reinicios
+  certbot_www:           # archivos de validación ACME
 
 services:
 
