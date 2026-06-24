@@ -43,6 +43,7 @@ services:
     command: "giacomazzi:${FILESERVER_PROD_SFTP_PASSWORD}:1001:::upload"
     volumes:
       - fileserver_prod_data:/home/giacomazzi/upload
+      - ./docker/fileserver/init-perms.sh:/etc/sftp.d/init-perms.sh:ro
     ports:
       - "127.0.0.1:2223:22"  # solo localhost — admin/backup, nunca público
     networks:
@@ -56,6 +57,7 @@ services:
     command: "giacomazzi:${FILESERVER_TEST_SFTP_PASSWORD}:1001:::upload"
     volumes:
       - fileserver_test_data:/home/giacomazzi/upload
+      - ./docker/fileserver/init-perms.sh:/etc/sftp.d/init-perms.sh:ro
     ports:
       - "127.0.0.1:2222:22"  # solo localhost — dev local conecta aquí
     networks:
