@@ -1,223 +1,178 @@
-# Despliegue a Producción — Giacomazzi Glass
+# Despliegue — Giacomazzi Glass
 
-Guía paso a paso para levantar el entorno de **producción** replicando toda la
-configuración que ya está funcionando en test (base de datos, file server SFTP,
-reverse proxy nginx, certificados Let's Encrypt y URLs HTTPS).
+Deploys por rama en un único VPS, sin Jenkins:
+- **prod** ⇐ rama `main` (`~/giacomazzi-glass`) — siempre arriba, junto con el reverse proxy.
+- **test** ⇐ rama `test` (`~/giacomazzi-glass-test`, git worktree) — efímero, on-demand.
 
-> **Antes de empezar:** todos los comandos se ejecutan en el servidor, dentro del
-> directorio del proyecto (`~/giacomazzi-glass` en el server actual).
+Dos archivos compose:
+- [compose.prod.yml](../compose.prod.yml): `nginx-proxy`, `certbot`, `app-prod`, `mysql-prod`, `fileserver-prod`.
+- [compose.test.yml](../compose.test.yml): `app-test`, `mysql-test`, `fileserver-test`.
 
----
+Cada `app-*` sirve sus propios `/files/` desde su fileserver (el proxy es solo TLS + ruteo). Único recurso
+compartido entre ambos compose: la red externa `proxy_net`.
 
-## 0. Prerequisitos
-
-- [ ] **Dominio de producción** comprado/configurado, apuntando (registro `A`) a la
-      IP pública del servidor. Reemplazá `tu-dominio.com` por el dominio real en
-      todos los pasos de abajo.
-- [ ] Puertos **80** y **443** abiertos en el firewall del servidor.
-- [ ] El código actualizado en el server (`git pull origin main`). Esto ya incluye
-      el fix de `trustProxies` en [bootstrap/app.php](../bootstrap/app.php), que hace
-      que Laravel genere URLs `https://` detrás del proxy — **aplica a prod sin tocar
-      nada más**.
+> **Estado actual:** el cert de `giacomazzi-test.duckdns.org` ya existe y funciona en HTTPS. La migración de
+> abajo **reusa ese certificado** (no se re-emite, no se pasa por HTTP). Prod se despliega más adelante.
 
 ---
 
-## 1. Configurar `.env.prod` con secretos reales
+## 0. Migración desde el compose único (una sola vez, en el server)
 
-El archivo [.env.prod](../.env.prod) viene con placeholders. Antes de desplegar hay
-que reemplazar **obligatoriamente**:
+> Requisito: la reestructuración (compose.prod.yml, compose.test.yml, scripts, cambios de nginx) ya tiene
+> que estar **commiteada y pusheada a `main` y a `test`** (mergear `main` → `test`).
 
-| Variable | Acción |
-|----------|--------|
-| `APP_KEY` | Generar con `php artisan key:generate --show` y pegar el valor |
-| `APP_URL` | `https://tu-dominio.com` |
-| `APP_DEBUG` | Debe quedar en `false` |
-| `DB_PASSWORD` / `MYSQL_PASSWORD` | Misma contraseña fuerte (deben coincidir) |
-| `MYSQL_ROOT_PASSWORD` | Contraseña fuerte distinta a la anterior |
-| `SFTP_PASSWORD` | Coincidir con `FILESERVER_PROD_SFTP_PASSWORD` (ver paso 2) |
-| `SFTP_URL` | `https://tu-dominio.com/files` |
+### 0.1 Bajar el stack viejo conservando los datos
+Con el `docker-compose.yml` viejo **todavía presente** (antes de hacer pull):
+```bash
+cd ~/giacomazzi-glass
+docker compose down          # SIN -v → conserva los volúmenes (certs, datos, imágenes)
+```
+Esto libera los nombres de contenedor y los puertos 80/443.
 
-> ⚠️ `APP_URL` y `SFTP_URL` **deben ir con `https://`**, igual que hicimos en test.
-> Si quedan en `http://` el formulario vuelve a marcar "conexión no segura".
+### 0.2 Traer el código reestructurado
+```bash
+git pull origin main         # elimina docker-compose.yml, agrega compose.prod/test.yml y scripts/
+```
 
-### Variable del host para el SFTP
+### 0.3 Crear la red compartida
+```bash
+docker network create proxy_net
+```
 
-El `docker-compose.yml` lee `${FILESERVER_PROD_SFTP_PASSWORD}` desde el entorno del
-host (no desde `.env.prod`). Definila en un archivo `.env` en la raíz (el que lee
-docker compose por defecto) o exportala:
+### 0.4 Preservar los volúmenes existentes (copia old → nuevos nombres)
+Los volúmenes viejos tienen prefijo `giacomazzi-glass_*`. Los nuevos compose usan los prefijos de proyecto
+`giaco-prod_*` y `giaco-test_*`. Copiamos lo que hay que conservar **antes** del primer `up`:
 
 ```bash
-# .env (raíz del proyecto, junto al docker-compose.yml)
-FILESERVER_PROD_SFTP_PASSWORD=f1l3S3rv3RG14c0PrD   # = SFTP_PASSWORD de .env.prod
+# Certificado SSL de test (imprescindible para arrancar en HTTPS sin bootstrap por HTTP)
+docker volume create giaco-prod_certbot_conf
+docker run --rm -v giacomazzi-glass_certbot_conf:/from:ro -v giaco-prod_certbot_conf:/to \
+  alpine sh -c "cp -a /from/. /to/"
+
+docker volume create giaco-prod_certbot_www
+docker run --rm -v giacomazzi-glass_certbot_www:/from:ro -v giaco-prod_certbot_www:/to \
+  alpine sh -c "cp -a /from/. /to/"
+
+# Imágenes de producto de test (compartidas con el dev local) — conservar
+docker volume create giaco-test_fileserver_test_data
+docker run --rm -v giacomazzi-glass_fileserver_test_data:/from:ro -v giaco-test_fileserver_test_data:/to \
+  alpine sh -c "cp -a /from/. /to/"
+
+# Base de datos de test — conservar para no re-sembrar
+docker volume create giaco-test_mysql_test_data
+docker run --rm -v giacomazzi-glass_mysql_test_data:/from:ro -v giaco-test_mysql_test_data:/to \
+  alpine sh -c "cp -a /from/. /to/"
 ```
+> Los volúmenes viejos quedan intactos como respaldo; se pueden borrar una vez confirmado que todo anda.
+
+### 0.5 Crear el worktree de test
+```bash
+cd ~/giacomazzi-glass
+git worktree add ../giacomazzi-glass-test test
+```
+
+### 0.6 Archivos de entorno (gitignored, en cada carpeta)
+- `~/giacomazzi-glass/.env` con `FILESERVER_PROD_SFTP_PASSWORD=...` + `~/giacomazzi-glass/.env.prod`
+- `~/giacomazzi-glass-test/.env` con `FILESERVER_TEST_SFTP_PASSWORD=...` + `~/giacomazzi-glass-test/.env.test`
 
 ---
 
-## 2. Levantar los contenedores en HTTP (config inicial)
+## 1. Deploy de TEST (HTTPS, reusando el certificado)
 
-El [docker-compose.yml](../docker-compose.yml) arranca con `nginx.conf` (HTTP puro).
-Esto es **intencional**: necesitamos nginx en HTTP para que certbot pueda validar el
-dominio antes de tener el certificado.
-
+### 1.1 Levantar el proxy (una vez; queda siempre arriba)
+El proxy vive en `compose.prod.yml`, pero se levanta **solo el servicio del proxy** (no toca app-prod):
 ```bash
-docker compose up -d --build app-prod mysql-prod fileserver-prod nginx-proxy
+cd ~/giacomazzi-glass
+docker compose -f compose.prod.yml up -d nginx-proxy
+docker exec giacomazzi-proxy nginx -t     # debe decir OK
+docker compose -f compose.prod.yml ps nginx-proxy   # Up
 ```
+El proxy arranca directo en HTTPS porque el volumen `giaco-prod_certbot_conf` ya tiene el cert de test
+(paso 0.4). Los bloques de prod en [nginx-https.conf](../docker/proxy/nginx-https.conf) siguen comentados
+hasta que exista el dominio/cert de prod.
 
-Verificá que todo esté `Up` (no `Restarting`):
-
+### 1.2 Levantar el stack de test
 ```bash
-docker compose ps
+cd ~/giacomazzi-glass-test
+git pull origin test
+docker compose -f compose.test.yml up -d --build
+docker compose -f compose.test.yml exec -T app-test php artisan migrate --force
 ```
+Esto está automatizado en `./scripts/deploy-test.sh` (hace exactamente lo de arriba).
 
-Deberías ver `Up`: `giacomazzi-proxy`, `giacomazzi-app-prod`,
-`giacomazzi-mysql-prod`, `giacomazzi-fileserver-prod`.
-
-> El file server aplica permisos solo con [init-perms.sh](../docker/fileserver/init-perms.sh)
-> al arrancar (umask 0022 → archivos 644 legibles por nginx). No hay que hacer nada manual.
+### 1.3 Verificar
+- `https://giacomazzi-test.duckdns.org` responde por HTTPS (candado válido, Let's Encrypt).
+- Una imagen de producto se sirve desde `https://giacomazzi-test.duckdns.org/files/...`
+  (ahora la sirve `app-test`, no el proxy).
+- `docker compose -f compose.test.yml ps` → todo `Up`.
 
 ---
 
-## 3. Migrar y poblar la base de datos
+## 2. Prender / apagar test (efímero)
 
-```bash
-docker compose exec app-prod php artisan migrate --force
-docker compose exec app-prod php artisan db:seed --force
-```
+- **Bajar** (deja `fileserver-test` arriba para que el dev local siga con sus imágenes vía SFTP 2222):
+  ```bash
+  cd ~/giacomazzi-glass-test && ./scripts/test-down.sh
+  ```
+- **Volver a subir** lo ya construido (sin rebuild): `./scripts/test-up.sh`
+- **Redeploy con cambios nuevos** de la rama test: `./scripts/deploy-test.sh`
 
-`--force` es obligatorio en producción (Laravel pide confirmación si no).
-El `db:seed` crea usuarios ([UserSeeder](../database/seeders/UserSeeder.php)) y
-categorías ([CategoriasSeeder](../database/seeders/CategoriasSeeder.php)).
-
----
-
-## 4. Obtener el certificado Let's Encrypt
-
-Con nginx corriendo en HTTP, pedí el certificado para el dominio de prod. **Comando
-en una sola línea** (incluí `www` si el dominio lo usa):
-
-```bash
-docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot --email santymichel016@gmail.com --agree-tos --no-eff-email -d tu-dominio.com -d www.tu-dominio.com
-```
-
-Tiene que terminar con:
-
-```
-Successfully received certificate.
-Certificate is saved at: /etc/letsencrypt/live/tu-dominio.com/fullchain.pem
-```
-
-> El contenedor `certbot` termina con `Exited` — **es normal**, no es un servicio
-> persistente. Lo único que importa es el mensaje de éxito. Verificá con:
-> ```bash
-> docker compose run --rm certbot certificates
-> ```
+Con test abajo, `https://giacomazzi-test.duckdns.org` devuelve 502 (esperado). Prod y el proxy no se afectan.
 
 ---
 
-## 5. Activar los bloques de producción en `nginx-https.conf`
+## 3. Deploy de PROD (en unas semanas)
 
-En [docker/proxy/nginx-https.conf](../docker/proxy/nginx-https.conf), los bloques de
-prod están **comentados** (los dejamos así para que test funcionara solo). Ahora:
+Cuando tengas el **dominio de producción** apuntando al server:
 
-1. **Descomentá** los dos `server {}` de PROD (HTTP→HTTPS y HTTPS).
-2. **Reemplazá** `tu-dominio.com` y `www.tu-dominio.com` por el dominio real en:
-   - `server_name` (ambos bloques)
-   - `ssl_certificate` → `/etc/letsencrypt/live/tu-dominio.com/fullchain.pem`
-   - `ssl_certificate_key` → `/etc/letsencrypt/live/tu-dominio.com/privkey.pem`
+1. En [.env.prod](../.env.prod): `APP_KEY`, passwords, `APP_URL=https://tu-dominio.com`,
+   `SFTP_URL=https://tu-dominio.com/files`, `APP_DEBUG=false`.
+2. Emitir el cert de prod (el proxy ya sirve `/.well-known/acme-challenge/` por el puerto 80; **no baja
+   HTTPS de test**):
+   ```bash
+   cd ~/giacomazzi-glass
+   docker compose -f compose.prod.yml run --rm certbot certonly --webroot \
+     --webroot-path /var/www/certbot --email santymichel016@gmail.com --agree-tos --no-eff-email \
+     -d tu-dominio.com -d www.tu-dominio.com
+   ```
+3. **Descomentar** los bloques de PROD en [nginx-https.conf](../docker/proxy/nginx-https.conf) y reemplazar
+   `tu-dominio.com` (server_name + rutas de cert). Agregarles la línea de HSTS como en el bloque de test.
+4. Levantar prod y recargar el proxy:
+   ```bash
+   docker compose -f compose.prod.yml up -d --build
+   docker exec giacomazzi-proxy nginx -s reload
+   ```
+5. Deploys posteriores de prod: `./scripts/deploy-prod.sh` (no reinicia el proxy).
 
-> La ruta de `live/` debe coincidir **exactamente** con el primer `-d` del comando de
-> certbot. Si pediste `-d tu-dominio.com`, la carpeta es `live/tu-dominio.com/`.
-
----
-
-## 6. Cambiar el proxy a la config HTTPS
-
-En [docker-compose.yml](../docker-compose.yml), en el servicio `nginx-proxy`, cambiá
-el montaje de la config:
-
-```yaml
-# antes
-- ./docker/proxy/nginx.conf:/etc/nginx/nginx.conf:ro
-# después
-- ./docker/proxy/nginx-https.conf:/etc/nginx/nginx.conf:ro
-```
-
-Recreá solo el proxy:
-
-```bash
-docker compose up -d --force-recreate nginx-proxy
-docker compose ps nginx-proxy   # debe quedar Up, no Restarting
-```
-
-> Si queda en `Restarting`, casi siempre es que la ruta del certificado en
-> `nginx-https.conf` no coincide con la carpeta real en `live/`. Revisá con
-> `docker logs giacomazzi-proxy --tail=20`.
+> **Migraciones de prod:** se corren **a mano, por fuera del deploy**, cuando corresponda y con backup previo.
+> El `deploy-prod.sh` a propósito **no** migra.
 
 ---
 
-## 7. Configurar la renovación automática del certificado
+## 4. Renovación automática del certificado
 
-Let's Encrypt vence a los 90 días. Agregá un cron en el **host** (no en un
-contenedor):
-
-```bash
-crontab -e
-```
-
+Let's Encrypt vence a los 90 días. Cron en el host (el proxy siempre arriba sirve la validación, así que el
+cert de test renueva aunque `app-test` esté abajo):
 ```cron
-# Renueva los certs y recarga nginx si hubo cambios — 3:00 AM todos los días
-0 3 * * * cd /root/giacomazzi-glass && docker compose run --rm certbot renew --quiet && docker compose exec -T nginx-proxy nginx -s reload
+0 3 * * * cd /root/giacomazzi-glass && docker compose -f compose.prod.yml run --rm certbot renew --quiet && docker exec giacomazzi-proxy nginx -s reload
 ```
 
-Ajustá la ruta `/root/giacomazzi-glass` si el proyecto está en otro lado.
-
 ---
 
-## 8. Verificación final
-
-- [ ] `docker compose ps` → todos los servicios de prod en `Up`.
-- [ ] Desde el server: `curl -I https://tu-dominio.com` responde `200` y
-      `SSL certificate verify ok`.
-- [ ] En el browser: el candado muestra el cert emitido por **Let's Encrypt** con el
-      dominio correcto.
-- [ ] Inspeccionar el `<form>` de login → el atributo `action` empieza con `https://`
-      (gracias al fix de `trustProxies`).
-- [ ] Subir una imagen de producto y confirmar que se sirve desde
-      `https://tu-dominio.com/files/...`.
-
----
-
-## Comandos útiles de mantenimiento (prod)
+## Comandos útiles
 
 ```bash
-# Reconstruir SOLO la app tras un cambio de código (rebuild de imagen)
-docker compose up -d --build app-prod
-
-# Recrear SOLO la app para tomar cambios de .env.prod (sin rebuild)
-docker compose up -d --force-recreate app-prod
+# Estado
+docker compose -f compose.prod.yml ps
+docker compose -f compose.test.yml ps
 
 # Logs
-docker compose logs app-prod   --tail=50
-docker compose logs nginx-proxy --tail=30
-docker compose logs mysql-prod  --tail=30
+docker compose -f compose.prod.yml logs nginx-proxy --tail=30
+docker compose -f compose.test.yml logs app-test --tail=50
 
-# Limpiar cachés de Laravel si algo se ve desactualizado
-docker compose exec app-prod php artisan config:clear
-docker compose exec app-prod php artisan cache:clear
-docker compose exec app-prod php artisan view:clear
+# Rebuild solo app-prod (no toca el proxy)
+cd ~/giacomazzi-glass && docker compose -f compose.prod.yml up -d --build app-prod
+
+# Recrear app-test para tomar cambios de .env.test (sin rebuild)
+cd ~/giacomazzi-glass-test && docker compose -f compose.test.yml up -d --force-recreate app-test
 ```
-
----
-
-## Resumen del flujo (por qué este orden)
-
-Es un problema de huevo y gallina:
-
-1. **nginx en HTTP** → único modo de arrancar sin tener todavía el certificado.
-2. **certbot valida** vía `/.well-known/acme-challenge/` y guarda el cert en el
-   volumen `certbot_conf`.
-3. **nginx cambia a HTTPS** → ahora sí encuentra los `.pem` y levanta con SSL.
-4. **cron renueva** cada 90 días y recarga nginx.
-
-Saltarse el orden (arrancar directo en HTTPS sin cert) hace que nginx crashee en
-bucle (`Restarting`), que fue exactamente el error que tuvimos en test.

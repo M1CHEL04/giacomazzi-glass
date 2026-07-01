@@ -1,0 +1,103 @@
+# PROD + reverse proxy — se corre desde ~/giacomazzi-glass (rama main).
+# Siempre arriba. Deploy: ./scripts/deploy-prod.sh (nombra app-prod → no reinicia el proxy).
+name: giaco-prod
+
+networks:
+  proxy_net:
+    external: true          # compartida con compose.test.yml (el proxy alcanza app-test)
+  prod_net:
+    driver: bridge
+    internal: true          # app-prod ↔ mysql-prod, sin salida a internet
+  prod_fileserver_net:
+    driver: bridge
+    internal: true          # app-prod ↔ fileserver-prod, sin salida a internet
+  db_management_net:
+    driver: bridge          # sin internal — permite que el puerto de la BD llegue al host
+
+volumes:
+  mysql_prod_data:
+  fileserver_prod_data:     # imágenes de producto prod — propias de este entorno
+  certbot_conf:             # certificados SSL
+  certbot_www:              # archivos de validación ACME
+
+services:
+
+  # ── Reverse Proxy ──────────────────────────────────────────────────────────
+  # Solo TLS + ruteo. Ya NO sirve /files/ (lo sirve cada app desde su fileserver).
+  # Usa nginx-https.conf reusando el cert de test ya emitido (ver guía: se preserva
+  # el volumen certbot_conf existente). Para un server nuevo SIN cert, hacer primero
+  # el bootstrap con nginx.conf (HTTP) para validar ACME y luego volver a este mount.
+  nginx-proxy:
+    image: nginx:1.27-alpine
+    container_name: giacomazzi-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/proxy/nginx-https.conf:/etc/nginx/nginx.conf:ro
+      - certbot_conf:/etc/letsencrypt:ro
+      - certbot_www:/var/www/certbot:ro
+    networks:
+      - proxy_net
+    restart: unless-stopped
+
+  # ── Certbot (Let's Encrypt) ────────────────────────────────────────────────
+  certbot:
+    image: certbot/certbot
+    container_name: giacomazzi-certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+  # ── File server PROD ───────────────────────────────────────────────────────
+  fileserver-prod:
+    image: atmoz/sftp:alpine
+    container_name: giacomazzi-fileserver-prod
+    command: "giacomazzi:${FILESERVER_PROD_SFTP_PASSWORD}:1001:::upload"
+    volumes:
+      - fileserver_prod_data:/home/giacomazzi/upload
+      - ./docker/fileserver/init-perms.sh:/etc/sftp.d/init-perms.sh:ro
+    ports:
+      - "127.0.0.1:2223:22"  # solo localhost — admin/backup, nunca público
+    networks:
+      - prod_fileserver_net
+    restart: unless-stopped
+
+  # ── App PROD ───────────────────────────────────────────────────────────────
+  app-prod:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: giacomazzi-app-prod
+    env_file: .env.prod
+    volumes:
+      - fileserver_prod_data:/var/www/files:ro   # sirve /files/ desde su nginx interno
+    networks:
+      - proxy_net
+      - prod_net
+      - prod_fileserver_net
+    depends_on:
+      mysql-prod:
+        condition: service_healthy
+      fileserver-prod:
+        condition: service_started
+    restart: unless-stopped
+
+  mysql-prod:
+    image: mysql:8.0
+    container_name: giacomazzi-mysql-prod
+    env_file: .env.prod
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3307:3306"   # solo localhost — acceso remoto vía túnel SSH
+    networks:
+      - prod_net
+      - db_management_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
