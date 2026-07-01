@@ -25,7 +25,7 @@
         opacity: 0.85;
     }
 
-    /* Dark scrim */
+    /* Dark scrim — mismo tratamiento que el hero de categorías */
     .contact-hero::before {
         content: '';
         position: absolute;
@@ -60,7 +60,7 @@
         font-weight: 700;
         letter-spacing: 0.14em;
         text-transform: uppercase;
-        color: rgba(138, 185, 165, 0.9);
+        color: var(--external-primary-soft);
         margin-bottom: 0.75rem;
     }
 
@@ -89,104 +89,103 @@
     }
 
     .contact-section {
-        padding: 3.5rem 0;
+        padding: 5rem 0;
     }
 
-    .contact-card {
-        background: var(--external-white);
-        border-radius: 0.5rem;
-        padding: 2rem;
+    .sede-card {
+        display: flex;
+        flex-direction: column;
         height: 100%;
+        background: var(--external-white);
         border: 1px solid rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
+        border-radius: 0.85rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .contact-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    .sede-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 14px 32px rgba(27, 45, 33, 0.12);
     }
 
-    .contact-card-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--external-primary) 0%, var(--external-primary-soft) 100%);
-        border-radius: 50%;
+    /* Header con degradé de marca */
+    .sede-card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 1.35rem 1.75rem;
+        background: linear-gradient(135deg, var(--external-primary) 0%, #1f5c3e 100%);
+        color: var(--external-white);
+    }
+
+    .sede-card-header-icon {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--external-white);
-        font-size: 1.75rem;
-        margin-bottom: 1.25rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 12px;
     }
 
-    .contact-card h3 {
-        font-size: 1.35rem;
-        font-weight: 600;
-        color: var(--external-secondary);
-        margin-bottom: 1rem;
+    .sede-card-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
     }
 
-    .contact-info {
-        color: var(--external-secondary-soft);
-        line-height: 1.7;
-        margin-bottom: 1rem;
-    }
-
-    .contact-info strong {
-        color: var(--external-secondary);
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .contact-info a {
-        color: var(--external-primary);
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .contact-info a:hover {
-        text-decoration: underline;
-    }
-
-    .contact-actions {
+    .sede-card-body {
         display: flex;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-        flex-wrap: wrap;
+        flex-direction: column;
+        flex-grow: 1;
+        padding: 1.5rem 1.75rem 1.75rem;
     }
 
-    .btn-contact {
-        padding: 0.65rem 1.5rem;
-        border-radius: 0.375rem;
+    .sede-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.85rem;
+        padding: 0.8rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .sede-info-row:first-child {
+        padding-top: 0;
+    }
+
+    .sede-info-icon {
+        flex-shrink: 0;
+        margin-top: 0.15rem;
+        width: 1.2rem;
+        height: 1.2rem;
+        color: var(--external-primary);
+    }
+
+    .sede-info-text {
+        color: var(--external-secondary-soft);
+        line-height: 1.55;
+        font-size: 0.92rem;
+    }
+
+    .sede-info-text strong {
+        display: block;
+        margin-bottom: 0.15rem;
+        color: var(--external-secondary);
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.88rem;
+    }
+
+    .sede-info-text a {
+        color: var(--external-primary);
+        font-weight: 600;
         text-decoration: none;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
     }
 
-    .btn-whatsapp {
-        background-color: #25D366;
-        color: var(--external-white);
-    }
-
-    .btn-whatsapp:hover {
-        background-color: #20BA5A;
-        color: var(--external-white);
-        transform: translateY(-2px);
-    }
-
-    .btn-email {
-        background-color: var(--external-primary);
-        color: var(--external-white);
-    }
-
-    .btn-email:hover {
-        background-color: #1f5c3f;
-        color: var(--external-white);
-        transform: translateY(-2px);
+    .sede-info-text a:hover {
+        text-decoration: underline;
     }
 
     #map {
@@ -226,15 +225,6 @@
         #map {
             height: 300px;
         }
-
-        .contact-actions {
-            flex-direction: column;
-        }
-
-        .btn-contact {
-            width: 100%;
-            justify-content: center;
-        }
     }
 </style>
 @endsection
@@ -258,58 +248,79 @@
 <!-- Contact Cards Section -->
 <section class="contact-section">
     <div class="container">
+        <div class="section-header text-center">
+            <h2 class="section-title">Dónde encontrarnos</h2>
+            <p class="section-subtitle">Dos puntos de atención para acompañarte en cada etapa de tu proyecto</p>
+        </div>
         <div class="row g-4">
             <!-- Fábrica -->
             <div class="col-lg-6">
-                <div class="contact-card">
-                    <div class="contact-card-icon">
-                        <x-heroicon-o-home-modern style="width: 35px; height: 35px;" />
+                <div class="sede-card">
+                    <div class="sede-card-header">
+                        <span class="sede-card-header-icon">
+                            <x-heroicon-o-home-modern style="width: 26px; height: 26px;" />
+                        </span>
+                        <h3>Fábrica</h3>
                     </div>
-                    <h3>Fábrica</h3>
-                    <div class="contact-info">
-                        <strong>Dirección</strong>
-                        San Juan 1978 entre Av. La Plata y Madame Curie<br>
-                        Quilmes Oeste, Buenos Aires
-                    </div>
-                    <div class="contact-info">
-                        <strong>Horarios</strong>
-                        Lunes a Viernes: 8:00 - 17:00<br>
-                    </div>
-                    <div class="contact-actions">
-                        <a href="https://wa.me/542395425498" target="_blank" class="btn-contact btn-whatsapp">
-                            <x-fluentui-chat-24-o /> WhatsApp
-                        </a>
-                        <a href="mailto:contacto@giacomazzi.com" class="btn-contact btn-email">
-                            <x-fluentui-mail-24-o /> Email
-                        </a>
+                    <div class="sede-card-body">
+                        <div class="sede-info-row">
+                            <x-heroicon-o-map-pin class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Dirección</strong>
+                                San Juan 1978 entre Av. La Plata y Madame Curie<br>
+                                Quilmes Oeste, Buenos Aires
+                            </div>
+                        </div>
+                        <div class="sede-info-row">
+                            <x-heroicon-o-clock class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Horarios</strong>
+                                Lunes a Viernes: 8:00 - 17:00
+                            </div>
+                        </div>
+                        <div class="sede-info-row">
+                            <x-heroicon-o-phone class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Teléfono</strong>
+                                <a href="tel:01164457059">011 6445-7059</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Local al Público -->
             <div class="col-lg-6">
-                <div class="contact-card">
-                    <div class="contact-card-icon">
-                        <x-heroicon-o-building-storefront style="width: 35px; height: 35px;" />
-
+                <div class="sede-card">
+                    <div class="sede-card-header">
+                        <span class="sede-card-header-icon">
+                            <x-heroicon-o-building-storefront style="width: 26px; height: 26px;" />
+                        </span>
+                        <h3>Local al público</h3>
                     </div>
-                    <h3>Local al público</h3>
-                    <div class="contact-info">
-                        <strong>Dirección</strong>
-                        Au Dr. Ricardo Balbín Km 30 - Local 03B<br>
-                        Guillermo Enrique Hudson, Buenos Aires
-                    </div>
-                    <div class="contact-info">
-                        <strong>Horarios</strong>
-                        Lunes a Viernes: 10:00 - 19:00<br>
-                    </div>
-                    <div class="contact-actions">
-                        <a href="https://wa.me/541164457059" target="_blank" class="btn-contact btn-whatsapp">
-                            WhatsApp
-                        </a>
-                        <a href="mailto:contacto@giacomazzi.com" class="btn-contact btn-email">
-                            Email
-                        </a>
+                    <div class="sede-card-body">
+                        <div class="sede-info-row">
+                            <x-heroicon-o-map-pin class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Dirección</strong>
+                                Au Dr. Ricardo Balbín Km 30 - Local 03B<br>
+                                Guillermo Enrique Hudson, Buenos Aires
+                            </div>
+                        </div>
+                        <div class="sede-info-row">
+                            <x-heroicon-o-clock class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Horarios</strong>
+                                Lunes a Viernes: 10:00 - 19:00
+                            </div>
+                        </div>
+                        <div class="sede-info-row">
+                            <x-heroicon-o-phone class="sede-info-icon" />
+                            <div class="sede-info-text">
+                                <strong>Teléfono</strong>
+                                <a href="tel:01192683417">011 9268-3417</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -333,7 +344,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // Inicializar mapa centrado entre las dos ubicaciones
-    const map = L.map('map').setView([-34.752, -58.224], 12);
+    // En mobile bajamos un punto de zoom para que entren los dos pines
+    const initialZoom = window.matchMedia('(max-width: 767.98px)').matches ? 11 : 12;
+    const map = L.map('map').setView([-34.752, -58.224], initialZoom);
 
     // Agregar tiles de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
