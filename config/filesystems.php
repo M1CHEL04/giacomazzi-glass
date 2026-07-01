@@ -65,6 +65,10 @@ return [
             'url'      => env('SFTP_URL'),
             'timeout'  => 30,
             'throw'    => true,
+            // Sin esto, Flysystem crea los directorios con 0700 y nginx (www-data)
+            // no puede atravesarlos para servir /files/. Público = archivos 0644, dirs 0755.
+            'visibility'           => 'public',
+            'directory_visibility' => 'public',
         ],
 
         's3' => [
