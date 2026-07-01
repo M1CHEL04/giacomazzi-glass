@@ -11,9 +11,9 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <link rel="stylesheet" href="{{ asset('css/externo.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/carrito.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/externo.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/toast.css') }}">
+    <link rel="stylesheet" href="{{ versioned_asset('css/carrito.css') }}">
 
     @yield('css')
 </head>
@@ -203,13 +203,13 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
 
-    <script src="{{ asset('js/toast.js') }}"></script>
-    <script src="{{ asset('js/modules/layout.js') }}"></script>
+    <script src="{{ versioned_asset('js/toast.js') }}"></script>
+    <script src="{{ versioned_asset('js/modules/layout.js') }}"></script>
 
     <script>
         window.__carritoInit = {!! json_encode(['cantidad' => count(session('carrito', [])), 'carrito' => array_values(session('carrito', []))]) !!};
     </script>
-    <script src="{{ asset('js/carrito.js') }}"></script>
+    <script src="{{ versioned_asset('js/carrito.js') }}"></script>
 
     @yield('script')
 </body>

@@ -140,5 +140,5 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
 @endsection
 
 @section('script')
-<script src="{{ asset('js/modules/hero-imagen.js') }}"></script>
+<script src="{{ versioned_asset('js/modules/hero-imagen.js') }}"></script>
 @endsection

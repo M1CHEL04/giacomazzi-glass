@@ -89,5 +89,5 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('js/searchCategory.js') }}"></script>
+<script src="{{ versioned_asset('js/searchCategory.js') }}"></script>
 @endsection

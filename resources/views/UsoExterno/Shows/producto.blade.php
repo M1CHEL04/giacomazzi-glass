@@ -3,8 +3,8 @@
 @section('title', $producto->nombre . ' - Giacomazzi Glass')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/categoria-index.css') }}">
-<link rel="stylesheet" href="{{ asset('css/producto-show.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/producto-show.css') }}">
 @endsection
 
 @section('content')
@@ -262,5 +262,5 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('js/modules/producto-show.js') }}"></script>
+<script src="{{ versioned_asset('js/modules/producto-show.js') }}"></script>
 @endsection

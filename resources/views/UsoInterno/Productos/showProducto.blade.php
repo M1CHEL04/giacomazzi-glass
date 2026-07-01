@@ -4,7 +4,7 @@
 @section('subhead', 'Detalle del producto · ' . ($producto->categoria?->nombre ?? 'Sin categoría'))
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/producto.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/producto.css') }}">
 <style>
 .sku-grid {
     display: flex;

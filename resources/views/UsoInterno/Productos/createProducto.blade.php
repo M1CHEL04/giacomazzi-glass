@@ -10,7 +10,7 @@ $formAction = $isEdit
 @section('subhead', $isEdit ? 'Modificá los datos del producto' : 'Agrega un nuevo producto al sistema')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/producto.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/producto.css') }}">
 @endsection
 
 @section('content')
@@ -353,5 +353,5 @@ $prodConfigJson = json_encode([
 <div id="tpl-icon-arrow-uturn-left" class="d-none" aria-hidden="true"><x-heroicon-m-arrow-uturn-left /></div>
 <div id="tpl-icon-star-fill" class="d-none" aria-hidden="true"><x-heroicon-s-star /></div>
 <div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
-<script type="module" src="{{ asset('js/manageVariants.js') }}"></script>
+<script type="module" src="{{ versioned_asset('js/manageVariants.js') }}"></script>
 @endsection

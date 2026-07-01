@@ -3,7 +3,7 @@
 @section('title', $categoria->nombre . ' - Giacomazzi Glass')
 
 @section('css')
-<link rel="stylesheet" href="{{ asset('css/categoria-index.css') }}">
+<link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
 @endsection
 
 @section('content')
@@ -81,5 +81,5 @@
 @endsection
 
 @section('script')
-<script src="{{ asset('js/modules/filtros-categoria.js') }}"></script>
+<script src="{{ versioned_asset('js/modules/filtros-categoria.js') }}"></script>
 @endsection
