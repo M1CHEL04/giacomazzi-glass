@@ -470,3 +470,58 @@
         padding: 0;
     }
 }
+
+/* ===== PAGINACIÓN (Bootstrap 5) ===== */
+.pagination {
+    display: flex;
+    gap: 0.3rem;
+    margin: 0;
+}
+
+/* Cada botón: cuadrado redondeado, borde sutil, tipografía compacta */
+.page-item:first-child .page-link,
+.page-item:last-child .page-link,
+.page-item .page-link {
+    border-radius: 8px;
+}
+
+.page-item .page-link {
+    min-width: 34px;
+    height: 34px;
+    margin-left: 0;              /* anula el solapado -1px de Bootstrap; usamos gap */
+    padding: 0 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--internal-border);
+    background: var(--internal-white);
+    color: var(--internal-secondary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.page-item .page-link:hover {
+    background: rgba(40, 116, 82, 0.08);
+    border-color: var(--internal-primary-soft);
+    color: var(--internal-primary);
+}
+
+.page-item.active .page-link {
+    background: var(--internal-primary);
+    border-color: var(--internal-primary);
+    color: var(--internal-white);
+}
+
+.page-item.disabled .page-link {
+    background: var(--internal-surface);
+    border-color: var(--internal-border);
+    color: var(--internal-secondary-soft);
+    opacity: 0.65;
+}
+
+.page-link:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(40, 116, 82, 0.15);
+}
