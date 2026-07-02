@@ -212,6 +212,14 @@
     transition: color 0.25s ease;
 }
 
+.internal-sidebar-link svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: var(--internal-primary);
+    transition: color 0.25s ease;
+}
+
 .internal-sidebar-link:hover i,
 .internal-sidebar-link.active i {
     color: var(--internal-primary);
@@ -524,4 +532,222 @@
 .page-link:focus {
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(40, 116, 82, 0.15);
+}
+
+/* ===== DASHBOARD (panel interno) ===== */
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    height: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--internal-white);
+    border: 1px solid var(--internal-border);
+    border-radius: 0.85rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+    border-color: var(--internal-primary-soft);
+    box-shadow: 0 4px 14px rgba(40, 116, 82, 0.07);
+}
+
+.stat-card-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: rgba(40, 116, 82, 0.1);
+    color: var(--internal-primary);
+}
+
+.stat-card-icon svg {
+    width: 19px;
+    height: 19px;
+}
+
+.stat-card-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.stat-card-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--internal-secondary);
+}
+
+.stat-card-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--internal-secondary);
+}
+
+.stat-card-meta {
+    margin-top: 0.1rem;
+    font-size: 0.7rem;
+    color: var(--internal-secondary-soft);
+}
+
+/* Variante alerta (productos sin imagen > 0) */
+.stat-card--warn .stat-card-icon {
+    background: rgba(217, 119, 6, 0.12);
+    color: #b45309;
+}
+
+.stat-card--warn .stat-card-value {
+    color: #b45309;
+}
+
+/* Paneles */
+.dash-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+}
+
+.dash-panel-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--internal-secondary);
+}
+
+.dash-panel-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--internal-primary);
+    text-decoration: none;
+}
+
+.dash-panel-link:hover {
+    text-decoration: underline;
+}
+
+/* Lista de últimos productos */
+.dash-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.dash-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.25rem;
+    text-decoration: none;
+    border-top: 1px solid var(--internal-border);
+    transition: background 0.12s ease;
+}
+
+.dash-list-item:first-child {
+    border-top: none;
+}
+
+.dash-list-item:hover {
+    background: var(--internal-surface);
+}
+
+.dash-status-dot {
+    flex-shrink: 0;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dash-status-dot.is-active {
+    background: var(--internal-primary);
+}
+
+.dash-status-dot.is-inactive {
+    background: var(--internal-secondary-soft);
+}
+
+.dash-list-title {
+    flex-grow: 1;
+    min-width: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--internal-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-list-date {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    color: var(--internal-secondary-soft);
+    white-space: nowrap;
+}
+
+/* Barras por categoría */
+.dash-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.dash-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dash-bar-label {
+    flex-shrink: 0;
+    width: 34%;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--internal-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.dash-bar-track {
+    flex-grow: 1;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(40, 116, 82, 0.1);
+    overflow: hidden;
+}
+
+.dash-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--internal-primary-soft), var(--internal-primary));
+}
+
+.dash-bar-count {
+    flex-shrink: 0;
+    min-width: 24px;
+    text-align: right;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--internal-secondary);
+}
+
+.dash-empty {
+    padding: 1.25rem 0;
+    text-align: center;
+    color: var(--internal-secondary-soft);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 575.98px) {
+    .stat-card-value {
+        font-size: 1.6rem;
+    }
+
+    .dash-bar-label {
+        width: 40%;
+    }
 }
