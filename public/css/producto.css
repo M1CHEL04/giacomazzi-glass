@@ -426,3 +426,71 @@
         font-weight: 600;
         letter-spacing: .03em;
     }
+
+    /* ── Formulario "Agregar variante" — grilla unificada ──
+       Los campos que el JS muestra/oculta (por id, con .d-none) entran todos
+       en el mismo flex-wrap con ancho consistente, sin importar el caso. */
+    .variante-form {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+
+    .variante-field {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 200px;
+        min-width: 160px;
+    }
+
+    .variante-field--wide {
+        flex-basis: 260px;
+    }
+
+    .variante-field--code {
+        flex: 0 0 96px;
+        min-width: 96px;
+    }
+
+    /* Nueva variante: display:contents hace que sus 3 campos actúen como
+       hijos directos de .variante-form (misma grilla, sin fila aparte).
+       Al ocultarse, .d-none (display:none !important) gana igual. */
+    .variante-subgrid {
+        display: contents;
+    }
+
+    /* Nuevo valor: input principal + código en línea dentro del mismo campo */
+    .variante-inline {
+        display: flex;
+        gap: 0.35rem;
+    }
+
+    .variante-inline-main {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .variante-form .variante-code-input {
+        text-transform: uppercase;
+        font-family: monospace;
+    }
+
+    .variante-inline .variante-code-input {
+        flex: 0 0 62px;
+        width: 62px;
+    }
+
+    @media (max-width: 575.98px) {
+        .variante-field,
+        .variante-field--wide,
+        .variante-field--code {
+            flex-basis: 100%;
+            min-width: 0;
+        }
+
+        .variante-inline .variante-code-input {
+            flex-basis: 72px;
+            width: 72px;
+        }
+    }
