@@ -77,18 +77,14 @@
 
                 <div class="internal-sidebar-menu">
                     <a href="{{route('uso-interno.productos.index')}}"
-                        class="internal-sidebar-link {{ request()->routeIs('home-interno') ? 'active' : '' }}">
-                        <i class="bi bi-window-stack"></i>
+                        class="internal-sidebar-link {{ request()->routeIs('uso-interno.productos.*') ? 'active' : '' }}">
+                        <x-heroicon-o-cube />
                         <span>Productos</span>
                     </a>
                     <a href="{{ route('uso-interno.categorias.index') }}"
                         class="internal-sidebar-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">
                         <i class="bi bi-grid-3x3-gap"></i>
                         <span>Categorías</span>
-                    </a>
-                    <a href="#" class="internal-sidebar-link {{ request()->routeIs('variantes.*') ? 'active' : '' }}">
-                        <i class="bi bi-box-seam"></i>
-                        <span>Variantes</span>
                     </a>
                 </div>
             </aside>

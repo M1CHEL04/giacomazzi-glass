@@ -225,11 +225,12 @@ $formAction = $isEdit
                 <div class="border rounded-2 p-3 bg-light d-flex flex-column gap-2">
                     <p class="small fw-semibold text-secondary mb-0" style="font-size:11px;">Agregar variante al producto</p>
 
-                    {{-- Fila principal: variante + valor/código --}}
-                    <div class="row g-2 align-items-end">
+                    {{-- Grilla unificada: los campos que el JS muestra/oculta entran siempre
+                         con el mismo ancho, sin importar el caso (existente, nuevo valor, nueva variante) --}}
+                    <div class="variante-form">
 
-                        {{-- Select variante --}}
-                        <div class="col-12 col-md-4">
+                        {{-- Select variante (siempre visible) --}}
+                        <div class="variante-field">
                             <label class="form-label small mb-1" style="font-size:11px;">Variante</label>
                             <select id="variante-select" class="form-select form-select-sm">
                                 <option value="">Seleccioná una variante...</option>
@@ -237,7 +238,7 @@ $formAction = $isEdit
                         </div>
 
                         {{-- Select valor (variante existente) --}}
-                        <div class="col-12 col-md-4 d-none" id="valor-existing-section">
+                        <div class="variante-field d-none" id="valor-existing-section">
                             <label class="form-label small mb-1" style="font-size:11px;">Valor</label>
                             <select id="valor-select" class="form-select form-select-sm">
                                 <option value="">Seleccioná un valor...</option>
@@ -245,61 +246,53 @@ $formAction = $isEdit
                         </div>
 
                         {{-- Código editable del valor existente --}}
-                        <div class="col-auto d-none" id="valor-codigo-section">
+                        <div class="variante-field variante-field--code d-none" id="valor-codigo-section">
                             <label class="form-label small mb-1" style="font-size:11px;">Código</label>
                             <input type="text" id="valor-codigo-input"
-                                class="form-control form-control-sm"
+                                class="form-control form-control-sm variante-code-input"
                                 placeholder="Cód" maxlength="10"
-                                style="width:75px;text-transform:uppercase;font-family:monospace;"
                                 title="Código del valor (editable)">
                         </div>
 
-                        {{-- Input nuevo valor --}}
-                        <div class="col-12 col-md-4 d-none" id="nuevo-valor-section">
-                            <div class="d-flex gap-1 align-items-end">
-                                <div class="flex-grow-1">
-                                    <label class="form-label small mb-1" style="font-size:11px;">Nuevo valor</label>
-                                    <input type="text" id="nuevo-valor-input"
-                                        class="form-control form-control-sm"
-                                        placeholder="Ej: Transparente">
-                                    <div class="text-danger d-none mt-1" id="nuevo-valor-input-feedback" style="font-size:0.8em;"></div>
-                                </div>
-                                <div>
-                                    <label class="form-label small mb-1" style="font-size:11px;">Cód.</label>
-                                    <input type="text" id="nuevo-valor-codigo"
-                                        class="form-control form-control-sm"
-                                        placeholder="TRNS" maxlength="10"
-                                        style="width:62px;text-transform:uppercase;font-family:monospace;"
-                                        title="Código del valor (auto)">
-                                </div>
+                        {{-- Nuevo valor (variante existente/pendiente): input + código en línea --}}
+                        <div class="variante-field variante-field--wide d-none" id="nuevo-valor-section">
+                            <label class="form-label small mb-1" style="font-size:11px;">Nuevo valor</label>
+                            <div class="variante-inline">
+                                <input type="text" id="nuevo-valor-input"
+                                    class="form-control form-control-sm variante-inline-main"
+                                    placeholder="Ej: Transparente">
+                                <input type="text" id="nuevo-valor-codigo"
+                                    class="form-control form-control-sm variante-code-input"
+                                    placeholder="TRNS" maxlength="10"
+                                    title="Código del valor (auto)">
                             </div>
+                            <div class="text-danger d-none mt-1" id="nuevo-valor-input-feedback" style="font-size:0.8em;"></div>
                         </div>
-                    </div>
 
-                    {{-- Nueva variante: ocupa ancho completo, separada del row --}}
-                    <div class="d-none" id="nueva-variante-section">
-                        <div class="row g-2">
-                            <div class="col-12 col-md-4">
+                        {{-- Nueva variante: nombre + valor + código.
+                             display:contents (ver .variante-subgrid) hace que sus 3 campos
+                             entren a la misma grilla que los de arriba, sin fila aparte --}}
+                        <div class="variante-subgrid d-none" id="nueva-variante-section">
+                            <div class="variante-field">
                                 <label class="form-label small mb-1" style="font-size:11px;">Nombre de la variante</label>
                                 <input type="text" id="nueva-variante-nombre"
                                     class="form-control form-control-sm"
                                     placeholder="Ej: Material">
                                 <div class="text-danger d-none mt-1" id="nueva-variante-nombre-feedback" style="font-size:0.8em;"></div>
                             </div>
-                            <div class="col-12 col-md-4">
+                            <div class="variante-field">
                                 <label class="form-label small mb-1" style="font-size:11px;">Valor</label>
                                 <input type="text" id="nueva-variante-valor"
                                     class="form-control form-control-sm"
                                     placeholder="Ej: Aluminio">
                             </div>
-                            <div class="col-12 col-md-4">
+                            <div class="variante-field variante-field--code">
                                 <label class="form-label small mb-1" style="font-size:11px;">
-                                    Código del valor <span class="text-secondary fw-normal">(auto)</span>
+                                    Código <span class="text-secondary fw-normal">(auto)</span>
                                 </label>
                                 <input type="text" id="nueva-variante-codigo"
-                                    class="form-control form-control-sm"
-                                    placeholder="Ej: ALM" maxlength="10"
-                                    style="text-transform:uppercase;font-family:monospace;">
+                                    class="form-control form-control-sm variante-code-input"
+                                    placeholder="ALM" maxlength="10">
                             </div>
                         </div>
                     </div>

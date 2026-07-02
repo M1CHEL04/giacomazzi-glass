@@ -20,7 +20,34 @@ class UsoInternoController extends Controller
 
     public function homeInterno()
     {
-        return view('UsoInterno.index');
+        $totalProductos     = Producto::count();
+        $productosActivos   = Producto::where('activo', true)->count();
+        $productosInactivos = $totalProductos - $productosActivos;
+
+        $totalCategorias   = Categoria::count();
+        $categoriasActivas = Categoria::where('activo', true)->count();
+
+        $productosSinImagen = Producto::doesntHave('imagenes')->count();
+
+        $ultimosProductos = Producto::with('categoria')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $productosPorCategoria = Categoria::withCount('productos')
+            ->orderByDesc('productos_count')
+            ->get();
+
+        return view('UsoInterno.index', compact(
+            'totalProductos',
+            'productosActivos',
+            'productosInactivos',
+            'totalCategorias',
+            'categoriasActivas',
+            'productosSinImagen',
+            'ultimosProductos',
+            'productosPorCategoria',
+        ));
     }
 
     public function miPerfil()
