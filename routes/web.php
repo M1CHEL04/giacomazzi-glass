@@ -22,6 +22,7 @@ Route::get('/carrito',           [CarritoController::class, 'obtener'])->name('c
 Route::post('/carrito/agregar',  [CarritoController::class, 'agregar'])->name('carrito.agregar');
 Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
 Route::post('/carrito/vaciar',   [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+Route::post('/carrito/cotizar',  [CarritoController::class, 'cotizar'])->name('carrito.cotizar');
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::get('/login',              [AccountsController::class, 'loginView'])->name('login-view');

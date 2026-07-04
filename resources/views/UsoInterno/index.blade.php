@@ -10,7 +10,7 @@
 
     {{-- ── KPIs ───────────────────────────────────────────────────────────── --}}
     <div class="row g-3">
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-lg-3">
             <div class="stat-card">
                 <span class="stat-card-icon"><x-heroicon-o-cube /></span>
                 <div class="stat-card-body">
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-lg-3">
             <div class="stat-card">
                 <span class="stat-card-icon"><x-heroicon-o-squares-2x2 /></span>
                 <div class="stat-card-body">
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-6 col-lg-3">
             <div class="stat-card {{ $productosSinImagen > 0 ? 'stat-card--warn' : '' }}">
                 <span class="stat-card-icon"><x-heroicon-o-photo /></span>
                 <div class="stat-card-body">
@@ -44,29 +44,60 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <span class="stat-card-icon"><x-heroicon-o-chat-bubble-left-right /></span>
+                <div class="stat-card-body">
+                    <span class="stat-card-value">{{ $totalConsultas }}</span>
+                    <span class="stat-card-label">Cotizaciones solicitadas</span>
+                    <span class="stat-card-meta">{{ $consultasMes }} este mes</span>
+                </div>
+            </div>
+        </div>
     </div>
 
     {{-- ── Paneles ────────────────────────────────────────────────────────── --}}
     <div class="row g-3">
-        {{-- Últimos productos --}}
+        {{-- Cotizaciones por mes --}}
         <div class="col-12 col-lg-6">
             <div class="internal-content-card h-100">
                 <div class="dash-panel-head">
-                    <h2 class="dash-panel-title">Últimos productos</h2>
-                    <a href="{{ route('uso-interno.productos.index') }}" class="dash-panel-link">Ver todos</a>
+                    <h2 class="dash-panel-title">Cotizaciones por mes</h2>
                 </div>
-                <div class="dash-list">
-                    @forelse($ultimosProductos as $producto)
-                    <a href="{{ route('uso-interno.productos.edit', $producto->id) }}" class="dash-list-item">
-                        <span class="dash-status-dot {{ $producto->activo ? 'is-active' : 'is-inactive' }}"
-                            title="{{ $producto->activo ? 'Activo' : 'Inactivo' }}"></span>
-                        <span class="dash-list-title">{{ $producto->nombre }}</span>
-                        <span class="dash-list-date">{{ $producto->created_at->diffForHumans() }}</span>
-                    </a>
-                    @empty
-                    <div class="dash-empty">Todavía no hay productos cargados.</div>
-                    @endforelse
+
+                @if($cotizacionesMensuales->isEmpty())
+                <div class="dash-empty">Todavía no hay cotizaciones registradas.</div>
+                @else
+                {{-- Serie única (magnitud en el tiempo): un solo hue verde, sin leyenda.
+                     Eje Y a la izquierda (fijo); las barras scrollean en X cuando no entran. --}}
+                <div class="dash-chart">
+                    <div class="dash-chart-yaxis" aria-hidden="true">
+                        <span class="dash-chart-ytick">{{ $maxCotizMes }}</span>
+                        <span class="dash-chart-ytick">{{ intdiv($maxCotizMes, 2) }}</span>
+                        <span class="dash-chart-ytick">0</span>
+                    </div>
+                    <div class="dash-chart-scroll">
+                        <div class="dash-chart-cols">
+                            @foreach($cotizacionesMensuales as $m)
+                            @php $h = $m['total'] == 0 ? 0 : max(6, round($m['total'] / $maxCotizMes * 100)); @endphp
+                            <div class="dash-chart-col"
+                                data-total="{{ $m['total'] }}"
+                                data-mes="{{ $m['mesLargo'] }}"
+                                data-anio="{{ $m['anio'] }}"
+                                aria-label="{{ $m['mesLargo'] }} {{ $m['anio'] }}: {{ $m['total'] }} {{ $m['total'] == 1 ? 'cotización' : 'cotizaciones' }}">
+                                <div class="dash-chart-track">
+                                    <div class="dash-chart-bar {{ $m['total'] == 0 ? 'dash-chart-bar--zero' : '' }}"
+                                        style="height: {{ $h }}%;"></div>
+                                </div>
+                                <span class="dash-chart-xlabel">{{ $m['mes'] }}</span>
+                                <span class="dash-chart-year">{{ ($loop->first || $m['esEnero']) ? $m['anio'] : '' }}</span>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
+                @endif
             </div>
         </div>
 
@@ -95,4 +126,8 @@
     </div>
 
 </div>
+@endsection
+
+@section('script')
+<script src="{{ versioned_asset('js/dashboard.js') }}"></script>
 @endsection

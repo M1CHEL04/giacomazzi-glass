@@ -619,74 +619,6 @@
     color: var(--internal-secondary);
 }
 
-.dash-panel-link {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--internal-primary);
-    text-decoration: none;
-}
-
-.dash-panel-link:hover {
-    text-decoration: underline;
-}
-
-/* Lista de últimos productos */
-.dash-list {
-    display: flex;
-    flex-direction: column;
-}
-
-.dash-list-item {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.5rem 0.25rem;
-    text-decoration: none;
-    border-top: 1px solid var(--internal-border);
-    transition: background 0.12s ease;
-}
-
-.dash-list-item:first-child {
-    border-top: none;
-}
-
-.dash-list-item:hover {
-    background: var(--internal-surface);
-}
-
-.dash-status-dot {
-    flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-}
-
-.dash-status-dot.is-active {
-    background: var(--internal-primary);
-}
-
-.dash-status-dot.is-inactive {
-    background: var(--internal-secondary-soft);
-}
-
-.dash-list-title {
-    flex-grow: 1;
-    min-width: 0;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--internal-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.dash-list-date {
-    flex-shrink: 0;
-    font-size: 0.72rem;
-    color: var(--internal-secondary-soft);
-    white-space: nowrap;
-}
-
 /* Barras por categoría */
 .dash-bars {
     display: flex;
@@ -740,6 +672,150 @@
     text-align: center;
     color: var(--internal-secondary-soft);
     font-size: 0.85rem;
+}
+
+/* Gráfico de barras: cotizaciones por mes (serie única, hue verde) */
+.dash-chart {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+
+.dash-chart-yaxis {
+    flex: 0 0 auto;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: 0.4rem;
+    border-right: 1px solid var(--internal-border);
+}
+
+.dash-chart-ytick {
+    font-size: 0.68rem;
+    line-height: 1;
+    color: var(--internal-secondary-soft);
+}
+
+.dash-chart-scroll {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    padding-bottom: 0.15rem;
+}
+
+.dash-chart-cols {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.45rem;
+    width: max-content;
+    min-width: 100%;
+}
+
+.dash-chart-col {
+    flex: 0 0 auto;
+    width: 34px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dash-chart-track {
+    height: 160px;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.dash-chart-bar {
+    width: 18px;
+    max-width: 72%;
+    min-height: 3px;
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, var(--internal-primary-soft), var(--internal-primary));
+    transition: opacity 0.15s ease;
+}
+
+.dash-chart-col:hover .dash-chart-bar {
+    opacity: 0.82;
+}
+
+.dash-chart-bar--zero {
+    height: 2px !important;
+    min-height: 0;
+    background: var(--internal-border);
+    border-radius: 2px;
+}
+
+.dash-chart-xlabel {
+    margin-top: 0.35rem;
+    font-size: 0.68rem;
+    line-height: 1.1;
+    color: var(--internal-secondary-soft);
+}
+
+.dash-chart-year {
+    min-height: 0.75rem;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--internal-secondary);
+}
+
+/* Popup del gráfico (hover en desktop / tap en touch) */
+.dash-chart-tip {
+    position: fixed;
+    z-index: 3000;
+    transform: translate(-50%, calc(-100% - 10px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    line-height: 1.1;
+    white-space: nowrap;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    background: #1B2D21;
+    color: #ffffff;
+    box-shadow: 0 10px 26px rgba(27, 45, 33, 0.30);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s ease;
+}
+
+.dash-chart-tip.is-visible {
+    opacity: 1;
+}
+
+.dash-chart-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1B2D21;
+}
+
+.dash-chart-tip-num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.dash-chart-tip-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    opacity: 0.8;
+}
+
+.dash-chart-tip-mes {
+    margin-top: 0.25rem;
+    font-size: 0.68rem;
+    opacity: 0.75;
 }
 
 @media (max-width: 575.98px) {

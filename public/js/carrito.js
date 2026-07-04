@@ -5,6 +5,7 @@
         agregar:  '/carrito/agregar',
         eliminar: '/carrito/eliminar',
         vaciar:   '/carrito/vaciar',
+        cotizar:  '/carrito/cotizar',
     };
 
     var state = (window.__carritoInit && typeof window.__carritoInit === 'object')
@@ -132,7 +133,15 @@
         var numero = btn && btn.dataset.whatsapp ? btn.dataset.whatsapp.replace(/\D/g, '') : '';
         var base   = numero ? 'https://wa.me/' + numero : 'https://wa.me/';
         window.open(base + '?text=' + encodeURIComponent(msg), '_blank');
-        vaciarCarrito();
+
+        // Registra la solicitud de cotización (con snapshot del carrito) y lo vacía.
+        // Si falla, no rompe la UX: WhatsApp ya se abrió.
+        post(URLS.cotizar, {}).then(function (data) {
+            if (data && data.ok) {
+                updateBadges(0);
+                renderCarrito([]);
+            }
+        });
     }
 
     // ── API pública ────────────────────────────────────────────────────────────

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cotizacion;
 use App\Models\Producto;
 use App\Models\ValorVariante;
 use App\Services\SkuService;
@@ -131,6 +132,39 @@ class CarritoController extends Controller
 
             return response()->json(['ok' => false, 'message' => 'No se pudo vaciar el carrito.'], 500);
         }
+    }
+
+    /**
+     * Registra una solicitud de cotización (clic en "Solicitar cotización por
+     * WhatsApp") con un snapshot del carrito, y luego lo vacía.
+     *
+     * No garantiza que el mensaje se haya enviado — mide la intención de consulta.
+     * Si el registro falla, igual se vacía el carrito para no romper la UX.
+     */
+    public function cotizar()
+    {
+        $carrito = session('carrito', []);
+
+        if (! empty($carrito)) {
+            try {
+                Cotizacion::create([
+                    'cantidad_items' => count($carrito),
+                    'items'          => array_values($carrito),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('CarritoController::cotizar - No se pudo registrar la cotización', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        session(['carrito' => []]);
+
+        return response()->json([
+            'ok'       => true,
+            'cantidad' => 0,
+            'carrito'  => [],
+        ]);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Cotizacion;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Services\SkuService;
@@ -29,14 +30,40 @@ class UsoInternoController extends Controller
 
         $productosSinImagen = Producto::doesntHave('imagenes')->count();
 
-        $ultimosProductos = Producto::with('categoria')
-            ->latest()
-            ->take(5)
-            ->get();
-
         $productosPorCategoria = Categoria::withCount('productos')
             ->orderByDesc('productos_count')
             ->get();
+
+        // Consultas = clics en "Solicitar cotización por WhatsApp"
+        $totalConsultas = Cotizacion::count();
+        $consultasMes   = Cotizacion::where('created_at', '>=', now()->startOfMonth())->count();
+
+        // Cotizaciones por mes — timeline continuo desde la primera hasta hoy
+        // (rellena meses sin datos con 0). Se agrupa en PHP para no depender de
+        // funciones de fecha propias de MySQL.
+        $conteoPorMes = Cotizacion::get(['created_at'])
+            ->groupBy(fn ($c) => $c->created_at->format('Y-m'))
+            ->map->count();
+
+        $cotizacionesMensuales = collect();
+        $primeraCotizacion = Cotizacion::min('created_at');
+        if ($primeraCotizacion) {
+            $meses      = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            $mesesLargos = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            $cursor = \Illuminate\Support\Carbon::parse($primeraCotizacion)->startOfMonth();
+            $fin    = now()->startOfMonth();
+            while ($cursor <= $fin) {
+                $cotizacionesMensuales->push([
+                    'mes'      => $meses[$cursor->month - 1],
+                    'mesLargo' => $mesesLargos[$cursor->month - 1],
+                    'anio'     => $cursor->year,
+                    'total'    => (int) ($conteoPorMes[$cursor->format('Y-m')] ?? 0),
+                    'esEnero'  => $cursor->month === 1,
+                ]);
+                $cursor->addMonth();
+            }
+        }
+        $maxCotizMes = max(1, (int) $cotizacionesMensuales->max('total'));
 
         return view('UsoInterno.index', compact(
             'totalProductos',
@@ -45,8 +72,11 @@ class UsoInternoController extends Controller
             'totalCategorias',
             'categoriasActivas',
             'productosSinImagen',
-            'ultimosProductos',
             'productosPorCategoria',
+            'totalConsultas',
+            'consultasMes',
+            'cotizacionesMensuales',
+            'maxCotizMes',
         ));
     }
 
