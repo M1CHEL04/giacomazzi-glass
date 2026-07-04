@@ -132,12 +132,38 @@
     }
 
     /* ---- Agregar al carrito ---- */
+    var MAX_UNIDADES = 10;
+
     function initCarrito() {
         var btn     = document.getElementById('btn-agregar-carrito');
         var icon    = document.getElementById('btn-carrito-icon');
         var spinner = document.getElementById('btn-carrito-spinner');
         var textEl  = document.getElementById('btn-carrito-text');
         if (!btn || !window.Carrito) return;
+
+        // ── Stepper de unidades ──
+        var cantInput = document.getElementById('ps-cantidad');
+        var btnMenos  = document.getElementById('ps-cant-menos');
+        var btnMas    = document.getElementById('ps-cant-mas');
+
+        function getCantidad() {
+            var n = parseInt(cantInput ? cantInput.value : '1', 10);
+            if (isNaN(n) || n < 1) n = 1;
+            if (n > MAX_UNIDADES) n = MAX_UNIDADES;
+            return n;
+        }
+
+        function setCantidad(n) {
+            if (n < 1) n = 1;
+            if (n > MAX_UNIDADES) n = MAX_UNIDADES;
+            if (cantInput) cantInput.value = n;
+            if (btnMenos) btnMenos.disabled = n <= 1;
+            if (btnMas)   btnMas.disabled   = n >= MAX_UNIDADES;
+        }
+
+        if (btnMenos) btnMenos.addEventListener('click', function () { setCantidad(getCantidad() - 1); });
+        if (btnMas)   btnMas.addEventListener('click', function () { setCantidad(getCantidad() + 1); });
+        setCantidad(1);
 
         function setLoading(loading) {
             btn.disabled = loading;
@@ -147,6 +173,7 @@
 
         btn.addEventListener('click', function () {
             var productoId = parseInt(btn.dataset.productoId, 10);
+            var cantidad   = getCantidad();
             var valorIds   = [];
 
             document.querySelectorAll('.ps-opcion.active').forEach(function (opcion) {
@@ -157,7 +184,7 @@
             setLoading(true);
             if (textEl) textEl.textContent = 'Agregando...';
 
-            window.Carrito.agregar(productoId, valorIds)
+            window.Carrito.agregar(productoId, valorIds, cantidad)
                 .then(function (data) {
                     setLoading(false);
                     if (!data.ok) {
@@ -165,6 +192,7 @@
                         return;
                     }
                     if (textEl) textEl.textContent = '¡Agregado!';
+                    setCantidad(1);
                     window.Carrito.abrirPanel();
                     setTimeout(function () {
                         if (textEl) textEl.textContent = 'Agregar al carrito';

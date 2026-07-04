@@ -4,9 +4,12 @@
     var URLS = {
         agregar:  '/carrito/agregar',
         eliminar: '/carrito/eliminar',
+        cantidad: '/carrito/cantidad',
         vaciar:   '/carrito/vaciar',
         cotizar:  '/carrito/cotizar',
     };
+
+    var MAX_UNIDADES = 10;
 
     var state = (window.__carritoInit && typeof window.__carritoInit === 'object')
         ? { cantidad: window.__carritoInit.cantidad, items: window.__carritoInit.carrito }
@@ -67,15 +70,24 @@
                     }).join(' &middot; ') +
                     '</div>';
             }
+            var cant  = item.cantidad != null ? item.cantidad : 1;
+            var keyAt = escHtml(item.key);
             html +=
                 '<li class="carrito-item">' +
                     '<div class="carrito-item-info">' +
                         '<span class="carrito-item-nombre">' + escHtml(item.nombre) + '</span>' +
                         sels +
                     '</div>' +
-                    '<button class="carrito-item-remove" data-key="' + escHtml(item.key) + '" aria-label="Eliminar del carrito">' +
-                        '<i class="bi bi-trash3"></i>' +
-                    '</button>' +
+                    '<div class="carrito-item-controls">' +
+                        '<button class="carrito-item-remove" data-key="' + keyAt + '" aria-label="Eliminar del carrito">' +
+                            '<i class="bi bi-trash3"></i>' +
+                        '</button>' +
+                        '<div class="carrito-cant" role="group" aria-label="Cantidad">' +
+                            '<button type="button" class="carrito-cant-btn" data-key="' + keyAt + '" data-accion="menos" data-cantidad="' + cant + '"' + (cant <= 1 ? ' disabled' : '') + ' aria-label="Quitar una unidad"><i class="bi bi-dash"></i></button>' +
+                            '<span class="carrito-cant-num">' + cant + '</span>' +
+                            '<button type="button" class="carrito-cant-btn" data-key="' + keyAt + '" data-accion="mas" data-cantidad="' + cant + '"' + (cant >= MAX_UNIDADES ? ' disabled' : '') + ' aria-label="Agregar una unidad"><i class="bi bi-plus"></i></button>' +
+                        '</div>' +
+                    '</div>' +
                 '</li>';
         });
         html += '</ul>';
@@ -85,6 +97,27 @@
             btn.addEventListener('click', function () {
                 eliminarItem(this.dataset.key, this);
             });
+        });
+
+        body.querySelectorAll('.carrito-cant-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var cur  = parseInt(this.dataset.cantidad, 10) || 1;
+                var next = this.dataset.accion === 'mas' ? cur + 1 : cur - 1;
+                if (next < 1) next = 1;
+                if (next > MAX_UNIDADES) next = MAX_UNIDADES;
+                if (next === cur) return;
+                actualizarCantidad(this.dataset.key, next);
+            });
+        });
+    }
+
+    function actualizarCantidad(key, cantidad) {
+        return post(URLS.cantidad, { key: key, cantidad: cantidad }).then(function (data) {
+            if (data.ok) {
+                updateBadges(data.cantidad);
+                renderCarrito(data.carrito);
+            }
+            return data;
         });
     }
 
@@ -118,6 +151,7 @@
 
         var msg = 'Hola, me interesaron los siguientes productos y necesitaba una cotización para mi obra:\n\n';
         state.items.forEach(function (item) {
+            var cant  = item.cantidad != null ? item.cantidad : 1;
             var linea = '- ';
             if (item.codigo) linea += '[' + item.codigo + '] ';
             linea += item.nombre;
@@ -126,6 +160,7 @@
                     return s.variante + ': ' + s.valor;
                 }).join(', ') + ')';
             }
+            if (cant > 1) linea += ' ×' + cant;
             msg += linea + '\n';
         });
 
@@ -146,8 +181,8 @@
 
     // ── API pública ────────────────────────────────────────────────────────────
     window.Carrito = {
-        agregar: function (productoId, valorIds) {
-            return post(URLS.agregar, { producto_id: productoId, valor_ids: valorIds })
+        agregar: function (productoId, valorIds, cantidad) {
+            return post(URLS.agregar, { producto_id: productoId, valor_ids: valorIds, cantidad: cantidad || 1 })
                 .then(function (data) {
                     if (data.ok) {
                         updateBadges(data.cantidad);
@@ -156,6 +191,7 @@
                     return data;
                 });
         },
+        actualizarCantidad: actualizarCantidad,
         abrirPanel: function () {
             var el = document.getElementById('carritoOffcanvas');
             if (el) bootstrap.Offcanvas.getOrCreateInstance(el).show();

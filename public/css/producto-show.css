@@ -379,6 +379,58 @@
     border-color: var(--external-primary);
 }
 
+/* Stepper de unidades */
+.ps-cantidad {
+    display: inline-flex;
+    align-items: stretch;
+    border: 1.5px solid rgba(40, 116, 82, 0.38);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: var(--external-white);
+}
+
+.ps-cantidad-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    border: none;
+    background: transparent;
+    color: var(--external-primary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.ps-cantidad-btn:hover:not(:disabled) {
+    background: rgba(40, 116, 82, 0.08);
+}
+
+.ps-cantidad-btn:disabled {
+    color: var(--external-secondary-soft);
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.ps-cantidad-btn svg {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+.ps-cantidad-input {
+    width: 2.6rem;
+    border: none;
+    border-inline: 1.5px solid rgba(40, 116, 82, 0.16);
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--external-secondary);
+    background: transparent;
+}
+
+.ps-cantidad-input:focus {
+    outline: none;
+}
+
 /* ---- Confianza ---- */
 .ps-confianza {
     display: flex;
@@ -793,6 +845,8 @@
 
 @media (max-width: 575.98px) {
     .ps-acciones { flex-direction: column; }
+
+    .ps-cantidad { align-self: center; }
 
     .btn-ps-primary,
     .btn-ps-secondary { width: 100%; }

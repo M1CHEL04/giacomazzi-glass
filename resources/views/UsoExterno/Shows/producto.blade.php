@@ -141,6 +141,18 @@
                     @endif
 
                     <div class="ps-acciones">
+                        <div class="ps-cantidad" role="group" aria-label="Cantidad de unidades">
+                            <button type="button" class="ps-cantidad-btn" id="ps-cant-menos"
+                                aria-label="Quitar una unidad">
+                                <x-heroicon-o-minus />
+                            </button>
+                            <input type="text" inputmode="numeric" class="ps-cantidad-input"
+                                id="ps-cantidad" value="1" aria-label="Cantidad" readonly>
+                            <button type="button" class="ps-cantidad-btn" id="ps-cant-mas"
+                                aria-label="Agregar una unidad">
+                                <x-heroicon-o-plus />
+                            </button>
+                        </div>
                         <button type="button"
                             id="btn-agregar-carrito"
                             class="btn-ps-primary"

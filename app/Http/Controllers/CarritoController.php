@@ -11,7 +11,16 @@ use Illuminate\Support\Facades\Log;
 
 class CarritoController extends Controller
 {
+    /** Tope de unidades por línea del carrito. */
+    private const MAX_UNIDADES = 10;
+
     public function __construct(private SkuService $skuService) {}
+
+    /** Total de unidades del carrito (suma de cantidades; ausente = 1). */
+    private function totalUnidades(array $carrito): int
+    {
+        return array_sum(array_map(fn ($i) => $i['cantidad'] ?? 1, $carrito));
+    }
 
     public function obtener()
     {
@@ -19,7 +28,7 @@ class CarritoController extends Controller
             $carrito = session('carrito', []);
 
             return response()->json([
-                'cantidad' => count($carrito),
+                'cantidad' => $this->totalUnidades($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -37,11 +46,13 @@ class CarritoController extends Controller
             'producto_id' => 'required|integer|exists:productos,id',
             'valor_ids'   => 'array',
             'valor_ids.*' => 'integer|exists:valores_variante,id',
+            'cantidad'    => 'nullable|integer|min:1|max:' . self::MAX_UNIDADES,
         ]);
 
         try {
-            $productoId = $request->integer('producto_id');
-            $valorIds   = array_map('intval', $request->input('valor_ids', []));
+            $productoId    = $request->integer('producto_id');
+            $cantidadPedida = max(1, $request->integer('cantidad', 1));
+            $valorIds      = array_map('intval', $request->input('valor_ids', []));
             sort($valorIds);
 
             $producto = Producto::select(['id', 'nombre', 'codigo'])
@@ -66,18 +77,24 @@ class CarritoController extends Controller
             $key = $productoId . (empty($valorIds) ? '' : '_' . implode('_', $valorIds));
 
             $carrito = session('carrito', []);
+
+            // Si la línea ya existe, sumamos las unidades (tope MAX_UNIDADES).
+            $cantidadExistente = $carrito[$key]['cantidad'] ?? 0;
+            $cantidad = min(self::MAX_UNIDADES, $cantidadExistente + $cantidadPedida);
+
             $carrito[$key] = [
                 'key'         => $key,
                 'producto_id' => $productoId,
                 'nombre'      => $producto->nombre,
                 'codigo'      => $codigo,
                 'selecciones' => $selecciones,
+                'cantidad'    => $cantidad,
             ];
             session(['carrito' => $carrito]);
 
             return response()->json([
                 'ok'       => true,
-                'cantidad' => count($carrito),
+                'cantidad' => $this->totalUnidades($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -102,7 +119,7 @@ class CarritoController extends Controller
 
             return response()->json([
                 'ok'       => true,
-                'cantidad' => count($carrito),
+                'cantidad' => $this->totalUnidades($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -112,6 +129,41 @@ class CarritoController extends Controller
             ]);
 
             return response()->json(['ok' => false, 'message' => 'No se pudo eliminar el producto del carrito.'], 500);
+        }
+    }
+
+    /**
+     * Setea la cantidad ABSOLUTA de una línea del carrito (stepper del panel).
+     * A diferencia de agregar (que suma), acá se fija el valor exacto.
+     */
+    public function actualizarCantidad(Request $request)
+    {
+        $request->validate([
+            'key'      => 'required|string',
+            'cantidad' => 'required|integer|min:1|max:' . self::MAX_UNIDADES,
+        ]);
+
+        try {
+            $carrito = session('carrito', []);
+            $key     = $request->input('key');
+
+            if (isset($carrito[$key])) {
+                $carrito[$key]['cantidad'] = $request->integer('cantidad');
+                session(['carrito' => $carrito]);
+            }
+
+            return response()->json([
+                'ok'       => true,
+                'cantidad' => $this->totalUnidades($carrito),
+                'carrito'  => array_values($carrito),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('CarritoController::actualizarCantidad - Error al actualizar la cantidad', [
+                'key'   => $request->input('key'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json(['ok' => false, 'message' => 'No se pudo actualizar la cantidad.'], 500);
         }
     }
 
@@ -148,7 +200,7 @@ class CarritoController extends Controller
         if (! empty($carrito)) {
             try {
                 Cotizacion::create([
-                    'cantidad_items' => count($carrito),
+                    'cantidad_items' => $this->totalUnidades($carrito),
                     'items'          => array_values($carrito),
                 ]);
             } catch (\Exception $e) {

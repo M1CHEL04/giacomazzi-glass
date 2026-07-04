@@ -21,6 +21,7 @@ Route::get('/productos/{id}',           [UsoExternoController::class, 'showProdu
 Route::get('/carrito',           [CarritoController::class, 'obtener'])->name('carrito.obtener');
 Route::post('/carrito/agregar',  [CarritoController::class, 'agregar'])->name('carrito.agregar');
 Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+Route::post('/carrito/cantidad', [CarritoController::class, 'actualizarCantidad'])->name('carrito.cantidad');
 Route::post('/carrito/vaciar',   [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
 Route::post('/carrito/cotizar',  [CarritoController::class, 'cotizar'])->name('carrito.cotizar');
 

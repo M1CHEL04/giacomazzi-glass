@@ -46,12 +46,13 @@ class CotizacionesSeeder extends Seeder
                         'nombre'      => $p->nombre,
                         'codigo'      => $p->codigo,
                         'selecciones' => [],
+                        'cantidad'    => rand(1, 3),
                     ])
                     ->values()
                     ->all();
 
                 $c = new Cotizacion();
-                $c->cantidad_items = count($items);
+                $c->cantidad_items = array_sum(array_column($items, 'cantidad'));
                 $c->items          = $items;
                 $c->created_at     = $fecha;
                 $c->updated_at     = $fecha;
