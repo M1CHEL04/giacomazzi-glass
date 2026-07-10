@@ -103,9 +103,18 @@
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .sede-card {
+        cursor: pointer;
+    }
+
     .sede-card:hover {
         transform: translateY(-6px);
         box-shadow: 0 14px 32px rgba(27, 45, 33, 0.12);
+    }
+
+    .sede-card:focus-visible {
+        outline: 2px solid var(--external-primary);
+        outline-offset: 3px;
     }
 
     /* Header con degradé de marca */
@@ -255,7 +264,8 @@
         <div class="row g-4">
             <!-- Fábrica -->
             <div class="col-lg-6">
-                <div class="sede-card">
+                <div class="sede-card" data-sede="fabrica" role="button" tabindex="0"
+                    aria-label="Ver Fábrica en el mapa">
                     <div class="sede-card-header">
                         <span class="sede-card-header-icon">
                             <x-heroicon-o-home-modern style="width: 26px; height: 26px;" />
@@ -291,7 +301,8 @@
 
             <!-- Local al Público -->
             <div class="col-lg-6">
-                <div class="sede-card">
+                <div class="sede-card" data-sede="local" role="button" tabindex="0"
+                    aria-label="Ver Local al público en el mapa">
                     <div class="sede-card-header">
                         <span class="sede-card-header-icon">
                             <x-heroicon-o-building-storefront style="width: 26px; height: 26px;" />
@@ -374,7 +385,7 @@
             Quilmes Oeste, Buenos Aires<br>
             <a href="tel:01164457059" style="color: #287452; text-decoration: none;"> 011 6445-7059</a>
         </div>
-    `);
+    `, { autoPan: false });
 
     // Marcador Local al Público (Polo Hudson - Au Balbín Km 30)
     const localMarker = L.marker([-34.7763988, -58.1634747], {
@@ -388,6 +399,41 @@
             Guillermo Enrique Hudson, Buenos Aires<br>
             <a href="tel:01192683417" style="color: #287452; text-decoration: none;"> 011 9268-3417</a>
         </div>
-    `);
+    `, { autoPan: false });
+
+    // Al tocar una card, llevar al mapa y abrir el pin de esa sede
+    const markers = { fabrica: fabricaMarker, local: localMarker };
+    const mapEl = document.getElementById('map');
+
+    function irASede(sede) {
+        const marker = markers[sede];
+        if (!marker) return;
+
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Esperamos a que termine el scroll para centrar y abrir el popup
+        setTimeout(function () {
+            const zoom = 15;
+            map.invalidateSize();
+            // Corremos el centro hacia arriba del pin para dejar lugar al popup,
+            // que se abre por encima del marcador.
+            const punto = map.project(marker.getLatLng(), zoom).subtract([0, 80]);
+            map.setView(map.unproject(punto, zoom), zoom, { animate: true });
+            marker.openPopup();
+        }, 500);
+    }
+
+    document.querySelectorAll('.sede-card[data-sede]').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            // Dejamos pasar los links (ej. teléfono) sin llevar al mapa
+            if (e.target.closest('a')) return;
+            irASede(card.dataset.sede);
+        });
+        card.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                irASede(card.dataset.sede);
+            }
+        });
+    });
 </script>
 @endsection
