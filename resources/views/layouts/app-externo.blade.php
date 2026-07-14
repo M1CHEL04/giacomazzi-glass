@@ -198,7 +198,13 @@
                 </address>
             </div>
 
-            <p class="external-footer-copy">© {{ date('Y') }} Aberturas Giacomazzi</p>
+            <p class="external-footer-copy">
+                <span>© {{ date('Y') }} Aberturas Giacomazzi</span>
+                <a href="{{ route('login-view') }}" class="external-footer-lock"
+                    aria-label="Acceso interno" title="Acceso interno">
+                    <i class="bi bi-lock-fill"></i>
+                </a>
+            </p>
         </div>
     </footer>
 
