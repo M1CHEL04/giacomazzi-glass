@@ -31,7 +31,7 @@ class CotizacionesSeeder extends Seeder
 
         for ($i = 16; $i >= 0; $i--) {
             $mesBase  = now()->startOfMonth()->subMonths($i);
-            $cantidad = fake()->randomElement($pesos);
+            $cantidad = $pesos[array_rand($pesos)];
 
             for ($j = 0; $j < $cantidad; $j++) {
                 $fecha = $mesBase->copy()
