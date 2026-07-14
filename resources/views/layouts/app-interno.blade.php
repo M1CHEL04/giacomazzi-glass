@@ -5,7 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Giacomazzi Glass'))</title>
+    <title>@yield('title', config('app.name', 'Aberturas Giacomazzi'))</title>
+
+    <link rel="icon" href="{{ versioned_asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="alternate icon" href="{{ versioned_asset('favicon.svg') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -29,13 +32,8 @@
         <div class="container-fluid py-3 px-3 px-xl-4">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
                 <a href="{{ route('uso-interno.home-interno') }}" class="internal-brand" aria-label="Inicio del panel interno">
-                    <span class="internal-brand-mark">
-                        <i class="bi bi-building-fill"></i>
-                    </span>
-                    <span class="internal-brand-text">
-                        <span class="internal-brand-name">Giacomazzi Glass</span>
-                        <span class="internal-brand-subtitle">Panel administrativo</span>
-                    </span>
+                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="internal-brand-logo">
+                    <span class="internal-brand-badge">Panel administrativo</span>
                 </a>
 
                 <div class="dropdown internal-user-dropdown">
@@ -108,7 +106,7 @@
 
         <div class="container-fluid px-3 px-xl-4 internal-footer-bottom">
             <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
-                <span>© {{ date('Y') }} Giacomazzi Glass</span>
+                <span>© {{ date('Y') }} Aberturas Giacomazzi</span>
                 <span>Interfaz interna para gestión administrativa</span>
             </div>
         </div>

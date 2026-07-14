@@ -1,6 +1,6 @@
 @extends('layouts.app-externo')
 
-@section('title', 'Todos los Productos - Giacomazzi Glass')
+@section('title', 'Todos los Productos - Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
@@ -14,7 +14,7 @@
         <div class="todos-hero-content">
             <p class="todos-hero-eyebrow">
                 <span class="todos-hero-eyebrow-line"></span>
-                Giacomazzi Glass
+                Aberturas Giacomazzi
             </p>
             <h1 class="todos-hero-title">Catálogo <em class="todos-hero-accent">Completo</em></h1>
             <p class="todos-hero-subtitle">

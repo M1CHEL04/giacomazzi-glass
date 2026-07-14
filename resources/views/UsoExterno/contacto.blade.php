@@ -1,5 +1,5 @@
 @extends('layouts.app-externo')
-@section('title', 'Contacto - Giacomazzi Glass')
+@section('title', 'Contacto - Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -246,7 +246,7 @@
     <div class="container contact-hero-content">
         <div class="row">
             <div class="col-lg-8 col-xl-7">
-                <p class="contact-hero-eyebrow">Giacomazzi Glass</p>
+                <p class="contact-hero-eyebrow">Aberturas Giacomazzi</p>
                 <h1>Contacto</h1>
                 <p>Estamos para ayudarte. Visitanos o comunicate con nosotros.</p>
             </div>

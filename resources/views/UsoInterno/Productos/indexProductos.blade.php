@@ -1,5 +1,5 @@
 @extends('layouts.app-interno')
-@section('title', 'Indice de productos - Panel interno - Giacomazzi Glass')
+@section('title', 'Indice de productos - Panel interno - Aberturas Giacomazzi')
 @section('page-title', 'Productos')
 @section('subhead', 'Lista de productos registrados en el sistema')
 @section('styles')

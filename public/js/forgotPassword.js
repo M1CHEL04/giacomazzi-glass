@@ -11,8 +11,9 @@ const setLoading = (button, isLoading) => {
 
 const setStepActive = (step) => {
 	document.querySelectorAll('[data-step-indicator]').forEach((indicator) => {
-		const isActive = indicator.getAttribute('data-step-indicator') === String(step);
-		indicator.classList.toggle('is-active', isActive);
+		const idx = Number(indicator.getAttribute('data-step-indicator'));
+		indicator.classList.toggle('is-active', idx === step);
+		indicator.classList.toggle('is-done', idx < step);
 	});
 };
 

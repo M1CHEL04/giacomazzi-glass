@@ -12,7 +12,18 @@ class UsoExternoController extends Controller
 {
     public function welcome()
     {
-        return view('UsoExterno.welcome');
+        // El ViewComposer inyecta las categorías solo en el layout (navbar);
+        // acá las pasamos explícitamente para la sección "Modelos estándar".
+        $categorias = Categoria::where('activo', true)
+            ->orderBy('nombre')
+            ->get(['id', 'nombre', 'imagen_hero']);
+
+        return view('UsoExterno.welcome', compact('categorias'));
+    }
+
+    public function nosotros()
+    {
+        return view('UsoExterno.nosotros');
     }
 
     public function contacto()

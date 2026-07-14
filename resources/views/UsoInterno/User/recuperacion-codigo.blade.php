@@ -12,17 +12,15 @@
         <tr>
             <td align="center">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:560px; background-color:#ffffff; border:1px solid rgba(63,63,63,0.12); border-radius:20px; box-shadow:0 16px 40px rgba(40,116,82,0.08); overflow:hidden;">
+                    {{-- Franja de acento de marca --}}
                     <tr>
-                        <td style="padding:28px 32px 16px;">
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td style="vertical-align:middle;">
-                                        <div style="display:inline-flex; align-items:center; gap:12px;">
-                                            <div style="font-size:14px; font-weight:700; letter-spacing:0.04em; color:#287452;">GIACOMAZZI GLASS</div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td style="height:4px; line-height:4px; font-size:0; background-color:#287452;">&nbsp;</td>
+                    </tr>
+                    {{-- Encabezado / marca. Cuando esté el logo en PNG, reemplazar el <div> de texto por:
+                         <img src="{{ asset('images/logo.png') }}" alt="Aberturas Giacomazzi" width="200" style="display:block; height:auto;"> --}}
+                    <tr>
+                        <td style="padding:28px 32px 8px;">
+                            <div style="font-size:16px; font-weight:800; letter-spacing:0.06em; color:#287452;">ABERTURAS GIACOMAZZI</div>
                         </td>
                     </tr>
                     <tr>
@@ -47,7 +45,7 @@
                     </tr>
                     <tr>
                         <td style="padding:18px 32px; background-color:#ffffff; border-top:1px solid rgba(63,63,63,0.08); font-size:12px; color:rgba(63,63,63,0.6); text-align:center;">
-                            <div style="margin-bottom:4px;">© {{ date('Y') }} Giacomazzi Glass</div>
+                            <div style="margin-bottom:4px;">© {{ date('Y') }} Aberturas Giacomazzi</div>
                         </td>
                     </tr>
                 </table>

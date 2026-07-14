@@ -1,7 +1,7 @@
 @extends('layouts.app-interno')
-@section('title', 'Panel Interno - Giacomazzi Glass')
+@section('title', 'Panel Interno - Aberturas Giacomazzi')
 @section('page-title', 'Panel Interno')
-@section('subhead', 'Bienvenido al panel de administración de Giacomazzi Glass')
+@section('subhead', 'Bienvenido al panel de administración de Aberturas Giacomazzi')
 @section('content')
 
 @php $maxProductos = $productosPorCategoria->max('productos_count') ?: 1; @endphp

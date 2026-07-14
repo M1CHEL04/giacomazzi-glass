@@ -12,6 +12,7 @@ Route::get('/imagen/{imagenProducto}', [ImagenController::class, 'show'])->name(
 
 // ── Uso Externo ──────────────────────────────────────────────────────────────
 Route::get('/',         [UsoExternoController::class, 'welcome'])->name('welcome');
+Route::get('/nosotros', [UsoExternoController::class, 'nosotros'])->name('nosotros');
 Route::get('/contacto', [UsoExternoController::class, 'contacto'])->name('contacto');
 Route::get('/productos',                [UsoExternoController::class, 'indexTodos'])->name('productos.todos');
 Route::get('/productos/categoria/{id}', [UsoExternoController::class, 'indexCategoria'])->name('productos.categoria');

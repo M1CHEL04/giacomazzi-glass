@@ -16,14 +16,16 @@
 
 </head>
 
-<body class="internal-body d-flex flex-column min-vh-100">
+<body class="internal-body auth-body d-flex flex-column min-vh-100">
     @include('layouts.partials.toast')
     <main class="flex-grow-1 d-flex align-items-center py-5">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-8 col-lg-5">
-                    <div class="card border-0 shadow-sm rounded-4 h-100">
-                        <div class="card-body p-4 p-lg-5">
+                    <div class="auth-card">
+                        <div class="p-4 p-lg-5">
+                            <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="auth-logo">
+                            <hr class="auth-divider">
                             <div class="mb-4">
                                 <h1 class="h4 fw-bold text-success mb-1">Cambiar contraseña</h1>
                                 <p class="text-secondary mb-0">Actualiza tu acceso con una clave segura.</p>
@@ -100,7 +102,7 @@
         <div class="container py-3">
             <div class="internal-footer-bottom border-0 p-0">
                 <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
-                    <span>© {{ date('Y') }} Giacomazzi Glass</span>
+                    <span>© {{ date('Y') }} Aberturas Giacomazzi</span>
                     <span>Interfaz interna para gestión administrativa</span>
                 </div>
             </div>

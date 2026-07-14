@@ -5,7 +5,7 @@ $formAction = $isEdit
 ? route('uso-interno.productos.update', $producto)
 : route('uso-interno.productos.store');
 @endphp
-@section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto - Panel interno - Giacomazzi Glass')
+@section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto - Panel interno - Aberturas Giacomazzi')
 @section('page-title', $isEdit ? 'Editar producto' : 'Crear producto')
 @section('subhead', $isEdit ? 'Modificá los datos del producto' : 'Agrega un nuevo producto al sistema')
 

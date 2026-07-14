@@ -4,7 +4,7 @@ $isEdit = isset($categoria);
 $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : route('uso-interno.categorias.store');
 @endphp
 
-@section('title', 'Panel Interno - Giacomazzi Glass')
+@section('title', 'Panel Interno - Aberturas Giacomazzi')
 @section('page-title', $isEdit ? 'Editar categoria' : 'Crear categoria')
 @section('subhead', 'Completa el nombre para registrar la categoria.')
 

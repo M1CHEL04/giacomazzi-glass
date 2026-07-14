@@ -1,5 +1,5 @@
 @extends('layouts.app-interno')
-@section('title', $producto->nombre . ' · Panel interno · Giacomazzi Glass')
+@section('title', $producto->nombre . ' · Panel interno · Aberturas Giacomazzi')
 @section('page-title', $producto->nombre)
 @section('subhead', 'Detalle del producto · ' . ($producto->categoria?->nombre ?? 'Sin categoría'))
 

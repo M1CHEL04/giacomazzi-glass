@@ -5,7 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Giacomazzi Glass'))</title>
+    <title>@yield('title', config('app.name', 'Aberturas Giacomazzi'))</title>
+
+    <link rel="icon" href="{{ versioned_asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="alternate icon" href="{{ versioned_asset('favicon.svg') }}">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -27,55 +30,58 @@
             <div class="container external-nav-container">
 
                 {{-- Logo --}}
-                <a class="navbar-brand external-logo" href="{{ route('welcome') }}" aria-label="Logo de la marca">
-                    LOGO
+                <a class="navbar-brand external-logo" href="{{ route('welcome') }}" aria-label="Inicio - Aberturas Giacomazzi">
+                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-logo-img">
                 </a>
 
-                {{-- ── Desktop nav (oculto en mobile) ──────────────────────── --}}
-                <div class="d-none d-lg-flex flex-grow-1 align-items-center">
-                    <ul class="navbar-nav mx-auto external-menu gap-2">
-                        <li class="nav-item">
-                            <a class="nav-link external-menu-btn {{ request()->routeIs('welcome') ? 'active' : '' }}"
-                                href="{{ route('welcome') }}">Inicio</a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link external-menu-btn dropdown-toggle {{ request()->routeIs('productos.*') ? 'active' : '' }}"
-                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Productos
-                            </a>
-                            <ul class="dropdown-menu external-dropdown-menu">
-                                @if(!empty($categoriasMenu))
-                                @foreach($categoriasMenu as $categoria)
-                                <li>
-                                    <a class="dropdown-item external-dropdown-item {{ request()->routeIs('productos.categoria') && request()->route('id') == $categoria['id'] ? 'active' : '' }}"
-                                        href="{{ route('productos.categoria', $categoria['id']) }}">
-                                        {{ $categoria['nombre'] }}
-                                    </a>
-                                </li>
-                                @endforeach
-                                <li><hr class="dropdown-divider"></li>
-                                @endif
-                                <li>
-                                    <a class="dropdown-item external-dropdown-item fw-semibold {{ request()->routeIs('productos.todos') ? 'active' : '' }}"
-                                        href="{{ route('productos.todos') }}">
-                                        Ver todos los productos
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link external-menu-btn {{ request()->routeIs('contacto') ? 'active' : '' }}"
-                                href="{{ route('contacto') }}">Contacto</a>
-                        </li>
-                    </ul>
-
-                    <div class="external-cart-wrapper d-flex">
-                        <a href="#" class="external-cart-link" aria-label="Carrito de compras"
-                            data-bs-toggle="offcanvas" data-bs-target="#carritoOffcanvas">
-                            <x-heroicon-o-shopping-cart />
-                            <span class="cart-badge" style="display:none;">0</span>
+                {{-- ── Menú desktop (columna central del grid) ──────────────── --}}
+                <ul class="navbar-nav external-menu gap-2 d-none d-lg-flex">
+                    <li class="nav-item">
+                        <a class="nav-link external-menu-btn {{ request()->routeIs('welcome') ? 'active' : '' }}"
+                            href="{{ route('welcome') }}">Inicio</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link external-menu-btn dropdown-toggle {{ request()->routeIs('productos.*') ? 'active' : '' }}"
+                            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Productos
                         </a>
-                    </div>
+                        <ul class="dropdown-menu external-dropdown-menu">
+                            @if(!empty($categoriasMenu))
+                            @foreach($categoriasMenu as $categoria)
+                            <li>
+                                <a class="dropdown-item external-dropdown-item {{ request()->routeIs('productos.categoria') && request()->route('id') == $categoria['id'] ? 'active' : '' }}"
+                                    href="{{ route('productos.categoria', $categoria['id']) }}">
+                                    {{ $categoria['nombre'] }}
+                                </a>
+                            </li>
+                            @endforeach
+                            <li><hr class="dropdown-divider"></li>
+                            @endif
+                            <li>
+                                <a class="dropdown-item external-dropdown-item fw-semibold {{ request()->routeIs('productos.todos') ? 'active' : '' }}"
+                                    href="{{ route('productos.todos') }}">
+                                    Ver todos los productos
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link external-menu-btn {{ request()->routeIs('nosotros') ? 'active' : '' }}"
+                            href="{{ route('nosotros') }}">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link external-menu-btn {{ request()->routeIs('contacto') ? 'active' : '' }}"
+                            href="{{ route('contacto') }}">Contacto</a>
+                    </li>
+                </ul>
+
+                {{-- ── Carrito desktop (columna derecha del grid) ───────────── --}}
+                <div class="external-cart-wrapper d-none d-lg-flex">
+                    <a href="#" class="external-cart-link" aria-label="Carrito de compras"
+                        data-bs-toggle="offcanvas" data-bs-target="#carritoOffcanvas">
+                        <x-heroicon-o-shopping-cart />
+                        <span class="cart-badge" style="display:none;">0</span>
+                    </a>
                 </div>
 
                 {{-- ── Mobile controls (ocultos en desktop) ────────────────── --}}
@@ -105,7 +111,9 @@
 
             {{-- Header del drawer --}}
             <div class="mobile-drawer-header">
-                <a href="{{ route('welcome') }}" class="mobile-drawer-logo" aria-label="Inicio">LOGO</a>
+                <a href="{{ route('welcome') }}" class="mobile-drawer-logo" aria-label="Inicio">
+                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="mobile-drawer-logo-img">
+                </a>
                 <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Cerrar menú">
                     <i class="bi bi-x-lg"></i>
                 </button>
@@ -139,6 +147,7 @@
                     </div>
                 </div>
 
+                <a href="{{ route('nosotros') }}" class="mobile-nav-link">Nosotros</a>
                 <a href="{{ route('contacto') }}" class="mobile-nav-link">Contacto</a>
             </nav>
 
@@ -157,45 +166,45 @@
         @yield('content')
     </main>
 
-    <footer class="external-footer mt-auto py-4">
-        <div class="container">
-            <div class="row align-items-center gy-4">
-                <div class="col-12 col-lg-4">
-                    <h6 class="external-footer-title mb-3">Contacto</h6>
-                    <div class="external-contact-block mb-3">
-                        <strong>Fábrica</strong><br>
-                        San Juan 1978 entre Av. La Plata y Madame Curie<br>
-                        Quilmes Oeste, Buenos Aires<br>
-                        011 6445-7059
-                    </div>
-                    <div class="external-contact-block">
-                        <strong>Local al público</strong><br>
-                        Au Dr. Ricardo Balbín Km 30 - Local 03B<br>
-                        Guillermo Enrique Hudson, Buenos Aires<br>
-                        011 9268-3417
-                    </div>
-                </div>
+    <footer class="external-footer mt-auto">
+        @php
+            $footerWa = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
+        @endphp
+        <div class="container external-footer-inner">
+            <a href="{{ route('welcome') }}" class="external-footer-logo" aria-label="Aberturas Giacomazzi">
+                <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-footer-logo-img">
+            </a>
 
-                <div class="col-12 col-lg-4 text-center">
-                    <div class="external-footer-logo mx-auto" aria-label="Logo en footer">LOGO</div>
-                </div>
+            <nav class="external-footer-social" aria-label="Redes sociales">
+                <a href="{{ $footerWa ? 'https://wa.me/' . $footerWa : '#' }}"
+                    @if($footerWa) target="_blank" rel="noopener" @endif aria-label="WhatsApp">
+                    <i class="bi bi-whatsapp"></i>
+                </a>
+                <a href="https://www.instagram.com/giacomazzi_srl/" target="_blank" rel="noopener" aria-label="Instagram">
+                    <i class="bi bi-instagram"></i>
+                </a>
+            </nav>
 
-                <div class="col-12 col-lg-4 d-flex justify-content-lg-end justify-content-center align-items-center gap-3">
-                    <a href="#" class="external-social-link" aria-label="WhatsApp">
-                        <i class="bi bi-whatsapp"></i>
-                    </a>
-                    <a href="https://www.instagram.com/giacomazzi_srl/" target="_blank"
-                        class="external-social-link" aria-label="Instagram">
-                        <i class="bi bi-instagram"></i>
-                    </a>
-                </div>
+            <div class="external-footer-locations">
+                <address class="external-footer-loc">
+                    <span class="external-footer-loc-label">Fábrica</span>
+                    <span class="external-footer-loc-addr">San Juan 1978, Quilmes Oeste</span>
+                    <a href="tel:+541164457059" class="external-footer-loc-phone">011 6445-7059</a>
+                </address>
+                <address class="external-footer-loc">
+                    <span class="external-footer-loc-label">Local al público</span>
+                    <span class="external-footer-loc-addr">Au Dr. Ricardo Balbín Km 30, G. E. Hudson</span>
+                    <a href="tel:+541192683417" class="external-footer-loc-phone">011 9268-3417</a>
+                </address>
             </div>
+
+            <p class="external-footer-copy">© {{ date('Y') }} Aberturas Giacomazzi</p>
         </div>
     </footer>
 
     @include('layouts.partials.carrito')
 
-    @if(request()->routeIs('welcome', 'productos.todos', 'productos.categoria'))
+    @if(request()->routeIs('welcome', 'nosotros', 'productos.todos', 'productos.categoria'))
         @include('layouts.partials.whatsapp-float')
     @endif
 

@@ -15,6 +15,45 @@
     color: var(--internal-secondary);
 }
 
+/* ===== Vistas de autenticación (login / recuperar / cambiar contraseña) ===== */
+/* Fondo tenue para que la card blanca resalte */
+.auth-body {
+    background: #eaf1ed;
+}
+
+.auth-card {
+    background: var(--internal-white);
+    border: 1px solid var(--internal-border);
+    border-radius: 1.25rem;
+    box-shadow: 0 14px 36px rgba(27, 45, 33, 0.1);
+}
+
+/* Línea debajo del logo */
+.auth-divider {
+    height: 1px;
+    border: 0;
+    background: var(--internal-border);
+    opacity: 1;
+    margin: 1.15rem 0 1.6rem;
+}
+
+/* Inputs con más contraste dentro de la card blanca */
+.auth-card .form-control {
+    background-color: #f2f5f3;
+    border-color: rgba(63, 63, 63, 0.16);
+}
+
+.auth-card .form-control:focus {
+    background-color: var(--internal-white);
+    border-color: var(--internal-primary);
+    box-shadow: 0 0 0 0.2rem rgba(40, 116, 82, 0.12);
+}
+
+.auth-card .input-group .password-toggle {
+    background-color: #f2f5f3;
+    border-color: rgba(63, 63, 63, 0.16);
+}
+
 .internal-shell {
     min-height: 100vh;
 }
@@ -39,6 +78,7 @@
     color: var(--internal-secondary);
 }
 
+/* Badge de ícono verde (reutilizado en la página de perfil) */
 .internal-brand-mark {
     width: 42px;
     height: 42px;
@@ -52,23 +92,24 @@
     flex: 0 0 auto;
 }
 
-.internal-brand-text {
-    line-height: 1.05;
+.internal-brand-logo {
+    /* Ancho = columna del sidebar (170px): el borde derecho calza con la línea gris */
+    width: 170px;
+    max-width: 45vw;
+    height: auto;
+    display: block;
+    flex: 0 0 auto;
 }
 
-.internal-brand-name {
-    display: block;
-    font-size: 0.95rem;
-    color: var(--internal-secondary);
-}
-
-.internal-brand-subtitle {
-    display: block;
+.internal-brand-badge {
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--internal-border);
     font-size: 0.72rem;
-    color: var(--internal-primary);
     font-weight: 600;
+    color: var(--internal-primary);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    white-space: nowrap;
 }
 
 .internal-user-chip {

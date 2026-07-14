@@ -1,5 +1,5 @@
 @extends('layouts.app-interno')
-@section('title', 'Panel Interno - Giacomazzi Glass')
+@section('title', 'Panel Interno - Aberturas Giacomazzi')
 @section('page-title', 'Categorias')
 @section('subhead', 'En esta sección podras crear y gestionar las categorias disponibles')
 @section('content')

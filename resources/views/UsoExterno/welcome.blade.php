@@ -1,140 +1,131 @@
 @extends('layouts.app-externo')
-@section('title', 'Giacomazzi Glass - Aberturas de Aluminio')
+@section('title', 'Aberturas Giacomazzi - Aluminio y PVC')
+
+@section('css')
+<link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
+@endsection
 
 @section('content')
-<!-- Hero Section -->
-<section class="hero-section">
-    <img src="{{ asset('images/homehero.jpg') }}" alt="Giacomazzi Glass" class="hero-section-bg">
-    <div class="hero-overlay"></div>
-    <div class="container hero-content">
-        <div class="row align-items-center min-vh-75">
+@php
+$waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
+$waMedida = '¡Hola! tengo un proyecto y quiero cotizarlo con ustedes.';
+$waHref = $waNumero
+? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMedida)
+: route('contacto');
+@endphp
+
+{{-- ── HERO ─────────────────────────────────────────────────────────── --}}
+<section class="home-hero">
+    <img src="{{ asset('images/homehero.jpg') }}" alt="Aberturas Giacomazzi" class="home-hero-bg">
+    <div class="home-hero-scrim"></div>
+    <div class="container home-hero-content">
+        <h1 class="home-hero-title">Diseño y solidez<br>en cada abertura</h1>
+        <h2 class="home-hero-subtitle">Aluminio y PVC de precisión</h2>
+        <p class="home-hero-text">
+            Más de 30 años fabricando aberturas de aluminio y PVC para hogares y obras,
+            con la calidad y el respaldo que tu proyecto merece.
+        </p>
+    </div>
+</section>
+
+{{-- ── NOSOTROS (mini) ──────────────────────────────────────────────── --}}
+<section class="home-about">
+    <div class="container">
+        <div class="row align-items-center g-5">
             <div class="col-lg-7">
-                <h1 class="hero-title">Aberturas de Aluminio<br><span class="hero-highlight">Calidad & Diseño</span></h1>
-                <p class="hero-subtitle">Productos estándar de alta calidad listos para tu proyecto. Fabricación local con garantía.</p>
-                <div class="hero-buttons">
-                    <a href="#productos" class="btn-hero-primary">Ver productos</a>
+                <div class="home-about-text">
+                    <span class="home-eyebrow">Sobre nosotros</span>
+                    <p class="home-about-lead">
+                        En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de aberturas
+                        de PVC y aluminio, ofreciendo soluciones funcionales, duraderas y de calidad para
+                        todo tipo de proyectos.
+                    </p>
+                    <a href="{{ route('nosotros') }}" class="home-about-link">
+                        Leer más <x-heroicon-o-arrow-right />
+                    </a>
                 </div>
+            </div>
+            <div class="col-lg-5">
+                <img src="{{ asset('images/heros/mampara.png') }}" alt="Trabajos de Aberturas Giacomazzi"
+                    class="home-about-media">
             </div>
         </div>
     </div>
 </section>
 
-<!-- Características -->
-<section class="features-section">
+{{-- ── PRODUCTOS ────────────────────────────────────────────────────── --}}
+<section class="home-products" id="productos">
     <div class="container">
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-                    <h3 class="feature-title">Productos estándar</h3>
-                    <p class="feature-text">Medidas estandarizadas de alta calidad, listas para entrega inmediata.</p>
-                </div>
+        <div class="home-products-head">
+            <div>
+                <span class="home-eyebrow">Nuestros productos</span>
+                <h2 class="home-products-title">Modelos estándar, listos para tu proyecto</h2>
             </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="bi bi-tools"></i>
-                    </div>
-                    <h3 class="feature-title">Fabricación local</h3>
-                    <p class="feature-text">Producidos en nuestras instalaciones con materiales de primera calidad.</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="bi bi-award"></i>
-                    </div>
-                    <h3 class="feature-title">Garantía asegurada</h3>
-                    <p class="feature-text">Respaldamos nuestros productos con garantía de fábrica.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Productos Destacados -->
-<section class="products-section" id="productos">
-    <div class="container">
-        <div class="section-header text-center">
-            <h2 class="section-title">Productos estándar</h2>
-            <p class="section-subtitle">Seleccioná por categoría y elegí el producto perfecto para tu proyecto</p>
+            <p class="home-products-intro">
+                Todos los productos disponibles en el sistema se ofrecen en medidas estándar para garantizar una producción eficiente y plazos de entrega confiables.
+            </p>
         </div>
 
-        @if(isset($categoriasMenu) && $categoriasMenu->count() > 0)
-        <div class="row g-4">
-            @foreach($categoriasMenu->take(6) as $categoria)
-            <div class="col-md-6 col-lg-4">
-                <div class="product-category-card">
-                    <div class="product-category-image">
-                        <div class="product-category-placeholder">
-                            <i class="bi bi-window"></i>
-                            <span>{{ $categoria->nombre }}</span>
-                        </div>
+        @if($categorias->isNotEmpty())
+        <div class="home-carousel" data-carousel data-per-desktop="4" data-per-tablet="3" data-per-mobile="2">
+            <div class="home-carousel-viewport" data-carousel-viewport>
+                <div class="home-carousel-track" data-carousel-track>
+                    @foreach($categorias as $categoria)
+                    <div class="home-carousel-slide">
+                        <a href="{{ route('productos.categoria', $categoria->id) }}" class="home-product-card">
+                            <div class="home-product-thumb">
+                                @if($categoria->imagen_hero)
+                                <img src="{{ asset($categoria->imagen_hero) }}" alt="{{ $categoria->nombre }}"
+                                    class="home-product-img" loading="lazy">
+                                @else
+                                <span class="home-product-icon"><x-heroicon-o-squares-2x2 /></span>
+                                @endif
+                                <span class="home-product-scrim"></span>
+                                <span class="home-product-label">{{ $categoria->nombre }}</span>
+                            </div>
+                        </a>
                     </div>
-                    <div class="product-category-content">
-                        <h3 class="product-category-title">{{ $categoria->nombre }}</h3>
-                        <p class="product-category-count">{{ $categoria->productos_count ?? 0 }} productos disponibles</p>
-                        <a href="{{ route('productos.categoria', $categoria->id) }}" class="product-category-link">Ver productos <i class="bi bi-arrow-right"></i></a>
-                    </div>
+                    @endforeach
                 </div>
             </div>
-            @endforeach
+
+            <div class="home-carousel-controls">
+                <button class="home-carousel-arrow" type="button"
+                    data-carousel-prev aria-label="Categorías anteriores">
+                    <x-heroicon-o-chevron-left />
+                </button>
+                <div class="home-carousel-dots" data-carousel-dots></div>
+                <button class="home-carousel-arrow" type="button"
+                    data-carousel-next aria-label="Categorías siguientes">
+                    <x-heroicon-o-chevron-right />
+                </button>
+            </div>
         </div>
         @else
-        <div class="text-center py-5">
-            <p class="text-muted">No hay categorías disponibles en este momento.</p>
-        </div>
+        <p class="text-center text-muted py-4 mb-0">No hay categorías disponibles en este momento.</p>
         @endif
 
-        <div class="text-center mt-5">
-            <a href="#" class="btn-view-all">Ver todas las categorías</a>
+        {{-- CTA medida a medida (fuera del sistema, por WhatsApp) --}}
+        <div class="home-medida">
+            <div class="home-medida-icon">
+                <x-heroicon-o-wrench-screwdriver />
+            </div>
+            <div class="home-medida-body">
+                <h3 class="home-medida-title">¿Necesitás una medida personalizada?</h3>
+                <p class="home-medida-text">
+                    Los productos del sistema son de medida estándar. Si tu proyecto requiere medidas
+                    personalizadas, cotizalo directamente con nuestro equipo.
+                </p>
+            </div>
+            <a href="{{ $waHref }}" class="home-medida-btn" @if($waNumero) target="_blank" rel="noopener" @endif>
+                <x-heroicon-o-chat-bubble-left-right />
+                Cotizar medida personalizada
+            </a>
         </div>
     </div>
 </section>
+@endsection
 
-<!-- Productos a Medida -->
-<section class="custom-section" id="medida">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-4 mb-lg-0">
-                <div class="custom-image">
-                    <div class="custom-image-placeholder">
-                        <i class="bi bi-gear-fill"></i>
-                        <span>Productos a medida</span>
-                    </div>
-
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="custom-content">
-                    <h2 class="custom-title">¿Necesitás algo a medida?</h2>
-                    <p class="custom-text">Si nuestros productos estándar no se ajustan a tus necesidades, podemos fabricar aberturas personalizadas según tus especificaciones exactas.</p>
-                    <ul class="custom-list">
-                        <li><i class="bi bi-check2"></i> Diseño personalizado según tus medidas</li>
-                        <li><i class="bi bi-check2"></i> Asesoramiento técnico profesional</li>
-                        <li><i class="bi bi-check2"></i> Presupuesto sin compromiso</li>
-                        <li><i class="bi bi-check2"></i> Instalación disponible</li>
-                    </ul>
-                    <a href="{{ route('contacto') }}" class="btn-custom-contact">Solicitar Presupuesto</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- CTA Final -->
-<section class="cta-section">
-    <div class="container">
-        <div class="cta-card">
-            <h2 class="cta-title">¿Listo para tu proyecto?</h2>
-            <p class="cta-text">Explorá nuestro catálogo de productos estándar o contactános para una solución personalizada</p>
-            <div class="cta-buttons">
-                <a href="#productos" class="btn-cta-primary">Ver Catálogo</a>
-                <a href="{{ route('contacto') }}" class="btn-cta-secondary">Contacto</a>
-            </div>
-        </div>
-    </div>
-</section>
+@section('script')
+<script src="{{ versioned_asset('js/modules/carousel.js') }}"></script>
 @endsection

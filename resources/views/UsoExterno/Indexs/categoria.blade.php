@@ -1,6 +1,6 @@
 @extends('layouts.app-externo')
 
-@section('title', $categoria->nombre . ' - Giacomazzi Glass')
+@section('title', $categoria->nombre . ' - Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">

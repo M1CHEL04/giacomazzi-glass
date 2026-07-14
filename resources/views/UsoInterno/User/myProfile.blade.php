@@ -1,5 +1,5 @@
 @extends('layouts.app-interno')
-@section('title', 'Mi Perfil - Giacomazzi Glass')
+@section('title', 'Mi Perfil - Aberturas Giacomazzi')
 @section('page-title', 'Mi perfil')
 @section('subhead', 'Gestiona tu información personal')
 @section('content')
@@ -29,7 +29,7 @@ $userInitial = mb_substr($userName, 0, 1);
                     <div class="form-control bg-light">{{ $fullName }}</div>
                 </div>
                 <div class="col-12 col-md-6">
-                    <label class="form-label fw-semibold">Correo electronico</label>
+                    <label class="form-label fw-semibold">Correo electrónico</label>
                     <div class="form-control bg-light">{{ $userEmail }}</div>
                 </div>
             </div>
@@ -55,7 +55,7 @@ $userInitial = mb_substr($userName, 0, 1);
                 </div>
                 <div>
                     <div class="fw-semibold">Recomendación</div>
-                    <div class="text-secondary small">Usa una contraseña unica y segura.</div>
+                    <div class="text-secondary small">Usa una contraseña única y segura.</div>
                 </div>
             </div>
         </div>
