@@ -1,5 +1,5 @@
 @extends('layouts.app-externo')
-@section('title', 'Aberturas Giacomazzi - Aluminio y PVC')
+@section('title', 'Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
