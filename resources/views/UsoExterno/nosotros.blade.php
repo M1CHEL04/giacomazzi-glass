@@ -7,11 +7,11 @@
 
 @section('content')
 @php
-    $waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
-    $waMedida = '¡Hola! Quería cotizar un proyecto a medida.';
-    $waHref   = $waNumero
-        ? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMedida)
-        : route('contacto');
+$waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
+$waMedida = '¡Hola! Quería cotizar un proyecto a medida.';
+$waHref = $waNumero
+? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMedida)
+: route('contacto');
 @endphp
 
 {{-- ── Header de página ─────────────────────────────────────────────── --}}
@@ -65,16 +65,16 @@
 <section class="about-projects">
     <div class="container">
         @php
-            // Las imágenes se definen más adelante: completar 'imagen' con la ruta
-            // (ej. 'images/proyectos/edificio.jpg') y aparecerá en lugar del placeholder.
-            $proyectos = [
-                ['nombre' => 'Edificio residencial', 'imagen' => null],
-                ['nombre' => 'Casa particular',      'imagen' => null],
-                ['nombre' => 'Local comercial',      'imagen' => null],
-                ['nombre' => 'Cerramiento de balcón','imagen' => null],
-                ['nombre' => 'Fachada vidriada',     'imagen' => null],
-                ['nombre' => 'Obra a medida',        'imagen' => null],
-            ];
+        // Las imágenes se definen más adelante: completar 'imagen' con la ruta
+        // (ej. 'images/proyectos/edificio.jpg') y aparecerá en lugar del placeholder.
+        $proyectos = [
+        ['nombre' => 'Edificio residencial', 'imagen' => null],
+        ['nombre' => 'Casa particular', 'imagen' => null],
+        ['nombre' => 'Local comercial', 'imagen' => null],
+        ['nombre' => 'Cerramiento de balcón','imagen' => null],
+        ['nombre' => 'Fachada vidriada', 'imagen' => null],
+        ['nombre' => 'Obra a medida', 'imagen' => null],
+        ];
         @endphp
 
         <span class="about-eyebrow">Proyectos realizados</span>
@@ -124,8 +124,7 @@
                 <div class="about-cta-card about-cta-card--primary">
                     <h3 class="about-cta-card-title">Productos estándar</h3>
                     <p class="about-cta-card-text">
-                        Explorá el catálogo de ventanas y puertas en medidas estándar, listas para cargar
-                        en tu pedido dentro del sistema.
+                        Explorá nuestro catálogo de productos estándar. Agrega lo que necesitás al carrito y solicitá tu presupuesto.
                     </p>
                     <a href="{{ route('productos.todos') }}" class="about-cta-link">
                         Ver productos <x-heroicon-o-arrow-right />
@@ -134,10 +133,9 @@
             </div>
             <div class="col-6">
                 <div class="about-cta-card about-cta-card--dark">
-                    <h3 class="about-cta-card-title">Proyecto a medida</h3>
+                    <h3 class="about-cta-card-title">Productos a medida</h3>
                     <p class="about-cta-card-text">
-                        ¿Tu proyecto necesita medidas personalizadas? Contanos los detalles y te armamos
-                        una cotización a medida, fuera del sistema.
+                        ¿Necesitás medidas personalizadas o cotizar un proyecto completo? Contanos qué buscás y te asesoraremos para encontrar la mejor solución.
                     </p>
                     <a href="{{ $waHref }}" class="about-cta-link" @if($waNumero) target="_blank" rel="noopener" @endif>
                         Cotizar por WhatsApp <x-heroicon-o-arrow-right />
