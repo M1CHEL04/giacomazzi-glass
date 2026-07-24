@@ -40,7 +40,7 @@ Route::post('/cambiar-contrasena-codigo',  [AccountsController::class, 'changePa
 // ── Uso Interno ───────────────────────────────────────────────────────────────
 Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group(function () {
 
-    Route::get('/panel-interno', [UsoInternoController::class, 'homeInterno'])->name('home-interno');
+    Route::get('/estadisticas', [UsoInternoController::class, 'estadisticas'])->name('estadisticas');
     Route::get('/mi-perfil',     [UsoInternoController::class, 'miPerfil'])->name('profile');
 
     // Categorías

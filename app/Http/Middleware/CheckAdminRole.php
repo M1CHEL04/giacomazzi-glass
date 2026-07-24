@@ -27,7 +27,7 @@ class CheckAdminRole
             if ($request->expectsJson()) {
                 return response()->json(['error' => 'Sin permisos'], 403);
             }
-            return redirect()->route('uso-interno.home-interno')->with('error', 'No tienes permisos para acceder a esta sección.');
+            return redirect()->route('uso-interno.estadisticas')->with('error', 'No tienes permisos para acceder a esta sección.');
         }
 
         return $next($request);

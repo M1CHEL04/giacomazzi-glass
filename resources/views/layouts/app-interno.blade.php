@@ -31,7 +31,7 @@
     <header class="internal-topbar">
         <div class="container-fluid py-3 px-3 px-xl-4">
             <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-                <a href="{{ route('uso-interno.home-interno') }}" class="internal-brand" aria-label="Inicio del panel interno">
+                <a href="{{ route('uso-interno.estadisticas') }}" class="internal-brand" aria-label="Inicio del panel interno">
                     <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="internal-brand-logo">
                     <span class="internal-brand-badge">Panel administrativo</span>
                 </a>
@@ -74,6 +74,11 @@
                 </div>
 
                 <div class="internal-sidebar-menu">
+                    <a href="{{ route('uso-interno.estadisticas') }}"
+                        class="internal-sidebar-link {{ request()->routeIs('uso-interno.estadisticas') ? 'active' : '' }}">
+                        <x-heroicon-o-chart-bar />
+                        <span>Estadísticas</span>
+                    </a>
                     <a href="{{route('uso-interno.productos.index')}}"
                         class="internal-sidebar-link {{ request()->routeIs('uso-interno.productos.*') ? 'active' : '' }}">
                         <x-heroicon-o-cube />

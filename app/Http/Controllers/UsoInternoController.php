@@ -19,7 +19,7 @@ class UsoInternoController extends Controller
 {
     public function __construct(private SkuService $skuService) {}
 
-    public function homeInterno()
+    public function estadisticas()
     {
         $totalProductos     = Producto::count();
         $productosActivos   = Producto::where('activo', true)->count();
@@ -65,7 +65,7 @@ class UsoInternoController extends Controller
         }
         $maxCotizMes = max(1, (int) $cotizacionesMensuales->max('total'));
 
-        return view('UsoInterno.index', compact(
+        return view('UsoInterno.estadisticas', compact(
             'totalProductos',
             'productosActivos',
             'productosInactivos',
