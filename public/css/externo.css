@@ -6,10 +6,21 @@
     --external-secondary-soft: #b3b2b2;
     --external-light: #e5e4e4;
     --external-white: #ffffff;
+
+    /* Neutros fríos tomados de los materiales que fabricamos:
+       aluminio anodizado, PVC y vidrio. Conviven con los grises
+       cálidos de arriba; no los reemplazan. */
+    --g-carbon: #23262a;
+    --g-vidrio: #f6f8f9;
+
+    /* Archivo y Asap: dos familias de Omnibus-Type (Buenos Aires).
+       Archivo titula y etiqueta; Asap sostiene el texto corrido. */
+    --font-display: 'Archivo', 'Segoe UI', Tahoma, sans-serif;
+    --font-body: 'Asap', 'Segoe UI', Tahoma, sans-serif;
 }
 
 .external-body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--font-body);
     background-color: var(--external-white);
     color: var(--external-secondary);
 }

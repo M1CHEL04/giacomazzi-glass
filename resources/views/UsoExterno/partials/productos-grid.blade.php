@@ -63,6 +63,16 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
     @endif
 </div>
 
+{{-- Énfasis personalización --}}
+<div class="grid-personalizar-banner">
+    <span class="grid-personalizar-icono"><i class="bi bi-stars"></i></span>
+    <p>
+        <strong>Todos nuestros productos pueden ser fabricados a medida.</strong>
+        ¿Necesitás otras medidas, colores o terminaciones?
+        <a href="{{ route('contacto') }}">Consultanos</a> y lo producimos especialmente para vos.
+    </p>
+</div>
+
 <div class="row g-4">
     @foreach($productos as $producto)
     <div class="col-6 col-xl-4">
@@ -104,16 +114,6 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
     {{ $productos->links('pagination::bootstrap-5') }}
 </nav>
 @endif
-
-{{-- Énfasis personalización --}}
-<div class="grid-personalizar-banner">
-    <span class="grid-personalizar-icono"><i class="bi bi-stars"></i></span>
-    <p>
-        <strong>Todos nuestros productos pueden ser fabricados a medida.</strong>
-        ¿Necesitás otras medidas, colores o terminaciones?
-        <a href="{{ route('contacto') }}">Consultanos</a> y lo producimos especialmente para vos.
-    </p>
-</div>
 
 @else
 
