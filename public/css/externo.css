@@ -25,6 +25,263 @@
     color: var(--external-secondary);
 }
 
+/* =====================================================================
+   PRIMITIVAS DE UI COMPARTIDAS
+   Nacieron en home.css y hoy las usan Inicio y Nosotros, así que viven
+   acá para no tener dos copias que se vayan separando con el tiempo.
+
+   Doble selector a propósito: .g-* es el nombre nuevo y .home-* queda
+   como alias mientras welcome.blade.php siga usando esas clases. Son
+   la misma regla, no una copia. Al migrar welcome a .g-*, se borran
+   los alias y nada más.
+
+   La firma de la marca es .g-cota: la línea de cota del plano de
+   taller. Acá se mide en milímetros, así que la cota informa, no
+   decora — por eso se usa poco y en lugares elegidos.
+   ===================================================================== */
+
+/* Línea de cota: |———— etiqueta ————| */
+.g-cota,
+.home-cota {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.g-cota::before,
+.g-cota::after,
+.home-cota::before,
+.home-cota::after {
+    content: '';
+    flex: 1 1 auto;
+    min-width: 1.25rem;
+    height: 7px;
+    border-left: 1px solid currentColor;
+    border-right: 1px solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat;
+    opacity: 0.55;
+}
+
+/* Cota vertical: el writing-mode gira el eje del flex, así que los
+   terminales pasan de borde lateral a borde superior/inferior. */
+.g-cota--v,
+.home-cota--v {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+}
+
+.g-cota--v::before,
+.g-cota--v::after,
+.home-cota--v::before,
+.home-cota--v::after {
+    height: auto;
+    width: 7px;
+    border-left: 0;
+    border-right: 0;
+    border-top: 1px solid currentColor;
+    border-bottom: 1px solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 1px 100% no-repeat;
+}
+
+/* Eyebrow: la misma cota, en versión corta */
+.g-eyebrow,
+.home-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0 0 0.85rem;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--external-primary);
+}
+
+.g-eyebrow::before,
+.home-eyebrow::before {
+    content: '';
+    flex: 0 0 auto;
+    width: 26px;
+    height: 7px;
+    border-left: 1px solid currentColor;
+    border-right: 1px solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat;
+}
+
+.g-eyebrow--light,
+.home-eyebrow--light {
+    color: var(--external-primary-soft);
+}
+
+/* Títulos de sección */
+.g-title,
+.home-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 5.2vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.14;
+    letter-spacing: -0.02em;
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+.g-title--light,
+.home-title--light {
+    color: var(--external-white);
+}
+
+/* Botones — 46px de alto: sigue por encima del mínimo táctil (44px)
+   sin que dos apilados se coman media pantalla. */
+.g-btn,
+.home-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 46px;
+    padding: 0.6rem 1.15rem;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease,
+                border-color 0.2s ease, transform 0.2s ease;
+}
+
+.g-btn svg,
+.g-btn .bi,
+.home-btn svg,
+.home-btn .bi {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.g-btn--primary,
+.home-btn--primary {
+    background: var(--external-primary);
+    border-color: var(--external-primary);
+    color: var(--external-white);
+}
+
+.g-btn--primary:hover,
+.g-btn--primary:focus,
+.home-btn--primary:hover,
+.home-btn--primary:focus {
+    background: var(--external-primary-dark);
+    border-color: var(--external-primary-dark);
+    color: var(--external-white);
+}
+
+.g-btn--ghost,
+.home-btn--ghost {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.5);
+    color: var(--external-white);
+}
+
+.g-btn--ghost:hover,
+.g-btn--ghost:focus,
+.home-btn--ghost:hover,
+.home-btn--ghost:focus {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--external-white);
+    color: var(--external-white);
+}
+
+.g-btn--solid,
+.home-btn--solid {
+    background: var(--external-white);
+    border-color: var(--external-white);
+    color: var(--g-carbon);
+}
+
+.g-btn--solid:hover,
+.g-btn--solid:focus,
+.home-btn--solid:hover,
+.home-btn--solid:focus {
+    background: var(--external-primary-soft);
+    border-color: var(--external-primary-soft);
+    color: var(--g-carbon);
+}
+
+.g-btn:active,
+.home-btn:active {
+    transform: translateY(1px);
+}
+
+/* Link de texto con flecha */
+.g-link,
+.home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    color: var(--external-primary);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.g-link:hover,
+.g-link:focus,
+.home-link:hover,
+.home-link:focus {
+    color: var(--external-primary-dark);
+    gap: 0.75rem;
+    text-decoration: underline;
+    text-underline-offset: 5px;
+}
+
+.g-link svg,
+.home-link svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+}
+
+/* Foco visible y consistente en todo lo accionable */
+.g-btn:focus-visible,
+.g-link:focus-visible,
+.home-btn:focus-visible,
+.home-link:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: 3px;
+}
+
+.g-btn--ghost:focus-visible,
+.g-btn--solid:focus-visible,
+.home-btn--ghost:focus-visible,
+.home-btn--solid:focus-visible {
+    outline-color: var(--external-white);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .g-btn,
+    .g-link,
+    .home-btn,
+    .home-link {
+        transition: none;
+    }
+}
+
 .external-navbar {
     background: #dbdad9;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);

@@ -26,11 +26,6 @@ class UsoExternoController extends Controller
         return view('UsoExterno.nosotros');
     }
 
-    public function contacto()
-    {
-        return view('UsoExterno.contacto');
-    }
-
     public function indexTodos(Request $request)
     {
         try {

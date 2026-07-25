@@ -13,7 +13,10 @@ Route::get('/imagen/{imagenProducto}', [ImagenController::class, 'show'])->name(
 // ── Uso Externo ──────────────────────────────────────────────────────────────
 Route::get('/',         [UsoExternoController::class, 'welcome'])->name('welcome');
 Route::get('/nosotros', [UsoExternoController::class, 'nosotros'])->name('nosotros');
-Route::get('/contacto', [UsoExternoController::class, 'contacto'])->name('contacto');
+// Contacto se unificó dentro de Nosotros. La ruta sobrevive como redirect
+// porque route('contacto') se usa en varias vistas y en links ya publicados;
+// el ancla deja al visitante justo en el mapa y las direcciones.
+Route::redirect('/contacto', '/nosotros#donde-estamos')->name('contacto');
 Route::get('/productos',                [UsoExternoController::class, 'indexTodos'])->name('productos.todos');
 Route::get('/productos/categoria/{id}', [UsoExternoController::class, 'indexCategoria'])->name('productos.categoria');
 Route::get('/productos/{id}',           [UsoExternoController::class, 'showProducto'])->whereNumber('id')->name('productos.show');

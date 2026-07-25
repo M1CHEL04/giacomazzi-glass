@@ -74,10 +74,9 @@
                         <a class="nav-link external-menu-btn {{ request()->routeIs('nosotros') ? 'active' : '' }}"
                             href="{{ route('nosotros') }}">Nosotros</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link external-menu-btn {{ request()->routeIs('contacto') ? 'active' : '' }}"
-                            href="{{ route('contacto') }}">Contacto</a>
-                    </li>
+                    {{-- Contacto se unificó dentro de Nosotros: una sola entrada
+                         para una sola página. La ruta /contacto sigue viva como
+                         redirect para los links ya publicados. --}}
                 </ul>
 
                 {{-- ── Carrito desktop (columna derecha del grid) ───────────── --}}
@@ -153,7 +152,6 @@
                 </div>
 
                 <a href="{{ route('nosotros') }}" class="mobile-nav-link">Nosotros</a>
-                <a href="{{ route('contacto') }}" class="mobile-nav-link">Contacto</a>
             </nav>
 
             {{-- Footer del drawer — CTA carrito --}}

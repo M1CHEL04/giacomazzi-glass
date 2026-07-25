@@ -2,151 +2,354 @@
 @section('title', 'Nosotros - Aberturas Giacomazzi')
 
 @section('css')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="{{ versioned_asset('css/nosotros.css') }}">
 @endsection
 
 @section('content')
 @php
 $waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
-$waMedida = '¡Hola! Quería cotizar un proyecto a medida.';
-$waHref = $waNumero
-? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMedida)
-: route('contacto');
+$waMensaje = '¡Hola! Quiero hacerles una consulta.';
+$waHref = $waNumero ? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMensaje) : null;
+
+// Sedes: alimentan tanto la lista como los marcadores del mapa
+$sedes = [
+[
+'key' => 'fabrica',
+'tipo' => 'Fábrica',
+'tag' => 'Producción',
+'direccion' => 'San Juan 1978 entre Av. La Plata y Madame Curie',
+'localidad' => 'Quilmes Oeste, Buenos Aires',
+'horarios' => 'Lun a Vie: 8:00 - 17:00',
+'telefono_label' => '011 6445-7059',
+'telefono_tel' => '01164457059',
+'lat' => -34.7277121,
+'lng' => -58.2851433,
+],
+[
+'key' => 'local',
+'tipo' => 'Local al público',
+'tag' => 'Atención y showroom',
+'direccion' => 'Au Dr. Ricardo Balbín Km 30 - Local 03B',
+'localidad' => 'Guillermo Enrique Hudson, Buenos Aires',
+'horarios' => 'Lun a Vie: 10:00 - 19:00',
+'telefono_label' => '011 9268-3417',
+'telefono_tel' => '01192683417',
+'lat' => -34.7763988,
+'lng' => -58.1634747,
+],
+];
+
+// Versión reducida para el JS del mapa
+$sedesMapa = array_map(fn($s) => [
+'key' => $s['key'],
+'tipo' => $s['tipo'],
+'direccion' => $s['direccion'],
+'localidad' => $s['localidad'],
+'telLabel' => $s['telefono_label'],
+'telTel' => $s['telefono_tel'],
+'lat' => $s['lat'],
+'lng' => $s['lng'],
+], $sedes);
+
+// Obras: cargá 'imagen' con la ruta (ej. 'images/obras/edificio.jpg') y
+// la obra aparece sola. Sin fotos cargadas la sección no se muestra:
+// seis recuadros vacíos comunican menos que no tener la sección.
+$obras = [
+['nombre' => 'Edificio residencial', 'imagen' => null],
+['nombre' => 'Casa particular', 'imagen' => null],
+['nombre' => 'Local comercial', 'imagen' => null],
+['nombre' => 'Cerramiento de balcón', 'imagen' => null],
+['nombre' => 'Fachada vidriada', 'imagen' => null],
+['nombre' => 'Obra a medida', 'imagen' => null],
+];
+$obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 @endphp
 
-{{-- ── Header de página ─────────────────────────────────────────────── --}}
-<section class="about-header">
-    <img src="{{ asset('images/homehero.jpg') }}" alt="Aberturas Giacomazzi" class="about-header-bg">
-    <div class="about-header-scrim"></div>
-    <div class="container about-header-content">
-        <h1 class="about-header-title">Nosotros</h1>
-        <p class="about-header-sub">Quiénes somos y cómo trabajamos</p>
+{{-- ── HERO ─────────────────────────────────────────────────────────── --}}
+{{-- Encabezado de sección, igual que el de los index de productos:
+     rótulo arriba, nombre de la sección grande y qué vas a encontrar. --}}
+<section class="about-hero">
+    <img src="{{ asset('images/homehero.jpg') }}" alt="" class="about-hero-bg" aria-hidden="true">
+    <span class="about-hero-scrim"></span>
+    <div class="container about-hero-inner">
+        <p class="about-hero-eyebrow">Aberturas Giacomazzi</p>
+        <h1 class="about-hero-title">Nosotros</h1>
+        <p class="g-cota about-hero-cota"><span>Quiénes somos y dónde estamos</span></p>
     </div>
 </section>
 
-{{-- ── Sobre nosotros ───────────────────────────────────────────────── --}}
+{{-- ── SOBRE NOSOTROS ───────────────────────────────────────────────── --}}
+{{-- Sin título ni bajada al costado: el texto se lee de corrido, en una
+     sola columna. Partirlo era lo que ensuciaba la sección. --}}
 <section class="about-intro">
     <div class="container">
-        <div class="row g-5">
-            <div class="col-lg-4">
-                <span class="about-eyebrow">Sobre nosotros</span>
-            </div>
-            <div class="col-lg-8">
-                <p class="about-intro-lead">
-                    En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de aberturas de
-                    PVC y aluminio, ofreciendo soluciones funcionales, duraderas y de calidad para todo
-                    tipo de proyectos.
-                </p>
-                <p class="about-intro-text">
-                    Trabajamos en la fabricación de puertas, ventanas, cerramientos, espejos, mamparas,
-                    barandas, y más, adaptándonos a las necesidades de cada obra con opciones
-                    personalizadas y terminaciones cuidadas.
-                </p>
-                <p class="about-intro-text">
-                    Además, somos representantes oficiales de puertas Oblaka y
-                    equipamiento para cocinas TST, lo que nos permite ampliar nuestra oferta con
-                    productos reconocidos por su calidad y diseño.
-                </p>
-                <p class="about-intro-text">
-                    También realizamos trabajos de herrería, brindando soluciones integrales para obras
-                    particulares, comerciales y desarrollos a medida.
-                </p>
-                <p class="about-intro-text">
-                    Nuestro compromiso es acompañar cada proyecto con asesoramiento personalizado,
-                    materiales de calidad y la experiencia necesaria para garantizar resultados
-                    confiables y duraderos.
-                </p>
-            </div>
+        <p class="g-eyebrow">Sobre nosotros</p>
+
+        <div class="about-intro-body">
+            <p class="about-intro-text">
+                En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de aberturas de
+                PVC y aluminio, ofreciendo soluciones funcionales, duraderas y de calidad para todo
+                tipo de proyectos.
+            </p>
+            <p class="about-intro-text">
+                Trabajamos en la fabricación de puertas, ventanas, cerramientos, espejos, mamparas,
+                barandas, y más, adaptándonos a las necesidades de cada obra con opciones
+                personalizadas y terminaciones cuidadas.
+            </p>
+            <p class="about-intro-text">
+                Además, somos representantes oficiales de puertas Oblaka y
+                equipamiento para cocinas TST, lo que nos permite ampliar nuestra oferta con
+                productos reconocidos por su calidad y diseño.
+            </p>
+            <p class="about-intro-text">
+                También realizamos trabajos de herrería, brindando soluciones integrales para obras
+                particulares, comerciales y desarrollos a medida.
+            </p>
+            <p class="about-intro-text">
+                Nuestro compromiso es acompañar cada proyecto con asesoramiento personalizado,
+                materiales de calidad y la experiencia necesaria para garantizar resultados
+                confiables y duraderos.
+            </p>
         </div>
     </div>
 </section>
 
-{{-- ── Proyectos realizados ─────────────────────────────────────────── --}}
-<section class="about-projects">
+{{-- ── OBRAS ────────────────────────────────────────────────────────── --}}
+@if(count($obras))
+<section class="about-obras">
     <div class="container">
-        @php
-        // Las imágenes se definen más adelante: completar 'imagen' con la ruta
-        // (ej. 'images/proyectos/edificio.jpg') y aparecerá en lugar del placeholder.
-        $proyectos = [
-        ['nombre' => 'Edificio residencial', 'imagen' => null],
-        ['nombre' => 'Casa particular', 'imagen' => null],
-        ['nombre' => 'Local comercial', 'imagen' => null],
-        ['nombre' => 'Cerramiento de balcón','imagen' => null],
-        ['nombre' => 'Fachada vidriada', 'imagen' => null],
-        ['nombre' => 'Obra a medida', 'imagen' => null],
-        ];
-        @endphp
+        <div class="about-head">
+            <div>
+                <p class="g-eyebrow">Obras realizadas</p>
+                <h2 class="g-title">Dónde confiaron en nosotros</h2>
+            </div>
+        </div>
 
-        <span class="about-eyebrow">Proyectos realizados</span>
-        <h2 class="about-projects-title">Obras donde confiaron en nosotros</h2>
-
-        <div class="about-carousel" data-carousel data-per-desktop="3" data-per-tablet="2" data-per-mobile="2">
-            <div class="about-carousel-viewport" data-carousel-viewport>
-                <div class="about-carousel-track" data-carousel-track>
-                    @foreach($proyectos as $proyecto)
-                    <div class="about-carousel-slide">
-                        <div class="about-project">
-                            <div class="about-project-thumb">
-                                @if($proyecto['imagen'])
-                                <img src="{{ asset($proyecto['imagen']) }}" alt="{{ $proyecto['nombre'] }}"
-                                    class="about-project-img" loading="lazy">
-                                @else
-                                <x-heroicon-o-building-office-2 />
-                                @endif
-                            </div>
-                            <div class="about-project-name">{{ $proyecto['nombre'] }}</div>
-                        </div>
-                    </div>
-                    @endforeach
+        <div class="about-rail-wrap" data-rail>
+            <div class="about-rail" data-rail-track tabindex="0" role="group"
+                aria-label="Obras realizadas">
+                @foreach($obras as $obra)
+                <div class="about-rail-item">
+                    <figure class="about-obra">
+                        <span class="about-obra-thumb">
+                            <img src="{{ asset($obra['imagen']) }}" alt="{{ $obra['nombre'] }}"
+                                class="about-obra-img" loading="lazy">
+                        </span>
+                        <figcaption class="about-obra-name">{{ $obra['nombre'] }}</figcaption>
+                    </figure>
                 </div>
+                @endforeach
             </div>
 
-            <div class="about-carousel-controls">
-                <button class="about-carousel-arrow" type="button"
-                    data-carousel-prev aria-label="Proyectos anteriores">
+            <div class="about-rail-controls">
+                <button class="about-rail-arrow" type="button"
+                    data-rail-prev aria-label="Obras anteriores">
                     <x-heroicon-o-chevron-left />
                 </button>
-                <div class="about-carousel-dots" data-carousel-dots></div>
-                <button class="about-carousel-arrow" type="button"
-                    data-carousel-next aria-label="Proyectos siguientes">
+                <div class="about-rail-dots" data-rail-dots></div>
+                <button class="about-rail-arrow" type="button"
+                    data-rail-next aria-label="Obras siguientes">
                     <x-heroicon-o-chevron-right />
                 </button>
             </div>
         </div>
     </div>
 </section>
+@endif
 
-{{-- ── CTA dual ─────────────────────────────────────────────────────── --}}
-<section class="about-cta">
+{{-- ── DÓNDE ESTAMOS ────────────────────────────────────────────────── --}}
+{{-- Ancla #donde-estamos: es adonde llega quien hace clic en "Contacto". --}}
+<section class="about-sedes" id="donde-estamos">
     <div class="container">
-        <div class="row g-4 about-cta-row">
-            <div class="col-6">
-                <div class="about-cta-card about-cta-card--primary">
-                    <h3 class="about-cta-card-title">Productos estándar</h3>
-                    <p class="about-cta-card-text">
-                        Explorá nuestro catálogo de productos estándar. Agrega lo que necesitás al carrito y solicitá tu presupuesto.
+        <div class="about-head">
+            <p class="g-eyebrow">Sedes</p>
+            <h2 class="g-title">Dónde encontrarnos</h2>
+        </div>
+
+        {{-- Tarjetas primero y mapa completo abajo. Antes el mapa iba
+             embutido al lado de una lista dentro de un mismo recuadro y en
+             teléfono quedaba angosto y apretado; separados, cada uno usa
+             todo el ancho que necesita. --}}
+        <div class="about-sede-grid">
+            @foreach($sedes as $i => $sede)
+            <div class="about-sede {{ $i === 0 ? 'is-active' : '' }}" data-sede="{{ $sede['key'] }}">
+                <span class="about-sede-tag">{{ $sede['tag'] }}</span>
+                <h3 class="about-sede-title">{{ $sede['tipo'] }}</h3>
+
+                <div class="about-sede-meta">
+                    <p class="about-sede-row">
+                        <x-heroicon-o-map-pin />
+                        <span>{{ $sede['direccion'] }}<br>{{ $sede['localidad'] }}</span>
                     </p>
-                    <a href="{{ route('productos.todos') }}" class="about-cta-link">
-                        Ver productos <x-heroicon-o-arrow-right />
+                    <p class="about-sede-row">
+                        <x-heroicon-o-clock />
+                        <span>{{ $sede['horarios'] }}</span>
+                    </p>
+                    <p class="about-sede-row">
+                        <x-heroicon-o-phone />
+                        <a href="tel:{{ $sede['telefono_tel'] }}">{{ $sede['telefono_label'] }}</a>
+                    </p>
+                </div>
+
+                <div class="about-sede-actions">
+                    {{-- La tarjeta entera responde al clic, pero el control
+                         real es este botón: así el teclado también llega. --}}
+                    <button type="button" class="about-sede-action"
+                        data-sede-focus="{{ $sede['key'] }}"
+                        aria-pressed="{{ $i === 0 ? 'true' : 'false' }}">
+                        <x-heroicon-o-map-pin />
+                        Ver en el mapa
+                    </button>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $sede['lat'] }},{{ $sede['lng'] }}"
+                        class="about-sede-action" target="_blank" rel="noopener">
+                        <x-heroicon-o-arrow-right />
+                        Cómo llegar
                     </a>
                 </div>
             </div>
-            <div class="col-6">
-                <div class="about-cta-card about-cta-card--dark">
-                    <h3 class="about-cta-card-title">Productos a medida</h3>
-                    <p class="about-cta-card-text">
-                        ¿Necesitás medidas personalizadas o cotizar un proyecto completo? Contanos qué buscás y te asesoraremos para encontrar la mejor solución.
-                    </p>
-                    <a href="{{ $waHref }}" class="about-cta-link" @if($waNumero) target="_blank" rel="noopener" @endif>
-                        Cotizar por WhatsApp <x-heroicon-o-arrow-right />
-                    </a>
-                </div>
-            </div>
+            @endforeach
+        </div>
+
+        <div class="about-map" id="map" data-sedes="{{ json_encode($sedesMapa) }}"></div>
+    </div>
+</section>
+
+{{-- ── ESCRIBINOS ───────────────────────────────────────────────────── --}}
+<section class="about-contacto">
+    {{-- Sin foto: la única disponible era stock genérico y acá una imagen
+         prestada resta más de lo que suma. Cierre centrado y angosto,
+         como el bloque final de Inicio. --}}
+    <div class="container about-contacto-inner">
+        <p class="g-eyebrow g-eyebrow--light">Escribinos</p>
+        <h2 class="g-title g-title--light about-contacto-title">
+            ¿Necesitás asesoramiento antes de cotizar?
+        </h2>
+        <p class="about-contacto-text">
+            Contanos tu proyecto y te acompañamos en todo el proceso.
+        </p>
+        <div class="about-contacto-actions">
+            @if($waHref)
+            <a href="{{ $waHref }}" class="g-btn g-btn--solid" target="_blank" rel="noopener">
+                <i class="bi bi-whatsapp"></i> Escribir por WhatsApp
+            </a>
+            @endif
+            <a href="https://www.instagram.com/giacomazzi_srl/" class="g-btn g-btn--ghost"
+                target="_blank" rel="noopener">
+                <i class="bi bi-instagram"></i> Ver Instagram
+            </a>
         </div>
     </div>
 </section>
 @endsection
 
 @section('script')
-<script src="{{ versioned_asset('js/modules/carousel.js') }}"></script>
+@if(count($obras))
+<script src="{{ versioned_asset('js/modules/rail.js') }}"></script>
+@endif
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    (function() {
+        const mapEl = document.getElementById('map');
+        if (!mapEl) return;
+
+        const sedes = JSON.parse(mapEl.dataset.sedes);
+
+        // Centro aproximado entre las dos sedes
+        const initialZoom = window.matchMedia('(max-width: 767.98px)').matches ? 11 : 12;
+        const map = L.map(mapEl, {
+            // La rueda no hace zoom para no entorpecer el scroll de la página.
+            // Queda disponible por botones (+/-) y gesto de dos dedos.
+            scrollWheelZoom: false,
+            touchZoom: true,
+        }).setView([-34.752, -58.224], initialZoom);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19,
+            minZoom: 10
+        }).addTo(map);
+
+        const greenIcon = L.icon({
+            iconUrl: 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41"%3E%3Cpath fill="%23287452" d="M12.5 0C5.596 0 0 5.596 0 12.5c0 1.996.47 3.882 1.299 5.555L12.5 41l11.201-22.945C24.53 16.382 25 14.496 25 12.5 25 5.596 19.404 0 12.5 0z"/%3E%3Ccircle fill="%23ffffff" cx="12.5" cy="12.5" r="5"/%3E%3C/svg%3E',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+        });
+
+        const markers = {};
+        sedes.forEach(function(s) {
+            const marker = L.marker([s.lat, s.lng], {
+                icon: greenIcon
+            }).addTo(map);
+            marker.bindPopup(
+                '<div style="font-family: Asap, sans-serif; line-height: 1.45;">' +
+                '<strong style="color: #287452; font-size: 1rem;">' + s.tipo + '</strong><br>' +
+                s.direccion + '<br>' +
+                s.localidad + '<br>' +
+                '<a href="tel:' + s.telTel + '" style="color: #287452; text-decoration: none; font-weight: 600;">' + s.telLabel + '</a>' +
+                '</div>', {
+                    autoPan: false
+                }
+            );
+            marker.on('click', function() {
+                setActive(s.key, false);
+            });
+            markers[s.key] = marker;
+        });
+
+        const cards = document.querySelectorAll('.about-sede[data-sede]');
+        const focusBtns = document.querySelectorAll('[data-sede-focus]');
+
+        function setActive(key, moveMap) {
+            if (moveMap === undefined) moveMap = true;
+
+            cards.forEach(function(card) {
+                card.classList.toggle('is-active', card.dataset.sede === key);
+            });
+            focusBtns.forEach(function(btn) {
+                btn.setAttribute('aria-pressed', btn.dataset.sedeFocus === key ? 'true' : 'false');
+            });
+
+            const marker = markers[key];
+            if (!marker) return;
+
+            if (moveMap) {
+                const zoom = 15;
+                // Se sube el centro para que el popup no quede pegado al borde
+                const punto = map.project(marker.getLatLng(), zoom).subtract([0, 60]);
+                map.setView(map.unproject(punto, zoom), zoom, {
+                    animate: true
+                });
+            }
+            marker.openPopup();
+        }
+
+        cards.forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                // Los links y el botón propio actúan por su cuenta
+                if (e.target.closest('a, button')) return;
+                setActive(card.dataset.sede);
+            });
+        });
+
+        focusBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                setActive(btn.dataset.sedeFocus);
+                // El mapa quedó abajo de las tarjetas: sin esto, en teléfono
+                // el botón parecía no hacer nada porque el mapa no se veía.
+                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                mapEl.scrollIntoView({
+                    behavior: reduce ? 'auto' : 'smooth',
+                    block: 'center'
+                });
+            });
+        });
+
+        // Reajuste por si el contenedor cambia de tamaño (mobile/desktop)
+        window.addEventListener('load', function() {
+            map.invalidateSize();
+        });
+    })();
+</script>
 @endsection
