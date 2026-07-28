@@ -40,14 +40,14 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    /* La altura del hero es lo que decide cuánto se recorta la foto.
-       Con object-fit: cover en una caja angosta y alta, la imagen se
-       escala hasta cubrir el alto y el recorte termina siendo sólo
-       horizontal (object-position vertical no hace nada acá).
-       Con una foto apaisada 4:3: a 82svh se veía ~42% del ancho, a
-       62svh se ve ~56%. El piso de 440px evita que en pantallas cortas
-       el contenido quede apretado. Bajá el 62svh para ver más foto. */
-    min-height: max(440px, 62svh);
+    /* Alto casi de pantalla completa: el catálogo asoma apenas abajo,
+       lo justo para que se lea que la página sigue.
+       El recorte vertical que sirve el <picture> en mobile es 3:4, así
+       que acá el alto ya no le come ancho a la foto — cuando la caja
+       era alta y la foto apaisada, cover recortaba a los costados y por
+       eso hubo que bajarla en su momento.
+       El piso de 440px protege pantallas muy cortas. */
+    min-height: max(440px, 82svh);
     overflow: hidden;
     /* Cancela el padding-top de .external-main (1rem hasta 767.98px) */
     margin-top: -1rem;
@@ -83,7 +83,7 @@
 
 .home-hero-title {
     font-family: var(--font-display);
-    font-size: clamp(2.15rem, 9vw, 4.25rem);
+    font-size: var(--fs-hero);
     font-weight: 900;
     line-height: 1.03;
     letter-spacing: -0.035em;
@@ -99,7 +99,7 @@
 }
 
 .home-hero-text {
-    font-size: 1.02rem;
+    font-size: var(--fs-body);
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.88);
     max-width: 46ch;
@@ -129,7 +129,7 @@
 }
 
 .home-catalogo-intro {
-    font-size: 1.02rem;
+    font-size: var(--fs-body);
     line-height: 1.6;
     color: var(--external-secondary);
     max-width: 52ch;
@@ -226,7 +226,7 @@
     color: var(--external-white);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 0.98rem;
+    font-size: var(--fs-body);
     line-height: 1.25;
 }
 
@@ -333,7 +333,7 @@
 }
 
 .home-medida-text {
-    font-size: 1.02rem;
+    font-size: var(--fs-body);
     line-height: 1.65;
     color: rgba(255, 255, 255, 0.82);
     max-width: 52ch;
@@ -387,7 +387,7 @@
 }
 
 .home-nosotros-lead {
-    font-size: clamp(1.15rem, 4.2vw, 1.5rem);
+    font-size: var(--fs-lead);
     line-height: 1.5;
     color: var(--external-secondary);
     font-weight: 500;
@@ -416,10 +416,9 @@
     .home-hero {
         /* .external-main pasa a padding-top: 1.5rem desde acá */
         margin-top: -1.5rem;
+        /* El alto (82svh) ya viene de la base; acá sólo cambia que el
+           contenido se centra en vez de apoyarse abajo. */
         align-items: center;
-        /* Acá la caja ya es más ancha que alta, así que la foto entra
-           casi entera: el hero puede recuperar altura sin recortar. */
-        min-height: 82svh;
     }
 
     .home-hero-inner {

@@ -15,72 +15,9 @@
    ===================================================================== */
 
 /* ── HERO ──────────────────────────────────────────────────────────── */
-.about-hero {
-    position: relative;
-    display: flex;
-    align-items: center;
-    /* Mismo alto que el hero de los index de productos (30vh / 42vh),
-       no el de Inicio: esta es una página interior y su encabezado
-       tiene que pesar como los otros encabezados interiores.
-       svh en vez de vh para que la barra del navegador móvil no lo
-       estire de más. */
-    min-height: 30svh;
-    overflow: hidden;
-    margin-top: -1rem;
-}
-
-.about-hero-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    z-index: 0;
-}
-
-.about-hero-scrim {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    background: linear-gradient(to top,
-            rgba(15, 17, 19, 0.9) 0%,
-            rgba(15, 17, 19, 0.7) 45%,
-            rgba(15, 17, 19, 0.38) 100%);
-}
-
-.about-hero-inner {
-    position: relative;
-    z-index: 2;
-    padding-top: 3rem;
-    padding-bottom: 2.5rem;
-}
-
-.about-hero-eyebrow {
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--external-primary-soft);
-    margin: 0 0 0.5rem;
-}
-
-.about-hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(1.9rem, 7.5vw, 3.6rem);
-    font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    color: var(--external-white);
-    margin: 0 0 0.9rem;
-    max-width: 18ch;
-}
-
-.about-hero-cota {
-    color: var(--external-primary-soft);
-    max-width: 26rem;
-}
+/* El hero de página interior se mudó a externo.css como componente
+   compartido (.g-hero, con .about-hero de alias), porque ahora también
+   lo usa el catálogo. Este archivo no cambió nada del markup. */
 
 /* ── Head de sección ───────────────────────────────────────────────── */
 /* Rótulo y título, nada más. La bajada al costado partía la lectura
@@ -90,10 +27,11 @@
 }
 
 /* ── QUIÉNES SOMOS ─────────────────────────────────────────────────── */
+/* Sin border-top verde: esa banda ahora la trae .g-hero como
+   border-bottom. Si se deja acá también, quedan 10px de verde. */
 .about-intro {
     background: var(--external-white);
     padding: 3.5rem 0;
-    border-top: 5px solid var(--external-primary);
 }
 
 /* Una sola columna, de corrido y a un ancho cómodo de lectura.
@@ -103,14 +41,14 @@
 }
 
 .about-intro-text {
-    font-size: 1rem;
+    font-size: var(--fs-body);
     line-height: 1.7;
     color: var(--external-secondary);
     margin: 0 0 1.1rem;
 }
 
 .about-intro-text:first-child {
-    font-size: clamp(1.08rem, 3.6vw, 1.2rem);
+    font-size: var(--fs-lead);
     line-height: 1.6;
     font-weight: 500;
 }
@@ -180,7 +118,7 @@
 .about-obra-name {
     padding: 0.7rem 0.85rem;
     font-family: var(--font-display);
-    font-size: 0.92rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     color: var(--external-secondary);
 }
@@ -314,12 +252,50 @@
     border-radius: 3px;
 }
 
+/* Nota de Instagram: cierra la sección con el tercer lugar donde
+   encontrarnos. Deliberadamente en tono menor —texto y no botón—
+   porque informa, no empuja a cotizar. */
+.about-sedes-online {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    margin: 1.1rem 0 0;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: var(--external-secondary);
+}
+
+.about-sedes-online .bi {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+    font-size: var(--fs-body);
+    line-height: 1;
+    color: var(--external-primary);
+}
+
+.about-sedes-online a {
+    color: var(--external-primary);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.about-sedes-online a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.about-sedes-online a:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: 3px;
+}
+
 /* La etiqueta es lo que distingue una sede de la otra, así que se
    queda con el lugar que antes ocupaba un ícono decorativo. */
 .about-sede-tag {
     display: block;
     font-family: var(--font-display);
-    font-size: 0.66rem;
+    font-size: var(--fs-label);
     font-weight: 700;
     letter-spacing: 0.18em;
     text-transform: uppercase;
@@ -329,7 +305,7 @@
 
 .about-sede-title {
     font-family: var(--font-display);
-    font-size: 1.1rem;
+    font-size: var(--fs-sub);
     font-weight: 800;
     letter-spacing: -0.01em;
     color: var(--external-secondary);
@@ -347,7 +323,7 @@
     display: flex;
     align-items: flex-start;
     gap: 0.55rem;
-    font-size: 0.88rem;
+    font-size: var(--fs-small);
     line-height: 1.5;
     color: var(--external-secondary);
 }
@@ -385,7 +361,7 @@
     border: none;
     background: none;
     font-family: var(--font-display);
-    font-size: 0.84rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     color: var(--external-primary);
     text-decoration: none;
@@ -425,7 +401,7 @@
 }
 
 .about-contacto-text {
-    font-size: 1rem;
+    font-size: var(--fs-body);
     line-height: 1.65;
     color: rgba(255, 255, 255, 0.82);
     max-width: 52ch;
@@ -449,16 +425,7 @@
 
 /* ── ≥768px ────────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
-    .about-hero {
-        margin-top: -1.5rem;
-        min-height: 42svh;
-    }
-
-    .about-hero-inner {
-        padding-top: 4rem;
-        padding-bottom: 4rem;
-    }
-
+    /* El hero vive en externo.css; acá sólo las secciones de la página. */
     .about-intro,
     .about-obras,
     .about-sedes,

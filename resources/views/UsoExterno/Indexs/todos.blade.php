@@ -8,37 +8,13 @@
 
 @section('content')
 
-{{-- Hero del catálogo completo --}}
-<section class="todos-hero">
-    <div class="container">
-        <div class="todos-hero-content">
-            <p class="todos-hero-eyebrow">
-                <span class="todos-hero-eyebrow-line"></span>
-                Aberturas Giacomazzi
-            </p>
-            <h1 class="todos-hero-title">Catálogo <em class="todos-hero-accent">Completo</em></h1>
-            <p class="todos-hero-subtitle">
-                Explorá toda nuestra línea de productos en vidrio y carpintería de aluminio.
-            </p>
-            <div class="todos-hero-stats">
-                <div class="todos-hero-stat">
-                    <span class="todos-hero-stat-value">{{ $productos->total() }}</span>
-                    <span class="todos-hero-stat-label">{{ $productos->total() === 1 ? 'producto' : 'productos' }}</span>
-                </div>
-                <span class="todos-hero-stat-sep" aria-hidden="true">·</span>
-                <div class="todos-hero-stat">
-                    <span class="todos-hero-stat-value">{{ $todasCategorias->count() }}</span>
-                    <span class="todos-hero-stat-label">{{ $todasCategorias->count() === 1 ? 'categoría' : 'categorías' }}</span>
-                </div>
-                @if(!empty($categoriasFiltro) || !empty(array_filter($filtros)))
-                <span class="todos-hero-stat-sep" aria-hidden="true">·</span>
-                <div class="todos-hero-stat todos-hero-stat--filtered">
-                    <i class="bi bi-funnel-fill"></i>
-                    Filtros activos
-                </div>
-                @endif
-            </div>
-        </div>
+<section class="g-hero">
+    <img src="{{ asset('images/heros/hero_todos_productos_2.jpg') }}" alt=""
+        class="g-hero-bg" aria-hidden="true">
+    <span class="g-hero-scrim"></span>
+    <div class="container g-hero-inner">
+        <p class="g-hero-eyebrow">Aberturas Giacomazzi</p>
+        <h1 class="g-hero-title">Catálogo</h1>
     </div>
 </section>
 
@@ -74,18 +50,18 @@
             {{-- Sidebar de filtros --}}
             <div class="col-lg-3">
                 @include('UsoExterno.partials.filtros-categoria', [
-                    'filtrosLimpiarUrl' => route('productos.todos'),
-                    'todasCategorias'   => $todasCategorias,
-                    'categoriasFiltro'  => $categoriasFiltro,
+                'filtrosLimpiarUrl' => route('productos.todos'),
+                'todasCategorias' => $todasCategorias,
+                'categoriasFiltro' => $categoriasFiltro,
                 ])
             </div>
 
             {{-- Grid de productos --}}
             <div class="col-lg-9" id="productos-container">
                 @include('UsoExterno.partials.productos-grid', [
-                    'gridBaseUrl'      => route('productos.todos'),
-                    'todasCategorias'  => $todasCategorias,
-                    'categoriasFiltro' => $categoriasFiltro,
+                'gridBaseUrl' => route('productos.todos'),
+                'todasCategorias' => $todasCategorias,
+                'categoriasFiltro' => $categoriasFiltro,
                 ])
             </div>
 

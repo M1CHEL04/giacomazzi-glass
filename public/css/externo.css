@@ -17,6 +17,38 @@
        Archivo titula y etiqueta; Asap sostiene el texto corrido. */
     --font-display: 'Archivo', 'Segoe UI', Tahoma, sans-serif;
     --font-body: 'Asap', 'Segoe UI', Tahoma, sans-serif;
+
+    /* ── Escala tipográfica ───────────────────────────────────────────
+       Siete pasos, uno por rol. Nadie escribe font-size a mano: se elige
+       el paso que corresponde al papel que cumple el texto. Así dos
+       títulos de sección miden igual aunque vivan en vistas distintas.
+
+       Los pasos grandes usan clamp() para no necesitar media queries;
+       el valor de la izquierda es el de teléfono y el de la derecha el
+       de escritorio.
+
+                                         390px    1440px
+       --fs-hero     h1 de hero            30.4px   57.6px
+       --fs-title    h2 de sección           28px   41.6px
+       --fs-title-sm h2 dentro de página   21.6px     28px
+       --fs-lead     párrafo de entrada    17.3px   19.2px
+       --fs-sub      h3 de tarjeta/bloque  17.6px   17.6px
+       --fs-body     texto corrido           16px     16px
+       --fs-small    apoyo, botones, meta  14.1px   14.1px
+       --fs-label    eyebrow y rótulos     11.2px   11.2px
+
+       --fs-title-sm existe por la ficha de producto: ahí el nombre del
+       producto es el título de la página y los bloques internos ("Más
+       en Mamparas") necesitan un escalón abajo para no empatarle.
+       ─────────────────────────────────────────────────────────────── */
+    --fs-hero: clamp(1.9rem, 7.5vw, 3.6rem);
+    --fs-title: clamp(1.75rem, 5.2vw, 2.6rem);
+    --fs-title-sm: clamp(1.35rem, 3.6vw, 1.75rem);
+    --fs-lead: clamp(1.08rem, 3.6vw, 1.2rem);
+    --fs-sub: 1.1rem;
+    --fs-body: 1rem;
+    --fs-small: 0.88rem;
+    --fs-label: 0.7rem;
 }
 
 .external-body {
@@ -40,6 +72,120 @@
    decora — por eso se usa poco y en lugares elegidos.
    ===================================================================== */
 
+/* ── Hero de página interior ───────────────────────────────────────────
+   Encabezado de sección con foto de fondo. Lo usan Nosotros y Catálogo.
+   Mide 30vh en teléfono y 42vh desde 768px: la mitad que el hero de
+   Inicio, porque acá presenta la sección, no la convence.
+
+   Igual que las primitivas de abajo, doble selector: .g-hero es el
+   nombre nuevo y .about-hero el alias que mantiene andando a Nosotros
+   sin tocarle el markup.
+   ──────────────────────────────────────────────────────────────────── */
+.g-hero,
+.about-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* svh y no vh: la barra del navegador móvil no lo estira de más */
+    min-height: 30svh;
+    overflow: hidden;
+    /* Cancela el padding-top de .external-main (1rem hasta 767.98px).
+       Tiene que coincidir con ese padding: de más, el hero se mete
+       debajo del navbar; de menos, queda una franja blanca arriba. */
+    margin-top: -1rem;
+    /* Respaldo para categorías sin imagen_hero: el scrim solo no tapa */
+    background: var(--g-carbon);
+    /* La banda verde del cierre es parte del hero, no de la sección que
+       sigue: así viaja con el componente y no hay que acordarse de
+       ponérsela a cada página nueva. */
+    border-bottom: 5px solid var(--external-primary);
+}
+
+.g-hero-bg,
+.about-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+
+/* Mismo filtro que el hero de Inicio, para que los tres se lean igual */
+.g-hero-scrim,
+.about-hero-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top,
+            rgba(15, 17, 19, 0.9) 0%,
+            rgba(15, 17, 19, 0.72) 42%,
+            rgba(15, 17, 19, 0.4) 100%);
+}
+
+.g-hero-inner,
+.about-hero-inner {
+    position: relative;
+    z-index: 2;
+    padding-top: 3rem;
+    padding-bottom: 2.5rem;
+}
+
+.g-hero-eyebrow,
+.about-hero-eyebrow {
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--external-primary-soft);
+    margin: 0 0 0.5rem;
+}
+
+.g-hero-title,
+.about-hero-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-hero);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--external-white);
+    margin: 0 0 0.9rem;
+    max-width: 18ch;
+}
+
+.g-hero-cota,
+.about-hero-cota {
+    color: var(--external-primary-soft);
+    max-width: 26rem;
+}
+
+@media (min-width: 768px) {
+    .g-hero,
+    .about-hero {
+        /* .external-main pasa a padding-top: 1.5rem desde acá */
+        margin-top: -1.5rem;
+        min-height: 42svh;
+    }
+
+    .g-hero-inner,
+    .about-hero-inner {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+
+    /* En pantalla ancha el degradado se inclina: oscurece el lado donde
+       vive el texto y deja respirar la foto del otro. */
+    .g-hero-scrim,
+    .about-hero-scrim {
+        background: linear-gradient(105deg,
+                rgba(15, 17, 19, 0.88) 0%,
+                rgba(15, 17, 19, 0.62) 55%,
+                rgba(15, 17, 19, 0.32) 100%);
+    }
+}
+
 /* Línea de cota: |———— etiqueta ————| */
 .g-cota,
 .home-cota {
@@ -48,7 +194,7 @@
     gap: 0.85rem;
     margin: 0;
     font-family: var(--font-display);
-    font-size: 0.68rem;
+    font-size: var(--fs-label);
     font-weight: 600;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -98,7 +244,7 @@
     gap: 0.65rem;
     margin: 0 0 0.85rem;
     font-family: var(--font-display);
-    font-size: 0.7rem;
+    font-size: var(--fs-label);
     font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -125,7 +271,7 @@
 .g-title,
 .home-title {
     font-family: var(--font-display);
-    font-size: clamp(1.75rem, 5.2vw, 2.6rem);
+    font-size: var(--fs-title);
     font-weight: 800;
     line-height: 1.14;
     letter-spacing: -0.02em;
@@ -151,7 +297,7 @@
     border: 1px solid transparent;
     border-radius: 3px;
     font-family: var(--font-display);
-    font-size: 0.88rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     line-height: 1.2;
     text-align: center;
@@ -235,7 +381,7 @@
     color: var(--external-primary);
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: var(--fs-body);
     text-decoration: none;
     transition: gap 0.2s ease, color 0.2s ease;
 }

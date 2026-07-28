@@ -66,25 +66,23 @@ $obras = [
 $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 @endphp
 
-{{-- ── HERO ─────────────────────────────────────────────────────────── --}}
-{{-- Encabezado de sección, igual que el de los index de productos:
-     rótulo arriba, nombre de la sección grande y qué vas a encontrar. --}}
 <section class="about-hero">
-    <img src="{{ asset('images/homehero.jpg') }}" alt="" class="about-hero-bg" aria-hidden="true">
+    <img src="{{ asset('images/heros/hero_nosotros.png') }}" alt="" class="about-hero-bg" aria-hidden="true">
     <span class="about-hero-scrim"></span>
     <div class="container about-hero-inner">
         <p class="about-hero-eyebrow">Aberturas Giacomazzi</p>
         <h1 class="about-hero-title">Nosotros</h1>
-        <p class="g-cota about-hero-cota"><span>Quiénes somos y dónde estamos</span></p>
     </div>
 </section>
 
 {{-- ── SOBRE NOSOTROS ───────────────────────────────────────────────── --}}
-{{-- Sin título ni bajada al costado: el texto se lee de corrido, en una
-     sola columna. Partirlo era lo que ensuciaba la sección. --}}
 <section class="about-intro">
     <div class="container">
-        <p class="g-eyebrow">Sobre nosotros</p>
+        <div class="about-head">
+            <p class="g-eyebrow">Sobre nosotros</p>
+            <h2 class="g-title">Quiénes somos</h2>
+
+        </div>
 
         <div class="about-intro-body">
             <p class="about-intro-text">
@@ -164,13 +162,9 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
     <div class="container">
         <div class="about-head">
             <p class="g-eyebrow">Sedes</p>
-            <h2 class="g-title">Dónde encontrarnos</h2>
-        </div>
+            <h2 class="g-title">Donde encotrarnos</h2>
 
-        {{-- Tarjetas primero y mapa completo abajo. Antes el mapa iba
-             embutido al lado de una lista dentro de un mismo recuadro y en
-             teléfono quedaba angosto y apretado; separados, cada uno usa
-             todo el ancho que necesita. --}}
+        </div>
         <div class="about-sede-grid">
             @foreach($sedes as $i => $sede)
             <div class="about-sede {{ $i === 0 ? 'is-active' : '' }}" data-sede="{{ $sede['key'] }}">
@@ -212,14 +206,21 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
         </div>
 
         <div class="about-map" id="map" data-sedes="{{ json_encode($sedesMapa) }}"></div>
+
+        <p class="about-sedes-online">
+            <i class="bi bi-instagram"></i>
+            <span>
+                También nos encontrás en Instagram, donde publicamos los trabajos
+                terminados:
+                <a href="https://www.instagram.com/giacomazzi_srl/"
+                    target="_blank" rel="noopener">@@giacomazzi_srl</a>
+            </span>
+        </p>
     </div>
 </section>
 
 {{-- ── ESCRIBINOS ───────────────────────────────────────────────────── --}}
 <section class="about-contacto">
-    {{-- Sin foto: la única disponible era stock genérico y acá una imagen
-         prestada resta más de lo que suma. Cierre centrado y angosto,
-         como el bloque final de Inicio. --}}
     <div class="container about-contacto-inner">
         <p class="g-eyebrow g-eyebrow--light">Escribinos</p>
         <h2 class="g-title g-title--light about-contacto-title">
@@ -234,10 +235,6 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
                 <i class="bi bi-whatsapp"></i> Escribir por WhatsApp
             </a>
             @endif
-            <a href="https://www.instagram.com/giacomazzi_srl/" class="g-btn g-btn--ghost"
-                target="_blank" rel="noopener">
-                <i class="bi bi-instagram"></i> Ver Instagram
-            </a>
         </div>
     </div>
 </section>
