@@ -40,14 +40,16 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    /* Alto casi de pantalla completa: el catálogo asoma apenas abajo,
-       lo justo para que se lea que la página sigue.
+    /* En teléfono el hero no se lleva la pantalla entera: a 82svh el
+       catálogo quedaba tan abajo que la primera pantalla era sólo foto.
+       Con 68svh la banda verde del catálogo ya asoma sin scrollear.
        El recorte vertical que sirve el <picture> en mobile es 3:4, así
        que acá el alto ya no le come ancho a la foto — cuando la caja
        era alta y la foto apaisada, cover recortaba a los costados y por
        eso hubo que bajarla en su momento.
-       El piso de 440px protege pantallas muy cortas. */
-    min-height: max(440px, 82svh);
+       El piso de 400px protege pantallas muy cortas: es lo que mide el
+       contenido del hero, así que por debajo de eso manda el texto. */
+    min-height: max(400px, 68svh);
     overflow: hidden;
     /* Cancela el padding-top de .external-main (1rem hasta 767.98px) */
     margin-top: -1rem;
@@ -69,9 +71,9 @@
     z-index: 1;
     /* Más denso abajo: es donde vive el texto en mobile */
     background: linear-gradient(to top,
-            rgba(15, 17, 19, 0.9) 0%,
-            rgba(15, 17, 19, 0.72) 42%,
-            rgba(15, 17, 19, 0.4) 100%);
+            rgba(15, 17, 19, 0.64) 0%,
+            rgba(15, 17, 19, 0.44) 42%,
+            rgba(15, 17, 19, 0.14) 100%);
 }
 
 .home-hero-inner {
@@ -416,8 +418,10 @@
     .home-hero {
         /* .external-main pasa a padding-top: 1.5rem desde acá */
         margin-top: -1.5rem;
-        /* El alto (82svh) ya viene de la base; acá sólo cambia que el
-           contenido se centra en vez de apoyarse abajo. */
+        /* El recorte bajo es sólo de teléfono: en escritorio la foto es
+           apaisada y el hero sí se lleva casi la pantalla completa. */
+        min-height: max(440px, 82svh);
+        /* Y el contenido se centra en vez de apoyarse abajo. */
         align-items: center;
     }
 
@@ -428,9 +432,9 @@
 
     .home-hero-scrim {
         background: linear-gradient(105deg,
-                rgba(15, 17, 19, 0.88) 0%,
-                rgba(15, 17, 19, 0.62) 55%,
-                rgba(15, 17, 19, 0.32) 100%);
+                rgba(15, 17, 19, 0.62) 0%,
+                rgba(15, 17, 19, 0.36) 55%,
+                rgba(15, 17, 19, 0.1) 100%);
     }
 
     .home-catalogo,
