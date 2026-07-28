@@ -17,9 +17,9 @@ $waHref = $waNumero
 {{-- ── HERO ─────────────────────────────────────────────────────────── --}}
 <section class="home-hero">
     <picture>
-        <source media="(max-width: 480px)"
-            srcset="{{ asset('images/posible_hero_mobile.jpg') }}">
-        <img src="{{ asset('images/posible_hero.JPG') }}" alt=""
+        <!-- <source media="(max-width: 480px)"
+            srcset="{{ asset('images/posible_hero_mobile.jpg') }}"> -->
+        <img src="{{ asset('images/hero_inicio.jpg') }}" alt=""
             class="home-hero-bg" aria-hidden="true">
     </picture>
     <span class="home-hero-scrim"></span>
