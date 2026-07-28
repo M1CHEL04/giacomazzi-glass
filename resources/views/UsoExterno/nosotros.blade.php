@@ -162,7 +162,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
     <div class="container">
         <div class="about-head">
             <p class="g-eyebrow">Sedes</p>
-            <h2 class="g-title">Donde encotrarnos</h2>
+            <h2 class="g-title">Dónde encontrarnos</h2>
 
         </div>
         <div class="about-sede-grid">
@@ -207,15 +207,17 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 
         <div class="about-map" id="map" data-sedes="{{ json_encode($sedesMapa) }}"></div>
 
-        <p class="about-sedes-online">
-            <i class="bi bi-instagram"></i>
-            <span>
-                También nos encontrás en Instagram, donde publicamos los trabajos
-                terminados:
-                <a href="https://www.instagram.com/giacomazzi_srl/"
-                    target="_blank" rel="noopener">@@giacomazzi_srl</a>
-            </span>
-        </p>
+        {{-- Instagram cierra la sección: es la única dirección que no
+             está en el mapa. La cota va abajo del dibujo, como en el
+             plano, y acota lo que el mapa no alcanza a mostrar. --}}
+        <div class="about-online">
+            <p class="g-cota about-online-cota"><span>También en línea</span></p>
+            <a href="https://www.instagram.com/giacomazzi_srl/"
+                class="about-online-link" target="_blank" rel="noopener">
+                <i class="bi bi-instagram" aria-hidden="true"></i>
+                <span>Seguinos en <strong>@@giacomazzi_srl</strong></span>
+            </a>
+        </div>
     </div>
 </section>
 
