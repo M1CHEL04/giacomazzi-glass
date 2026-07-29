@@ -317,8 +317,13 @@ $formAction = $isEdit
 
         {{-- Submit --}}
         <div class="d-flex justify-content-end border rounded-3 bg-white p-3">
-            <button type="submit" class="btn btn-success btn-sm px-3 py-1 rounded-2" style="font-size:13px;">
-                {{ $isEdit ? 'Guardar cambios' : 'Crear producto' }}
+            {{-- El envío sube las imágenes por SFTP y puede tardar: el
+                 spinner y el disabled evitan el doble alta. --}}
+            <button type="submit" class="btn btn-success btn-sm px-3 py-1 rounded-2" style="font-size:13px;"
+                data-submit data-loading-text="{{ $isEdit ? 'Guardando…' : 'Creando…' }}">
+                <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"
+                    data-spinner></span>
+                <span data-submit-text>{{ $isEdit ? 'Guardar cambios' : 'Crear producto' }}</span>
             </button>
         </div>
 

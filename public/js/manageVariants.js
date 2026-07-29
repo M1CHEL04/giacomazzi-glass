@@ -6,6 +6,7 @@
  */
 import { initImageManager }   from './modules/imageManager.js';
 import { initVariantManager } from './modules/variantManager.js';
+import { initSubmitState }    from './modules/submitState.js';
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -21,4 +22,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, iconStarOutline });
     initVariantManager({ cfg, iconXMark });
+
+    // Último: así su listener de submit corre después del de imágenes,
+    // que es el que escribe el hidden de portada antes de que salga.
+    initSubmitState(document.querySelector('form[enctype="multipart/form-data"]'));
 });

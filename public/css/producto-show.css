@@ -1,7 +1,12 @@
 /* ===== PRODUCTO SHOW STYLES ===== */
 
+/* Ritmo del sistema: 5rem de franja y 3.5rem en teléfono, igual que las
+   secciones de Inicio y Nosotros. Arriba va menos porque el breadcrumb
+   ya separa del navbar.
+   (Este archivo es desktop-first —usa max-width—, así que la base es el
+   valor de escritorio y el teléfono lo corrige más abajo.) */
 .ps-section {
-    padding: 2rem 0 4rem;
+    padding: 2.5rem 0 5rem;
 }
 
 /* ---- Galería ---- */
@@ -11,9 +16,9 @@
 }
 
 .ps-carousel {
-    border-radius: 0.875rem;
+    border-radius: 3px;
     overflow: hidden;
-    background: #f4f8f6;
+    background: var(--g-vidrio);
     border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -98,7 +103,7 @@
     height: 32px;
     background: rgba(255, 255, 255, 0.88);
     border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 0.45rem;
+    border-radius: 3px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,10 +151,10 @@
     min-width: 58px;
     padding: 0;
     border: 2px solid transparent;
-    border-radius: 0.5rem;
+    border-radius: 3px;
     overflow: hidden;
     cursor: pointer;
-    background: #f4f8f6;
+    background: var(--g-vidrio);
     transition: border-color 0.18s ease, opacity 0.18s ease;
     opacity: 0.5;
     flex-shrink: 0;
@@ -176,10 +181,10 @@
     font-family: var(--font-display);
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.65rem;
     font-size: var(--fs-label);
     font-weight: 700;
-    letter-spacing: 0.13em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--external-primary);
     text-decoration: none;
@@ -189,12 +194,12 @@
 
 .ps-categoria-eyebrow::before {
     content: '';
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: var(--external-primary);
-    border-radius: 2px;
-    flex-shrink: 0;
+    flex: 0 0 auto;
+    width: 26px;
+    height: 7px;
+    border-left: 1px solid currentColor;
+    border-right: 1px solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat;
 }
 
 .ps-categoria-eyebrow:hover {
@@ -213,7 +218,7 @@
 }
 
 .ps-descripcion {
-    font-size: 0.93rem;
+    font-size: var(--fs-body);
     color: var(--external-secondary-soft);
     line-height: 1.75;
     margin-bottom: 1.75rem;
@@ -229,7 +234,7 @@
 
 .ps-variante-label {
     display: block;
-    font-size: 0.65rem;
+    font-size: var(--fs-label);
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -248,7 +253,7 @@
     color: var(--external-secondary-soft);
     letter-spacing: 0;
     text-transform: none;
-    font-size: 0.68rem;
+    font-size: var(--fs-label);
 }
 
 .ps-opcion {
@@ -260,7 +265,7 @@
     border: 1.5px solid rgba(0, 0, 0, 0.12);
     background: transparent;
     color: var(--external-secondary);
-    font-size: 0.775rem;
+    font-size: var(--fs-small);
     font-weight: 600;
     cursor: pointer;
     transition: all 0.16s ease;
@@ -288,7 +293,7 @@
     padding: 0.9rem 1rem;
     background: rgba(40, 116, 82, 0.045);
     border: 1px solid rgba(40, 116, 82, 0.15);
-    border-radius: 0.65rem;
+    border-radius: 3px;
     margin-bottom: 1.75rem;
 }
 
@@ -306,7 +311,7 @@
 }
 
 .ps-personalizar-texto {
-    font-size: 0.81rem;
+    font-size: var(--fs-small);
     color: var(--external-secondary);
     line-height: 1.6;
 }
@@ -315,7 +320,7 @@
     display: block;
     color: var(--external-secondary);
     margin-bottom: 0.15rem;
-    font-size: 0.83rem;
+    font-size: var(--fs-small);
 }
 
 .ps-personalizar-link {
@@ -338,19 +343,33 @@
     margin-bottom: 1.4rem;
 }
 
+/* Mismas medidas que .g-btn: 46px de alto, Archivo 700 a --fs-small y
+   borde de 1px. Antes eran 0.83rem/600 en la fuente del cuerpo, así que
+   "Agregar al carrito" no se leía como los botones de Inicio. */
 .btn-ps-primary,
 .btn-ps-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.45rem;
-    padding: 0.58rem 1.25rem;
-    border-radius: 0.5rem;
-    font-size: 0.83rem;
-    font-weight: 600;
-    letter-spacing: 0.01em;
+    min-height: 46px;
+    padding: 0.6rem 1.15rem;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    line-height: 1.2;
     text-decoration: none;
-    transition: all 0.22s ease;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease,
+                border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Se hunden al pulsar, como todos los botones del sistema */
+.btn-ps-primary:active,
+.btn-ps-secondary:active {
+    transform: translateY(1px);
 }
 
 .btn-ps-primary svg,
@@ -372,7 +391,7 @@
 .btn-ps-secondary {
     background-color: transparent;
     color: var(--external-primary);
-    border: 1.5px solid rgba(40, 116, 82, 0.38);
+    border-color: rgba(40, 116, 82, 0.38);
 }
 
 .btn-ps-secondary:hover {
@@ -382,11 +401,14 @@
 }
 
 /* Stepper de unidades */
+/* Los 46px lo dejan a la misma altura que el botón que tiene al lado:
+   antes el stepper era más bajo y la fila quedaba despareja. */
 .ps-cantidad {
     display: inline-flex;
     align-items: stretch;
-    border: 1.5px solid rgba(40, 116, 82, 0.38);
-    border-radius: 0.5rem;
+    min-height: 46px;
+    border: 1px solid rgba(40, 116, 82, 0.38);
+    border-radius: 3px;
     overflow: hidden;
     background: var(--external-white);
 }
@@ -423,7 +445,7 @@
     border: none;
     border-inline: 1.5px solid rgba(40, 116, 82, 0.16);
     text-align: center;
-    font-size: 0.9rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     color: var(--external-secondary);
     background: transparent;
@@ -447,7 +469,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.76rem;
+    font-size: var(--fs-small);
     font-weight: 500;
     color: var(--external-secondary-soft);
 }
@@ -460,25 +482,31 @@
 }
 
 /* ---- Encabezados de sección ---- */
+/* Mismo rótulo que Inicio y Nosotros: Archivo, --fs-label y 0.2em de
+   letra. El terminal es la cota del sistema (.g-eyebrow), no una barra
+   maciza: la cota es la firma de la marca y el catálogo la estaba
+   dibujando de otra manera. */
 .ps-seccion-eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.68rem;
+    gap: 0.65rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
     font-weight: 700;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--external-primary);
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.5rem;
 }
 
 .ps-seccion-eyebrow::before {
     content: '';
-    display: block;
-    width: 18px;
-    height: 2px;
-    background: var(--external-primary);
-    border-radius: 2px;
+    flex: 0 0 auto;
+    width: 26px;
+    height: 7px;
+    border-left: 1px solid currentColor;
+    border-right: 1px solid currentColor;
+    background: linear-gradient(currentColor, currentColor) center / 100% 1px no-repeat;
 }
 
 .ps-seccion-titulo {
@@ -492,25 +520,28 @@
 
 /* ---- Descripción técnica ---- */
 .ps-tecnica-section {
-    padding: 3rem 0;
-    background-color: #f8f9fa;
+    padding: 5rem 0;
+    background-color: var(--g-vidrio);
 }
 
 .ps-tecnica-texto {
     max-width: 760px;
-    font-size: 0.9rem;
+    font-size: var(--fs-body);
     color: var(--external-secondary);
     line-height: 1.85;
     margin: 1.25rem 0 0;
     white-space: pre-line;
 }
 
-/* ---- Banner personalización (sección completa) ---- */
+/* ---- Banner personalización (sección completa) ----
+   Cierre de la página. Toma el mismo recurso con el que Inicio abre el
+   catálogo y con el que cierra el hero: fondo vidrio y una banda verde
+   de 5px arriba. Antes era un verde pálido propio (#edf5f1) que no
+   existía en ninguna otra vista. */
 .ps-banner-personalizar {
-    padding: 2.5rem 0;
-    background-color: #edf5f1;
-    border-top: 1px solid rgba(40, 116, 82, 0.12);
-    border-bottom: 1px solid rgba(40, 116, 82, 0.12);
+    padding: 5rem 0;
+    background-color: var(--g-vidrio);
+    border-top: 5px solid var(--external-primary);
 }
 
 .ps-banner-personalizar-inner {
@@ -552,7 +583,7 @@
 }
 
 .ps-banner-personalizar-desc {
-    font-size: 0.86rem;
+    font-size: var(--fs-small);
     color: var(--external-secondary-soft);
     line-height: 1.65;
     margin: 0;
@@ -565,9 +596,9 @@
     padding: 0.6rem 1.35rem;
     background: transparent;
     border: 1.5px solid rgba(40, 116, 82, 0.4);
-    border-radius: 0.45rem;
+    border-radius: 3px;
     color: var(--external-primary);
-    font-size: 0.84rem;
+    font-size: var(--fs-small);
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s ease;
@@ -662,7 +693,7 @@
     width: auto;
     height: auto;
     object-fit: contain;
-    border-radius: 0.5rem;
+    border-radius: 3px;
     box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
     animation: ps-lb-in 0.22s ease both;
     transition: opacity 0.14s ease;
@@ -690,7 +721,7 @@
     min-width: 50px;
     padding: 0;
     border: 2px solid rgba(255, 255, 255, 0.15);
-    border-radius: 0.4rem;
+    border-radius: 3px;
     overflow: hidden;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.08);
@@ -714,7 +745,7 @@
 
 /* ---- Relacionados ---- */
 .ps-relacionados-section {
-    padding: 3.5rem 0 4.5rem;
+    padding: 5rem 0;
 }
 
 .ps-relacionados-header {
@@ -731,7 +762,7 @@
     align-items: center;
     gap: 0.4rem;
     color: var(--external-primary);
-    font-size: 0.82rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     text-decoration: none;
     transition: gap 0.2s ease, color 0.2s ease;
@@ -755,7 +786,7 @@
     padding: 0.65rem;
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.07);
-    border-radius: 0.65rem;
+    border-radius: 3px;
     text-decoration: none;
     transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -769,7 +800,7 @@
 .ps-mini-imagen {
     width: 60px;
     height: 60px;
-    border-radius: 0.45rem;
+    border-radius: 3px;
     overflow: hidden;
     background: linear-gradient(135deg, #edf5f1 0%, #d4e8df 100%);
     flex-shrink: 0;
@@ -797,7 +828,7 @@
 
 .ps-mini-nombre {
     display: -webkit-box;
-    font-size: 0.84rem;
+    font-size: var(--fs-small);
     font-weight: 700;
     color: var(--external-secondary);
     line-height: 1.3;
@@ -839,9 +870,14 @@
 }
 
 @media (max-width: 767.98px) {
-    .ps-section { padding-top: 1.25rem; padding-bottom: 3rem; }
+    /* El escalón de teléfono del ritmo: 3.5rem por franja */
+    .ps-section { padding: 2rem 0 3.5rem; }
+
+    .ps-tecnica-section,
+    .ps-relacionados-section,
+    .ps-banner-personalizar { padding: 3.5rem 0; }
+
     .ps-thumb { width: 50px; height: 50px; min-width: 50px; }
-    .ps-banner-personalizar { padding: 2rem 0; }
 }
 
 @media (max-width: 575.98px) {
