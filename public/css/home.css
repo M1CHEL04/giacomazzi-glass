@@ -263,7 +263,6 @@
 .home-rail-arrow:hover:not(:disabled) {
     color: var(--external-primary-dark);
     box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
-    transform: translateY(-1px);
 }
 
 .home-rail-arrow:disabled {

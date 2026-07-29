@@ -79,9 +79,11 @@
     white-space: nowrap;
 }
 
+/* El chip ya descansa sobre el tinte del 8%, así que su hover es el
+   escalón siguiente de la misma escala. */
 .filtro-chip:hover {
-    background: rgba(40, 116, 82, 0.16);
-    color: #1f5c3e;
+    background: var(--g-hover-verde-alto);
+    color: var(--external-primary-dark);
     border-color: rgba(40, 116, 82, 0.4);
 }
 
@@ -100,7 +102,7 @@
 }
 
 .filtro-chip-limpiar:hover {
-    color: #c0392b;
+    color: var(--g-peligro);
 }
 
 /* ---- Filtros sidebar ---- */
@@ -167,7 +169,7 @@
 }
 
 .filtros-limpiar:hover {
-    color: #1f5c3e;
+    color: var(--external-primary-dark);
 }
 
 .filtros-badge {
@@ -322,7 +324,7 @@
 }
 
 .filtro-opcion:hover {
-    background: rgba(40, 116, 82, 0.06);
+    background: var(--g-hover-verde);
     color: var(--external-primary);
 }
 
@@ -359,8 +361,7 @@
 }
 
 .btn-aplicar-filtros:hover {
-    background-color: #1f5c3e;
-    transform: translateY(-1px);
+    background-color: var(--external-primary-dark);
 }
 
 /* ---- Loading overlay ---- */
@@ -494,6 +495,7 @@
 }
 
 .filtros-sticky-bar-btn:hover {
+    background: var(--g-hover-verde);
     border-color: var(--external-primary);
     color: var(--external-primary);
 }
@@ -543,9 +545,8 @@
 }
 
 .btn-filtros-mobile:hover {
-    background: rgba(40, 116, 82, 0.05);
+    background: var(--g-hover-verde);
     border-color: var(--external-primary);
-    box-shadow: 0 2px 8px rgba(40, 116, 82, 0.12);
 }
 
 .filtros-badge-mobile {
@@ -755,7 +756,7 @@
 
 .producto-card:hover .producto-cta {
     gap: 0.6rem;
-    color: #1f5c3e;
+    color: var(--external-primary-dark);
 }
 
 /* ---- Banner personalización en grid ---- */
@@ -846,8 +847,8 @@
 }
 
 .btn-limpiar-filtros:hover {
-    background: var(--external-primary);
-    color: #ffffff;
+    background: var(--g-hover-verde);
+    color: var(--external-primary-dark);
 }
 
 /* ---- Paginación ---- */
@@ -882,10 +883,9 @@
 }
 
 .page-link:hover {
-    background-color: rgba(40, 116, 82, 0.07);
+    background-color: var(--g-hover-verde);
     color: var(--external-primary);
     border-color: rgba(40, 116, 82, 0.35);
-    transform: translateY(-1px);
 }
 
 .page-item.active .page-link {

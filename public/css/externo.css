@@ -49,6 +49,46 @@
     --fs-body: 1rem;
     --fs-small: 0.88rem;
     --fs-label: 0.7rem;
+
+    /* ── Hover ────────────────────────────────────────────────────────
+       Un solo gesto en toda la app: el hover no le cambia el color al
+       botón, lo corre un escalón dentro de su propia escala.
+
+         relleno    →  el fondo baja al tono oscuro de ese mismo color
+         sin fondo  →  aparece el tinte del 8% de su propio color
+         ya teñido  →  el tinte sube al siguiente escalón (16%)
+
+       Cada color tiene su escala y el hover se mueve dentro de ella,
+       nunca salta a otra. Ningún botón inventa un valor intermedio:
+
+         verde    0 → 8% → 16% → #287452 → #1f5c3e
+         neutro   0 → 12% → #ffffff → #e5e4e4
+
+       Por eso un botón blanco sobre fondo oscuro se apaga a
+       --external-light y no se tiñe de verde: el verde es otra escala.
+
+       Nada se levanta al pasar el mouse. Los botones se hunden 1px al
+       pulsarlos (.g-btn:active) y son las superficies —las tarjetas—
+       las que flotan; un botón que hace las dos cosas se lee como dos
+       componentes distintos. Antes había tres versiones del mismo
+       hover verde (liso, con salto, con salto y sombra).
+       ─────────────────────────────────────────────────────────────── */
+    --g-hover-verde: rgba(40, 116, 82, 0.08);
+    --g-hover-verde-alto: rgba(40, 116, 82, 0.16);
+    --g-hover-blanco: rgba(255, 255, 255, 0.12);
+    --g-hover-gris: rgba(63, 63, 63, 0.07);
+
+    /* Rojo de las acciones que borran. Uno solo: convivían tres
+       (#e74c3c, #dc3545, #c0392b) y con tres rojos ningún hover podía
+       ser el mismo. */
+    --g-peligro: #c0392b;
+    --g-peligro-dark: #a5322a;
+    --g-hover-peligro: rgba(192, 57, 43, 0.08);
+
+    /* Verde de WhatsApp: es el color del canal, no el de la marca, así
+       que tiene su propia escala y no toma el verde Giacomazzi. */
+    --g-whatsapp: #25d366;
+    --g-whatsapp-dark: #1da851;
 }
 
 .external-body {
@@ -345,7 +385,7 @@
 .g-btn--ghost:focus,
 .home-btn--ghost:hover,
 .home-btn--ghost:focus {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--g-hover-blanco);
     border-color: var(--external-white);
     color: var(--external-white);
 }
@@ -361,8 +401,12 @@
 .g-btn--solid:focus,
 .home-btn--solid:hover,
 .home-btn--solid:focus {
-    background: var(--external-primary-soft);
-    border-color: var(--external-primary-soft);
+    /* Escalón dentro de su propia escala, que acá es la neutra: el
+       blanco baja a --external-light. Antes bajaba a
+       --external-primary-soft y un botón blanco se volvía verde, que
+       es cambiar de color en vez de bajar un escalón. */
+    background: var(--external-light);
+    border-color: var(--external-light);
     color: var(--g-carbon);
 }
 
@@ -553,7 +597,7 @@
 
 .external-dropdown-item:hover,
 .external-dropdown-item:focus {
-    background-color: rgba(40, 116, 82, 0.06);
+    background-color: var(--g-hover-verde);
     color: var(--external-primary);
     padding-left: 1.25rem;
 }
@@ -587,7 +631,7 @@
 
 .external-dropdown-item.fw-semibold:hover,
 .external-dropdown-item.fw-semibold:focus {
-    background-color: rgba(40, 116, 82, 0.1);
+    background-color: var(--g-hover-verde);
     color: var(--external-primary);
     padding-left: 1rem;
 }
@@ -620,7 +664,7 @@
 
 .external-cart-link:hover,
 .external-cart-link:focus {
-    background-color: rgba(40, 116, 82, 0.08);
+    background-color: var(--g-hover-verde);
     color: var(--external-primary);
 }
 
@@ -650,7 +694,7 @@
 
 .mobile-menu-btn:hover,
 .mobile-menu-btn:focus-visible {
-    background: rgba(40, 116, 82, 0.08);
+    background: var(--g-hover-verde);
     border-color: var(--external-primary);
     outline: none;
 }
@@ -765,7 +809,7 @@
 }
 
 .mobile-drawer-close:hover {
-    background: rgba(40, 116, 82, 0.08);
+    background: var(--g-hover-verde);
     border-color: var(--external-primary);
     color: var(--external-primary);
 }
@@ -865,10 +909,12 @@
     transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
+/* Pastilla de contorno: se tiñe, no se rellena. Rellenarse de verde
+   era el hover de un botón sólido puesto sobre uno que no lo es. */
 .mobile-nav-category-pill:hover {
-    background: var(--external-primary);
+    background: var(--g-hover-verde);
     border-color: var(--external-primary);
-    color: var(--external-white);
+    color: var(--external-primary);
 }
 
 .mobile-nav-todos {
@@ -1141,7 +1187,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #25D366;
+    background-color: var(--g-whatsapp);
     color: #ffffff;
     border-radius: 50%;
     font-size: 1.7rem;
@@ -1153,7 +1199,9 @@
 .whatsapp-float:hover,
 .whatsapp-float:focus {
     color: #ffffff;
-    background-color: #20BA5A;
+    background-color: var(--g-whatsapp-dark);
+    /* Único botón que crece al pasar: es flotante, no tiene :active
+       con el que hundirse y no convive en línea con ningún otro. */
     transform: scale(1.08);
     box-shadow: 0 8px 24px rgba(37, 211, 102, 0.55);
 }

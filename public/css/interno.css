@@ -7,6 +7,19 @@
     --internal-surface: #f7faf8;
     --internal-border: rgba(63, 63, 63, 0.12);
     --internal-shadow: 0 16px 40px rgba(40, 116, 82, 0.08);
+    --internal-primary-dark: #1f5c3e;
+
+    /* Los mismos escalones de hover que el uso externo. Se repiten acá
+       porque el layout interno no carga externo.css, pero los valores
+       son idénticos a propósito: es una sola app y el hover no debería
+       cambiar de tono según de qué lado del login estés. */
+    --g-hover-verde: rgba(40, 116, 82, 0.08);
+    --g-hover-verde-alto: rgba(40, 116, 82, 0.16);
+    --g-hover-blanco: rgba(255, 255, 255, 0.12);
+    --g-hover-gris: rgba(63, 63, 63, 0.07);
+    --g-peligro: #c0392b;
+    --g-peligro-dark: #a5322a;
+    --g-hover-peligro: rgba(192, 57, 43, 0.08);
 }
 
 .internal-body {
@@ -152,7 +165,7 @@
 
 .internal-user-item:hover,
 .internal-user-item:focus {
-    background: rgba(40, 116, 82, 0.08);
+    background: var(--g-hover-verde);
     color: var(--internal-primary);
 }
 
@@ -240,7 +253,7 @@
 
 .internal-sidebar-link:hover,
 .internal-sidebar-link.active {
-    background: rgba(40, 116, 82, 0.06);
+    background: var(--g-hover-verde);
     border-color: rgba(40, 116, 82, 0.22);
     color: var(--internal-primary);
     box-shadow: none;
@@ -552,7 +565,7 @@
 }
 
 .page-item .page-link:hover {
-    background: rgba(40, 116, 82, 0.08);
+    background: var(--g-hover-verde);
     border-color: var(--internal-primary-soft);
     color: var(--internal-primary);
 }

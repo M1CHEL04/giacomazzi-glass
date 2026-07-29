@@ -251,7 +251,7 @@
         width: 20px;
         height: 20px;
         border-radius: 50%;
-        background: rgba(220, 53, 69, .85);
+        background: rgba(192, 57, 43, .85);
         color: #fff;
         border: none;
         font-size: 13px;
@@ -266,7 +266,7 @@
     }
 
     .imagen-remove-card-btn:hover {
-        background: #dc3545;
+        background: var(--g-peligro);
     }
 
     /* Botón limpiar imagen (↩, top-left): solo visible cuando hay preview.
@@ -337,7 +337,7 @@
     }
 
     .variante-tag-remove:hover {
-        color: #dc3545;
+        color: var(--g-peligro);
     }
 
     /* Tamaño de iconos SVG dentro de botones de imagen y variante */
