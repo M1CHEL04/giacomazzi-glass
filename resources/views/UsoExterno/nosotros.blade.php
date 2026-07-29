@@ -167,7 +167,11 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
         </div>
         <div class="about-sede-grid">
             @foreach($sedes as $i => $sede)
-            <div class="about-sede {{ $i === 0 ? 'is-active' : '' }}" data-sede="{{ $sede['key'] }}">
+            {{-- La fábrica arranca señalada, pero con .is-default y no con
+                 .is-active: al cargar el mapa muestra las dos sedes y
+                 ninguna está elegida todavía, así que pintarla de activa
+                 era decir algo que no había pasado. --}}
+            <div class="about-sede {{ $i === 0 ? 'is-default' : '' }}" data-sede="{{ $sede['key'] }}">
                 <span class="about-sede-tag">{{ $sede['tag'] }}</span>
                 <h3 class="about-sede-title">{{ $sede['tipo'] }}</h3>
 
@@ -191,7 +195,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
                          real es este botón: así el teclado también llega. --}}
                     <button type="button" class="about-sede-action"
                         data-sede-focus="{{ $sede['key'] }}"
-                        aria-pressed="{{ $i === 0 ? 'true' : 'false' }}">
+                        aria-pressed="false">
                         <x-heroicon-o-map-pin />
                         Ver en el mapa
                     </button>
@@ -304,6 +308,9 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
             if (moveMap === undefined) moveMap = true;
 
             cards.forEach(function(card) {
+                // La marca de arranque se va apenas hay una elección real:
+                // si no, quedarían dos tarjetas señaladas a la vez.
+                card.classList.remove('is-default');
                 card.classList.toggle('is-active', card.dataset.sede === key);
             });
             focusBtns.forEach(function(btn) {

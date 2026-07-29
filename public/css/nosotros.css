@@ -236,12 +236,25 @@
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
+/* Tres estados, y el fondo teñido es de uno solo: si el hover también
+   pintaba la tarjeta (antes 0.04 contra 0.05, indistinguibles), pasar
+   el mouse por arriba se veía igual que elegir. Acá el hover mueve el
+   borde y nada más. */
 .about-sede:hover {
-    background: rgba(40, 116, 82, 0.04);
+    border-color: rgba(40, 116, 82, 0.35);
 }
 
+/* Arranque: la fábrica queda señalada con el filo en verde claro, sin
+   fondo. Alcanza para decir "empezá por acá" sin afirmar que el mapa
+   la está mostrando, que es lo que todavía no pasó. */
+.about-sede.is-default {
+    border-left-color: var(--external-primary-soft);
+}
+
+/* Elegida: la única con superficie verde y filo verde pleno. */
 .about-sede.is-active {
     background: rgba(40, 116, 82, 0.05);
+    border-color: rgba(40, 116, 82, 0.35);
     border-left-color: var(--external-primary);
 }
 
