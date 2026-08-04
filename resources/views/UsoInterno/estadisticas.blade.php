@@ -1,7 +1,7 @@
 @extends('layouts.app-interno')
-@section('title', 'Panel Interno - Aberturas Giacomazzi')
-@section('page-title', 'Panel Interno')
-@section('subhead', 'Bienvenido al panel de administración de Aberturas Giacomazzi')
+@section('title', 'Estadisticas - Aberturas Giacomazzi')
+@section('page-title', 'Estadisticas')
+@section('subhead', 'Resumen general del catálogo y las cotizaciones recibidas')
 @section('content')
 
 @php $maxProductos = $productosPorCategoria->max('productos_count') ?: 1; @endphp

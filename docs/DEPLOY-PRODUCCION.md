@@ -123,26 +123,48 @@ Con test abajo, `https://giacomazzi-test.duckdns.org` devuelve 502 (esperado). P
 
 ## 3. Deploy de PROD (en unas semanas)
 
-Cuando tengas el **dominio de producción** apuntando al server:
+Dominio de producción: **aberturasgiacomazzi.com** (+ `www`).
 
-1. En [.env.prod](../.env.prod): `APP_KEY`, passwords, `APP_URL=https://tu-dominio.com`,
-   `SFTP_URL=https://tu-dominio.com/files`, `APP_DEBUG=false`.
-2. Emitir el cert de prod (el proxy ya sirve `/.well-known/acme-challenge/` por el puerto 80; **no baja
-   HTTPS de test**):
+0. **DNS y firewall.** Registros `A` para `@` y `www` → IP del VPS. Verificar **desde el server** antes de
+   seguir (si el DNS no propagó, la validación ACME falla):
+   ```bash
+   dig +short aberturasgiacomazzi.com
+   dig +short www.aberturasgiacomazzi.com
+   curl -sI http://aberturasgiacomazzi.com   # responde nginx ⇒ puerto 80 abierto y DNS OK
+   ```
+1. En `~/giacomazzi-glass/.env.prod` (gitignored, el del repo es plantilla): `APP_KEY`
+   (`php artisan key:generate --show`), `APP_DEBUG=false` y las passwords reales.
+   `DB_PASSWORD` **debe ser idéntica** a `MYSQL_PASSWORD`, y `SFTP_PASSWORD` idéntica a
+   `FILESERVER_PROD_SFTP_PASSWORD` de `~/giacomazzi-glass/.env`.
+   ⚠️ Definirlas **antes** del primer `up` de `mysql-prod`: la imagen solo las aplica al inicializar el
+   volumen vacío; cambiarlas después no re-inicializa la BD.
+2. Emitir el cert de prod (el proxy ya sirve `/.well-known/acme-challenge/` por el puerto 80 — el bloque 80
+   de test es el *default server* y atiende también al dominio de prod; **no baja HTTPS de test**).
+   Primero en seco, para no gastar el rate limit de Let's Encrypt:
    ```bash
    cd ~/giacomazzi-glass
    docker compose -f compose.prod.yml run --rm certbot certonly --webroot \
      --webroot-path /var/www/certbot --email santymichel016@gmail.com --agree-tos --no-eff-email \
-     -d tu-dominio.com -d www.tu-dominio.com
+     --dry-run -d aberturasgiacomazzi.com -d www.aberturasgiacomazzi.com
    ```
-3. **Descomentar** los bloques de PROD en [nginx-https.conf](../docker/proxy/nginx-https.conf) y reemplazar
-   `tu-dominio.com` (server_name + rutas de cert). Agregarles la línea de HSTS como en el bloque de test.
+   Si dice *The dry run was successful*, repetir **sin** `--dry-run` y confirmar con
+   `docker compose -f compose.prod.yml run --rm certbot certificates`.
+3. **Descomentar** los dos bloques de PROD en [nginx-https.conf](../docker/proxy/nginx-https.conf) (ya tienen
+   el dominio real, HSTS y el patrón `set $upstream`; solo hay que sacar los `#`), commitear a `main`,
+   `git pull origin main` en el server y validar: `docker exec giacomazzi-proxy nginx -t`.
+   Recién descomentar **después** del paso 2: sin el cert en disco, nginx no arranca y se cae también test.
 4. Levantar prod y recargar el proxy:
    ```bash
-   docker compose -f compose.prod.yml up -d --build
+   docker compose -f compose.prod.yml up -d --build app-prod   # arrastra mysql-prod y fileserver-prod
+   docker compose -f compose.prod.yml ps                       # los tres Up, mysql healthy
    docker exec giacomazzi-proxy nginx -s reload
+   docker compose -f compose.prod.yml exec -T app-prod php artisan migrate --force
    ```
-5. Deploys posteriores de prod: `./scripts/deploy-prod.sh` (no reinicia el proxy).
+5. Verificar: `curl -sI http://aberturasgiacomazzi.com` → 301; `https://` → 200 con candado válido;
+   `/up` responde; una imagen carga desde `https://aberturasgiacomazzi.com/files/...`; sin *mixed content*
+   en consola (si aparece `http://`, `APP_URL` quedó mal → corregir y
+   `up -d --force-recreate app-prod`, porque el `config:cache` se genera al arrancar el contenedor).
+6. Deploys posteriores de prod: `./scripts/deploy-prod.sh` (no reinicia el proxy).
 
 > **Migraciones de prod:** se corren **a mano, por fuera del deploy**, cuando corresponda y con backup previo.
 > El `deploy-prod.sh` a propósito **no** migra.
