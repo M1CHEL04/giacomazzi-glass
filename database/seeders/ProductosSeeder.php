@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Categoria;
 use App\Models\Producto;
+use App\Models\UnidadMedida;
 use App\Models\Variante;
 use App\Models\ValorVariante;
 use Illuminate\Database\Seeder;
@@ -34,9 +35,13 @@ class ProductosSeeder extends Seeder
             $variantes[$nombre] = $variante;
         }
 
-        // ── 2. Categorías con sus variantes asociadas ─────────────────────────
+        // Unidades de medida (sembradas por la migración de unidades_medida).
+        $unidades = UnidadMedida::pluck('id', 'codigo');
+
+        // ── 2. Categorías con su unidad de cotización y sus variantes ─────────
         $categoriasConfig = [
             'Mamparas' => [
+                'unidad'    => 'alto_ancho',
                 'variantes' => ['Espesor', 'Tipo de vidrio', 'Color de perfil'],
                 'productos' => [
                     ['Mampara de baño corredera', 'Panel de vidrio templado sobre bañera con sistema deslizante de perfil fino.'],
@@ -48,6 +53,7 @@ class ProductosSeeder extends Seeder
                 ],
             ],
             'Puertas' => [
+                'unidad'    => 'unidades',
                 'variantes' => ['Sistema de apertura', 'Color de perfil', 'Tipo de vidrio'],
                 'productos' => [
                     ['Puerta de aluminio batiente', 'Hoja única con apertura interior o exterior, marco reforzado y burlete perimetral.'],
@@ -58,6 +64,7 @@ class ProductosSeeder extends Seeder
                 ],
             ],
             'Ventanas' => [
+                'unidad'    => 'alto_ancho',
                 'variantes' => ['Sistema de apertura', 'Espesor', 'Color de perfil', 'Tipo de vidrio'],
                 'productos' => [
                     ['Ventana corrediza serie 25', 'Dos hojas deslizantes con perfil de 25 mm, mosquitero retráctil incluido.'],
@@ -68,6 +75,7 @@ class ProductosSeeder extends Seeder
                 ],
             ],
             'Cortinas' => [
+                'unidad'    => 'ancho',
                 'variantes' => ['Color de perfil', 'Acabado'],
                 'productos' => [
                     ['Cortina de enrollar de PVC', 'Láminas de PVC rígido de alta densidad, accionamiento manual por cinta.'],
@@ -77,6 +85,7 @@ class ProductosSeeder extends Seeder
                 ],
             ],
             'Persianas' => [
+                'unidad'    => 'alto',
                 'variantes' => ['Color de perfil', 'Acabado'],
                 'productos' => [
                     ['Persiana de aluminio de 40 mm', 'Lamas de 40 mm de ancho, lamas reforzadas con doble pared de aluminio.'],
@@ -114,6 +123,7 @@ class ProductosSeeder extends Seeder
                     ['codigo' => $codigo],
                     [
                         'categoria_id'       => $categoria->id,
+                        'unidad_id'          => $unidades[$config['unidad']],
                         'nombre'             => $nombre,
                         'descripcion'        => $descripcion,
                         'descripcion_tecnica'=> null,

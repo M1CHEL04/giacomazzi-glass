@@ -120,6 +120,13 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                             {{ $producto->categoria?->nombre ?? '—' }}
                         </span>
                     </div>
+                    <div class="col-sm-6">
+                        <div class="info-field-label">Se cotiza por</div>
+                        <span class="badge rounded-pill text-primary bg-primary-subtle"
+                            style="font-size:11px; padding:3px 12px; font-weight:600;">
+                            {{ $producto->unidad?->nombre ?? '—' }}
+                        </span>
+                    </div>
                     <div class="col-12">
                         <div class="info-field-label">Descripción</div>
                         <p class="mb-0 text-secondary" style="font-size:14px; line-height:1.65;">

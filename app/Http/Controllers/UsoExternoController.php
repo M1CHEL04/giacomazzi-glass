@@ -173,6 +173,7 @@ class UsoExternoController extends Controller
         try {
             $producto = Producto::with([
                 'categoria:id,nombre,activo',
+                'unidad',
                 'imagenes' => fn($q) => $q
                     ->where('activa', true)
                     ->orderByDesc('es_principal')
@@ -180,7 +181,7 @@ class UsoExternoController extends Controller
                 'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
                 'valoresVariantes.variante:id,nombre',
             ])
-                ->select(['id', 'categoria_id', 'nombre', 'descripcion', 'descripcion_tecnica'])
+                ->select(['id', 'categoria_id', 'unidad_id', 'nombre', 'descripcion', 'descripcion_tecnica'])
                 ->where('activo', true)
                 ->findOrFail($id);
 

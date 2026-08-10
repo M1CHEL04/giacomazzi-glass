@@ -18,12 +18,12 @@ class CotizacionesSeeder extends Seeder
     public function run(): void
     {
         // Usa productos reales para el snapshot; si no hay, usa un fallback.
-        $productos = Producto::get(['id', 'nombre', 'codigo']);
+        $productos = Producto::with('unidad')->get(['id', 'nombre', 'codigo', 'unidad_id']);
         $pool = $productos->isNotEmpty() ? $productos : collect([
-            (object) ['id' => 101, 'nombre' => 'Ventana corrediza',  'codigo' => 'VC-001'],
-            (object) ['id' => 102, 'nombre' => 'Puerta placa',       'codigo' => 'PP-002'],
-            (object) ['id' => 103, 'nombre' => 'Mampara de ducha',   'codigo' => 'MD-003'],
-            (object) ['id' => 104, 'nombre' => 'Cortina de enrollar', 'codigo' => 'CE-004'],
+            (object) ['id' => 101, 'nombre' => 'Ventana corrediza',  'codigo' => 'VC-001', 'unidad' => null],
+            (object) ['id' => 102, 'nombre' => 'Puerta placa',       'codigo' => 'PP-002', 'unidad' => null],
+            (object) ['id' => 103, 'nombre' => 'Mampara de ducha',   'codigo' => 'MD-003', 'unidad' => null],
+            (object) ['id' => 104, 'nombre' => 'Cortina de enrollar', 'codigo' => 'CE-004', 'unidad' => null],
         ]);
 
         // Cantidad de cotizaciones por mes (peso: varios 0, algunos altos)
@@ -40,19 +40,32 @@ class CotizacionesSeeder extends Seeder
                     ->addMinutes(rand(0, 59));
 
                 $items = $pool->random(min(rand(1, 4), $pool->count()))
-                    ->map(fn ($p) => [
-                        'key'         => (string) $p->id,
-                        'producto_id' => $p->id,
-                        'nombre'      => $p->nombre,
-                        'codigo'      => $p->codigo,
-                        'selecciones' => [],
-                        'cantidad'    => rand(1, 3),
-                    ])
+                    ->map(function ($p) {
+                        // Misma forma que arma CarritoController::agregar.
+                        $alto  = $p->unidad?->requiere_alto ? round(rand(500, 3000) / 1000, 3) : null;
+                        $ancho = $p->unidad?->requiere_ancho ? round(rand(500, 3000) / 1000, 3) : null;
+
+                        return [
+                            'key'          => (string) $p->id,
+                            'producto_id'  => $p->id,
+                            'nombre'       => $p->nombre,
+                            'codigo'       => $p->codigo,
+                            'selecciones'  => [],
+                            'cantidad'     => rand(1, 3),
+                            'unidad'       => $p->unidad?->codigo ?? 'unidades',
+                            'unidad_label' => $p->unidad?->nombre ?? 'Unidades',
+                            'simbolo'      => $p->unidad?->simbolo ?? 'u',
+                            'alto'         => $alto,
+                            'ancho'        => $ancho,
+                            'm2'           => ($alto !== null && $ancho !== null) ? round($alto * $ancho, 3) : null,
+                        ];
+                    })
                     ->values()
                     ->all();
 
                 $c = new Cotizacion();
-                $c->cantidad_items = array_sum(array_column($items, 'cantidad'));
+                // Igual que CarritoController::totalLineas: una fila por línea.
+                $c->cantidad_items = count($items);
                 $c->items          = $items;
                 $c->created_at     = $fecha;
                 $c->updated_at     = $fecha;

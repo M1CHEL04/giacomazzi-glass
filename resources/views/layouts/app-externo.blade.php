@@ -226,7 +226,8 @@
     <script src="{{ versioned_asset('js/modules/layout.js') }}"></script>
 
     <script>
-        window.__carritoInit = {!! json_encode(['cantidad' => array_sum(array_map(fn($i) => $i['cantidad'] ?? 1, session('carrito', []))), 'carrito' => array_values(session('carrito', []))]) !!};
+        // `cantidad` es la cantidad de líneas del carrito (ver CarritoController::totalLineas).
+        window.__carritoInit = {!! json_encode(['cantidad' => count(session('carrito', [])), 'carrito' => array_values(session('carrito', []))]) !!};
     </script>
     <script src="{{ versioned_asset('js/carrito.js') }}"></script>
 

@@ -133,6 +133,20 @@
 
     /* ---- Agregar al carrito ---- */
     var MAX_UNIDADES = 10;
+    var MAX_METROS   = 100;   // debe coincidir con CarritoController::MAX_METROS
+    var MIN_METROS   = 0.001;
+
+    /** Interpreta una medida tipeada a mano: acepta coma o punto decimal. */
+    function parseMetros(str) {
+        var n = parseFloat(String(str == null ? '' : str).trim().replace(',', '.'));
+        return isNaN(n) ? null : Math.round(n * 1000) / 1000;
+    }
+
+    /** Formatea metros con coma decimal y sin ceros de relleno (2,5 / 12,756). */
+    function fmtMetros(n) {
+        if (n == null || isNaN(n)) return '';
+        return (Math.round(n * 1000) / 1000).toString().replace('.', ',');
+    }
 
     function initCarrito() {
         var btn     = document.getElementById('btn-agregar-carrito');
@@ -140,6 +154,52 @@
         var spinner = document.getElementById('btn-carrito-spinner');
         var textEl  = document.getElementById('btn-carrito-text');
         if (!btn || !window.Carrito) return;
+
+        // ── Medidas en metros (sólo si el producto se cotiza por medida) ──
+        var medidasEl = document.getElementById('ps-medidas');
+        var altoInput  = document.getElementById('ps-alto');
+        var anchoInput = document.getElementById('ps-ancho');
+        var m2El       = document.getElementById('ps-m2');
+        var errorEl    = document.getElementById('ps-medidas-error');
+
+        function mostrarError(msg) {
+            if (!errorEl) return;
+            errorEl.textContent = msg;
+            errorEl.classList.toggle('d-none', !msg);
+        }
+
+        /** Lee y valida una medida; marca el input y devuelve null si no sirve. */
+        function leerMedida(input, etiqueta, errores) {
+            if (!input) return null;
+            var n = parseMetros(input.value);
+            var valido = n !== null && n >= MIN_METROS && n <= MAX_METROS;
+            input.classList.toggle('is-invalid', !valido);
+            if (!valido) {
+                errores.push(n === null || n <= 0
+                    ? 'Ingresá el ' + etiqueta + ' en metros.'
+                    : 'El ' + etiqueta + ' no puede superar los ' + MAX_METROS + ' m.');
+                return null;
+            }
+            return n;
+        }
+
+        function actualizarM2() {
+            if (!m2El) return;
+            var alto  = parseMetros(altoInput ? altoInput.value : '');
+            var ancho = parseMetros(anchoInput ? anchoInput.value : '');
+            m2El.textContent = (alto && ancho)
+                ? '= ' + fmtMetros(alto * ancho) + ' m² por pieza'
+                : '';
+        }
+
+        [altoInput, anchoInput].forEach(function (input) {
+            if (!input) return;
+            input.addEventListener('input', function () {
+                input.classList.remove('is-invalid');
+                mostrarError('');
+                actualizarM2();
+            });
+        });
 
         // ── Stepper de unidades ──
         var cantInput = document.getElementById('ps-cantidad');
@@ -181,14 +241,34 @@
                 if (id) valorIds.push(id);
             });
 
+            // Las medidas son obligatorias cuando la unidad del producto las pide.
+            var medidas = {};
+            if (medidasEl) {
+                var errores = [];
+                if (medidasEl.dataset.requiereAlto === '1') {
+                    medidas.alto = leerMedida(altoInput, 'alto', errores);
+                }
+                if (medidasEl.dataset.requiereAncho === '1') {
+                    medidas.ancho = leerMedida(anchoInput, 'ancho', errores);
+                }
+                if (errores.length) {
+                    mostrarError(errores[0]);
+                    var primerInvalido = medidasEl.querySelector('.is-invalid');
+                    if (primerInvalido) primerInvalido.focus();
+                    return;
+                }
+                mostrarError('');
+            }
+
             setLoading(true);
             if (textEl) textEl.textContent = 'Agregando...';
 
-            window.Carrito.agregar(productoId, valorIds, cantidad)
+            window.Carrito.agregar(productoId, valorIds, cantidad, medidas)
                 .then(function (data) {
                     setLoading(false);
                     if (!data.ok) {
                         if (textEl) textEl.textContent = 'Agregar al carrito';
+                        mostrarError(data.message || 'No se pudo agregar el producto.');
                         return;
                     }
                     if (textEl) textEl.textContent = '¡Agregado!';

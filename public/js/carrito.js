@@ -11,6 +11,44 @@
 
     var MAX_UNIDADES = 10;
 
+    /** Formatea metros con coma decimal y sin ceros de relleno (2,5 / 12,756). */
+    function fmt(n) {
+        if (n == null || isNaN(n)) return '';
+        return (Math.round(n * 1000) / 1000).toString().replace('.', ',');
+    }
+
+    /**
+     * Magnitud de una línea, según su unidad. Los carritos que quedaron en
+     * sesión antes de existir las unidades no traen `unidad`: se asumen piezas.
+     *
+     * Devuelve { detalle, total } en texto: `detalle` es la medida de una pieza
+     * y `total` el acumulado cuando hay más de una.
+     */
+    function magnitud(item) {
+        var unidad = item.unidad || 'unidades';
+        var cant   = item.cantidad != null ? item.cantidad : 1;
+
+        if (unidad === 'alto_ancho') {
+            var m2 = item.m2 != null ? item.m2 : (item.alto * item.ancho);
+            return {
+                detalle: fmt(item.alto) + ' m × ' + fmt(item.ancho) + ' m = ' + fmt(m2) + ' m²',
+                total:   cant > 1 ? fmt(m2 * cant) + ' m² totales' : '',
+            };
+        }
+        if (unidad === 'alto' || unidad === 'ancho') {
+            var medida = unidad === 'alto' ? item.alto : item.ancho;
+            var label  = unidad === 'alto' ? 'Alto' : 'Ancho';
+            return {
+                detalle: label + ': ' + fmt(medida) + ' m',
+                total:   cant > 1 ? fmt(medida * cant) + ' m totales' : '',
+            };
+        }
+        return {
+            detalle: cant + (cant === 1 ? ' unidad' : ' unidades'),
+            total:   '',
+        };
+    }
+
     var state = (window.__carritoInit && typeof window.__carritoInit === 'object')
         ? { cantidad: window.__carritoInit.cantidad, items: window.__carritoInit.carrito }
         : { cantidad: 0, items: [] };
@@ -72,11 +110,22 @@
             }
             var cant  = item.cantidad != null ? item.cantidad : 1;
             var keyAt = escHtml(item.key);
+
+            // Medidas de la línea (sólo productos que no se cotizan por pieza).
+            var medidas = '';
+            if (item.unidad && item.unidad !== 'unidades') {
+                var mag = magnitud(item);
+                medidas = '<div class="carrito-item-medidas">' + escHtml(mag.detalle) +
+                    (mag.total ? ' <span class="carrito-item-total">· ' + escHtml(mag.total) + '</span>' : '') +
+                    '</div>';
+            }
+
             html +=
                 '<li class="carrito-item">' +
                     '<div class="carrito-item-info">' +
                         '<span class="carrito-item-nombre">' + escHtml(item.nombre) + '</span>' +
                         sels +
+                        medidas +
                     '</div>' +
                     '<div class="carrito-item-controls">' +
                         '<button class="carrito-item-remove" data-key="' + keyAt + '" aria-label="Eliminar del carrito">' +
@@ -160,7 +209,16 @@
                     return s.variante + ': ' + s.valor;
                 }).join(', ') + ')';
             }
-            if (cant > 1) linea += ' ×' + cant;
+
+            // Siempre se informa la magnitud; el multiplicador de piezas y el
+            // total sólo cuando se pidió más de una.
+            var mag    = magnitud(item);
+            var porPza = item.unidad && item.unidad !== 'unidades';
+            linea += ' — ' + mag.detalle;
+            if (porPza && cant > 1) {
+                linea += ' ×' + cant + ' pzas (' + mag.total + ')';
+            }
+
             msg += linea + '\n';
         });
 
@@ -181,8 +239,12 @@
 
     // ── API pública ────────────────────────────────────────────────────────────
     window.Carrito = {
-        agregar: function (productoId, valorIds, cantidad) {
-            return post(URLS.agregar, { producto_id: productoId, valor_ids: valorIds, cantidad: cantidad || 1 })
+        agregar: function (productoId, valorIds, cantidad, medidas) {
+            var payload = { producto_id: productoId, valor_ids: valorIds, cantidad: cantidad || 1 };
+            if (medidas && medidas.alto != null)  payload.alto  = medidas.alto;
+            if (medidas && medidas.ancho != null) payload.ancho = medidas.ancho;
+
+            return post(URLS.agregar, payload)
                 .then(function (data) {
                     if (data.ok) {
                         updateBadges(data.cantidad);

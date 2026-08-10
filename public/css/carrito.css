@@ -124,6 +124,20 @@
     line-height: 1.6;
 }
 
+/* Medidas de la línea (productos que no se cotizan por pieza). */
+.carrito-item-medidas {
+    font-size: .76rem;
+    font-weight: 600;
+    color: #287452;
+    margin-top: .3rem;
+    line-height: 1.6;
+}
+
+.carrito-item-total {
+    font-weight: 500;
+    color: #666;
+}
+
 .carrito-item-remove {
     background: none;
     border: none;

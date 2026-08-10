@@ -143,8 +143,45 @@
                     </div>
                     @endif
 
+                    @php
+                    $unidad = $producto->unidad;
+                    $requiereAlto = (bool) $unidad?->requiere_alto;
+                    $requiereAncho = (bool) $unidad?->requiere_ancho;
+                    $esSuperficie = $requiereAlto && $requiereAncho;
+                    @endphp
+
+                    {{-- Medidas: sólo para productos que no se cotizan por pieza --}}
+                    @if($requiereAlto || $requiereAncho)
+                    <div class="ps-medidas" id="ps-medidas"
+                        data-requiere-alto="{{ $requiereAlto ? '1' : '0' }}"
+                        data-requiere-ancho="{{ $requiereAncho ? '1' : '0' }}">
+                        <span class="ps-medidas-label">Ingresá las medidas en metros</span>
+                        <div class="ps-medidas-campos">
+                            @if($requiereAlto)
+                            <div class="ps-medida">
+                                <label class="ps-medida-label" for="ps-alto">Alto (m)</label>
+                                <input type="text" inputmode="decimal" class="ps-medida-input"
+                                    id="ps-alto" placeholder="0,000" autocomplete="off">
+                            </div>
+                            @endif
+                            @if($requiereAncho)
+                            <div class="ps-medida">
+                                <label class="ps-medida-label" for="ps-ancho">Ancho (m)</label>
+                                <input type="text" inputmode="decimal" class="ps-medida-input"
+                                    id="ps-ancho" placeholder="0,000" autocomplete="off">
+                            </div>
+                            @endif
+                        </div>
+                        @if($esSuperficie)
+                        <div class="ps-medidas-total" id="ps-m2" aria-live="polite"></div>
+                        @endif
+                        <div class="ps-medidas-error d-none" id="ps-medidas-error" role="alert"></div>
+                    </div>
+                    @endif
+
                     <div class="ps-acciones">
-                        <div class="ps-cantidad" role="group" aria-label="Cantidad de unidades">
+                        <div class="ps-cantidad" role="group"
+                            aria-label="{{ $requiereAlto || $requiereAncho ? 'Cantidad de piezas' : 'Cantidad de unidades' }}">
                             <button type="button" class="ps-cantidad-btn" id="ps-cant-menos"
                                 aria-label="Quitar una unidad">
                                 <x-heroicon-o-minus />

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Categoria;
+use App\Models\UnidadMedida;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,7 @@ return new class extends Migration
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Categoria::class)->index();
+            $table->foreignIdFor(UnidadMedida::class, 'unidad_id')->index();
             $table->string('nombre');
             $table->string('descripcion');
             $table->string('descripcion_tecnica')->nullable();

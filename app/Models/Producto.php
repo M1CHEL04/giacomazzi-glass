@@ -10,6 +10,7 @@ class Producto extends Model
 
     protected $fillable = [
         'categoria_id',
+        'unidad_id',
         'nombre',
         'descripcion',
         'descripcion_tecnica',
@@ -20,6 +21,11 @@ class Producto extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
+
+    public function unidad()
+    {
+        return $this->belongsTo(UnidadMedida::class, 'unidad_id');
     }
 
     public function valoresVariantes()

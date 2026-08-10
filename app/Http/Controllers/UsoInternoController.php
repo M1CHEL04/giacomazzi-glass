@@ -6,6 +6,7 @@ use App\Models\Categoria;
 use App\Models\Cotizacion;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
+use App\Models\UnidadMedida;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -233,7 +234,7 @@ class UsoInternoController extends Controller
             $categoriaId = $request->input('categoria_id');
             $activo      = $request->input('activo');
 
-            $productos = Producto::with('categoria')
+            $productos = Producto::with(['categoria', 'unidad'])
                 ->when($search, fn($q) => $q->where(function ($q) use ($search) {
                     $q->where('nombre', 'like', '%' . $search . '%')
                         ->orWhere('codigo', 'like', '%' . $search . '%');
@@ -254,6 +255,7 @@ class UsoInternoController extends Controller
                         'codigo'      => $p->codigo,
                         'descripcion' => $p->descripcion,
                         'categoria'   => $p->categoria ? $p->categoria->nombre : '—',
+                        'unidad'      => $p->unidad ? $p->unidad->nombre : '—',
                         'activo'      => (bool) $p->activo,
                     ]),
                     'pagination' => [
@@ -284,6 +286,7 @@ class UsoInternoController extends Controller
         try {
             $producto = Producto::with([
                 'categoria',
+                'unidad',
                 'valoresVariantes.variante',
                 'imagenes',
                 'variantes',
@@ -302,9 +305,10 @@ class UsoInternoController extends Controller
     {
         try {
             $categorias       = Categoria::orderBy('nombre')->get();
+            $unidades         = UnidadMedida::orderBy('id')->get();
             $initialVariantes = [];
 
-            return view('UsoInterno.Productos.createProducto', compact('categorias', 'initialVariantes'));
+            return view('UsoInterno.Productos.createProducto', compact('categorias', 'unidades', 'initialVariantes'));
         } catch (\Exception $e) {
             Log::error('Error al cargar formulario de creación de producto: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al cargar el formulario.');
@@ -315,6 +319,7 @@ class UsoInternoController extends Controller
     {
         $request->validate([
             'categoria_id'        => 'required|exists:categorias,id',
+            'unidad_id'           => 'required|exists:unidades_medida,id',
             'nombre'              => 'required|string|max:255',
             'codigo'              => 'required|string|max:100|unique:productos,codigo',
             'descripcion'         => 'required|string|max:255',
@@ -326,6 +331,8 @@ class UsoInternoController extends Controller
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
+            'unidad_id.required'    => 'La unidad de cotización es obligatoria.',
+            'unidad_id.exists'      => 'La unidad de cotización seleccionada no existe.',
             'nombre.required'       => 'El nombre es obligatorio.',
             'nombre.max'            => 'El nombre no puede superar los 255 caracteres.',
             'codigo.required'       => 'El código es obligatorio.',
@@ -340,6 +347,7 @@ class UsoInternoController extends Controller
         try {
             $producto = Producto::create([
                 'categoria_id'        => $request->categoria_id,
+                'unidad_id'           => $request->unidad_id,
                 'nombre'              => $request->nombre,
                 'codigo'              => $request->codigo,
                 'descripcion'         => $request->descripcion,
@@ -374,8 +382,9 @@ class UsoInternoController extends Controller
     public function editProducto(String $id)
     {
         try {
-            $producto   = Producto::with(['categoria', 'valoresVariantes.variante', 'imagenes'])->findOrFail($id);
+            $producto   = Producto::with(['categoria', 'unidad', 'valoresVariantes.variante', 'imagenes'])->findOrFail($id);
             $categorias = Categoria::orderBy('nombre')->get();
+            $unidades   = UnidadMedida::orderBy('id')->get();
 
             $initialVariantes = $producto->valoresVariantes->map(fn($vv) => [
                 'tipo'              => 'existente',
@@ -386,7 +395,7 @@ class UsoInternoController extends Controller
                 '_lid'              => (string) Str::uuid(),
             ])->values()->toArray();
 
-            return view('UsoInterno.Productos.createProducto', compact('producto', 'categorias', 'initialVariantes'));
+            return view('UsoInterno.Productos.createProducto', compact('producto', 'categorias', 'unidades', 'initialVariantes'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             throw $e;
         } catch (\Exception $e) {
@@ -401,6 +410,7 @@ class UsoInternoController extends Controller
 
         $request->validate([
             'categoria_id'        => 'required|exists:categorias,id',
+            'unidad_id'           => 'required|exists:unidades_medida,id',
             'nombre'              => 'required|string|max:255',
             'codigo'              => 'required|string|max:100|unique:productos,codigo,' . $producto->id,
             'descripcion'         => 'required|string|max:255',
@@ -415,6 +425,8 @@ class UsoInternoController extends Controller
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
+            'unidad_id.required'    => 'La unidad de cotización es obligatoria.',
+            'unidad_id.exists'      => 'La unidad de cotización seleccionada no existe.',
             'nombre.required'       => 'El nombre es obligatorio.',
             'codigo.required'       => 'El código es obligatorio.',
             'codigo.unique'         => 'Ya existe un producto con ese código.',
@@ -427,6 +439,7 @@ class UsoInternoController extends Controller
         try {
             $producto->update([
                 'categoria_id'        => $request->categoria_id,
+                'unidad_id'           => $request->unidad_id,
                 'nombre'              => $request->nombre,
                 'codigo'              => $request->codigo,
                 'descripcion'         => $request->descripcion,

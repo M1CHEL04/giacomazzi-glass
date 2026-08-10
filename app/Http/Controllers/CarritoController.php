@@ -8,18 +8,29 @@ use App\Models\ValorVariante;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class CarritoController extends Controller
 {
-    /** Tope de unidades por línea del carrito. */
+    /** Tope de piezas por línea del carrito. */
     private const MAX_UNIDADES = 10;
+
+    /** Tope de una medida en metros (guarda contra errores de tipeo). */
+    private const MAX_METROS = 100;
+
+    /** Decimales admitidos en las medidas (ej. 5,546 m). */
+    private const DECIMALES_METROS = 3;
 
     public function __construct(private SkuService $skuService) {}
 
-    /** Total de unidades del carrito (suma de cantidades; ausente = 1). */
-    private function totalUnidades(array $carrito): int
+    /**
+     * Cantidad de líneas del carrito. Es lo que muestra el badge y lo que se
+     * guarda en cotizaciones.cantidad_items: con unidades y metros conviviendo,
+     * sumar las cantidades no representaría nada.
+     */
+    private function totalLineas(array $carrito): int
     {
-        return array_sum(array_map(fn ($i) => $i['cantidad'] ?? 1, $carrito));
+        return count($carrito);
     }
 
     public function obtener()
@@ -28,7 +39,7 @@ class CarritoController extends Controller
             $carrito = session('carrito', []);
 
             return response()->json([
-                'cantidad' => $this->totalUnidades($carrito),
+                'cantidad' => $this->totalLineas($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -38,6 +49,62 @@ class CarritoController extends Controller
 
             return response()->json(['cantidad' => 0, 'carrito' => []], 500);
         }
+    }
+
+    /**
+     * Valida alto/ancho según la unidad del producto y los normaliza a metros
+     * con DECIMALES_METROS decimales. Devuelve [alto, ancho], null cuando la
+     * unidad no pide esa medida.
+     *
+     * Acepta coma o punto decimal: el input de la ficha es de texto libre.
+     */
+    private function validarMedidas(Request $request, Producto $producto): array
+    {
+        $unidad        = $producto->unidad;
+        $requiereAlto  = (bool) ($unidad?->requiere_alto);
+        $requiereAncho = (bool) ($unidad?->requiere_ancho);
+
+        $normalizar = fn ($v) => is_string($v) ? str_replace(',', '.', trim($v)) : $v;
+
+        $datos = [
+            'alto'  => $normalizar($request->input('alto')),
+            'ancho' => $normalizar($request->input('ancho')),
+        ];
+
+        $reglaMedida = 'required|numeric|min:0.001|max:' . self::MAX_METROS;
+
+        Validator::make($datos, [
+            'alto'  => $requiereAlto ? $reglaMedida : 'nullable|prohibited',
+            'ancho' => $requiereAncho ? $reglaMedida : 'nullable|prohibited',
+        ], [
+            'alto.required'  => 'El alto es obligatorio para este producto.',
+            'ancho.required' => 'El ancho es obligatorio para este producto.',
+            'alto.prohibited'  => 'Este producto no se cotiza por alto.',
+            'ancho.prohibited' => 'Este producto no se cotiza por ancho.',
+            'numeric'          => 'La medida debe ser un número en metros.',
+            'min'              => 'La medida debe ser mayor a 0.',
+            'max'              => 'La medida no puede superar los :max metros.',
+        ])->validate();
+
+        return [
+            $requiereAlto ? round((float) $datos['alto'], self::DECIMALES_METROS) : null,
+            $requiereAncho ? round((float) $datos['ancho'], self::DECIMALES_METROS) : null,
+        ];
+    }
+
+    /**
+     * Sufijo determinístico de la clave de línea a partir de las medidas.
+     * Vacío cuando el producto se cotiza por unidades.
+     */
+    private function sufijoMedidas(?float $alto, ?float $ancho): string
+    {
+        if ($alto === null && $ancho === null) {
+            return '';
+        }
+
+        $fmt = fn (?float $v) => $v === null ? '' : number_format($v, self::DECIMALES_METROS, '.', '');
+
+        return '_' . $fmt($alto) . 'x' . $fmt($ancho);
     }
 
     public function agregar(Request $request)
@@ -50,14 +117,19 @@ class CarritoController extends Controller
         ]);
 
         try {
-            $productoId    = $request->integer('producto_id');
+            $productoId     = $request->integer('producto_id');
             $cantidadPedida = max(1, $request->integer('cantidad', 1));
-            $valorIds      = array_map('intval', $request->input('valor_ids', []));
+            $valorIds       = array_map('intval', $request->input('valor_ids', []));
             sort($valorIds);
 
-            $producto = Producto::select(['id', 'nombre', 'codigo'])
+            $producto = Producto::select(['id', 'nombre', 'codigo', 'unidad_id'])
+                ->with('unidad')
                 ->where('activo', true)
                 ->findOrFail($productoId);
+
+            // Las medidas dependen de la unidad del producto, así que recién se
+            // pueden validar una vez que sabemos cuál es.
+            [$alto, $ancho] = $this->validarMedidas($request, $producto);
 
             $valores = ValorVariante::with('variante:id,nombre')
                 ->whereIn('id', $valorIds)
@@ -74,29 +146,44 @@ class CarritoController extends Controller
             $sku    = $this->skuService->buscarSku($productoId, $valores);
             $codigo = $sku ?? $producto->codigo ?? '';
 
-            $key = $productoId . (empty($valorIds) ? '' : '_' . implode('_', $valorIds));
+            // Las medidas forman parte de la clave: dos medidas distintas del
+            // mismo producto son dos líneas separadas del carrito.
+            $key = $productoId
+                . (empty($valorIds) ? '' : '_' . implode('_', $valorIds))
+                . $this->sufijoMedidas($alto, $ancho);
 
             $carrito = session('carrito', []);
 
-            // Si la línea ya existe, sumamos las unidades (tope MAX_UNIDADES).
+            // Si la línea ya existe (mismo producto, variantes y medidas),
+            // sumamos las piezas (tope MAX_UNIDADES).
             $cantidadExistente = $carrito[$key]['cantidad'] ?? 0;
             $cantidad = min(self::MAX_UNIDADES, $cantidadExistente + $cantidadPedida);
 
             $carrito[$key] = [
-                'key'         => $key,
-                'producto_id' => $productoId,
-                'nombre'      => $producto->nombre,
-                'codigo'      => $codigo,
-                'selecciones' => $selecciones,
-                'cantidad'    => $cantidad,
+                'key'          => $key,
+                'producto_id'  => $productoId,
+                'nombre'       => $producto->nombre,
+                'codigo'       => $codigo,
+                'selecciones'  => $selecciones,
+                'cantidad'     => $cantidad,
+                'unidad'       => $producto->unidad?->codigo ?? 'unidades',
+                'unidad_label' => $producto->unidad?->nombre ?? 'Unidades',
+                'simbolo'      => $producto->unidad?->simbolo ?? 'u',
+                'alto'         => $alto,
+                'ancho'        => $ancho,
+                'm2'           => ($alto !== null && $ancho !== null)
+                    ? round($alto * $ancho, self::DECIMALES_METROS)
+                    : null,
             ];
             session(['carrito' => $carrito]);
 
             return response()->json([
                 'ok'       => true,
-                'cantidad' => $this->totalUnidades($carrito),
+                'cantidad' => $this->totalLineas($carrito),
                 'carrito'  => array_values($carrito),
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::error('CarritoController::agregar - Error al agregar producto al carrito', [
                 'producto_id' => $request->input('producto_id'),
@@ -119,7 +206,7 @@ class CarritoController extends Controller
 
             return response()->json([
                 'ok'       => true,
-                'cantidad' => $this->totalUnidades($carrito),
+                'cantidad' => $this->totalLineas($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -154,7 +241,7 @@ class CarritoController extends Controller
 
             return response()->json([
                 'ok'       => true,
-                'cantidad' => $this->totalUnidades($carrito),
+                'cantidad' => $this->totalLineas($carrito),
                 'carrito'  => array_values($carrito),
             ]);
         } catch (\Exception $e) {
@@ -200,7 +287,7 @@ class CarritoController extends Controller
         if (! empty($carrito)) {
             try {
                 Cotizacion::create([
-                    'cantidad_items' => $this->totalUnidades($carrito),
+                    'cantidad_items' => $this->totalLineas($carrito),
                     'items'          => array_values($carrito),
                 ]);
             } catch (\Exception $e) {

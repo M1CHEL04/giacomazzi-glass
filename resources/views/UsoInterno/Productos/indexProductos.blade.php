@@ -58,6 +58,7 @@
             <div style="width: 110px;">Código</div>
             <div class="flex-grow-1">Nombre</div>
             <div style="width: 180px;">Categoría</div>
+            <div style="width: 150px;">Se cotiza por</div>
             <div style="width: 100px;">Estado</div>
             <div class="text-end" style="width: 60px;">Acciones</div>
         </div>
@@ -79,6 +80,11 @@
                 <div style="width: 180px;">
                     <span class="badge rounded-pill text-primary bg-primary-subtle" style="font-size: 10px; padding: 3px 10px;">
                         {{ $producto->categoria?->nombre ?? '—' }}
+                    </span>
+                </div>
+                <div style="width: 150px;">
+                    <span class="badge rounded-pill text-secondary bg-secondary-subtle" style="font-size: 10px; padding: 3px 10px;">
+                        {{ $producto->unidad?->nombre ?? '—' }}
                     </span>
                 </div>
                 <div style="width: 100px;">

@@ -80,6 +80,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${escapeHtml(producto.categoria)}
                         </span>
                     </div>
+                    <div style="width: 150px;">
+                        <span class="badge rounded-pill text-secondary bg-secondary-subtle" style="font-size: 10px; padding: 3px 10px;">
+                            ${escapeHtml(producto.unidad)}
+                        </span>
+                    </div>
                     <div style="width: 100px;">
                         <span class="badge rounded-pill ${producto.activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle'}" style="font-size: 10px; padding: 3px 10px;">
                             ${producto.activo ? 'Activo' : 'Inactivo'}

@@ -335,6 +335,82 @@
     text-underline-offset: 3px;
 }
 
+/* ---- Medidas en metros ----
+   Se muestran sólo cuando la unidad del producto las pide (alto, ancho o
+   alto × ancho). El rótulo repite el patrón de .ps-variante-label para que
+   lea como un grupo más del selector. */
+.ps-medidas {
+    margin-bottom: 1.25rem;
+}
+
+.ps-medidas-label {
+    display: block;
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--external-secondary-soft);
+    margin-bottom: 0.45rem;
+}
+
+.ps-medidas-campos {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+
+.ps-medida {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 8.5rem;
+    flex: 1 1 8.5rem;
+}
+
+.ps-medida-label {
+    font-size: var(--fs-label);
+    font-weight: 600;
+    color: var(--external-secondary-soft);
+}
+
+/* Misma altura y borde que .ps-cantidad para que la columna quede pareja. */
+.ps-medida-input {
+    min-height: 46px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid rgba(40, 116, 82, 0.38);
+    border-radius: 3px;
+    background: var(--external-white);
+    color: var(--external-secondary);
+    font-family: inherit;
+    font-size: var(--fs-small);
+    font-weight: 600;
+    width: 100%;
+}
+
+.ps-medida-input:focus {
+    outline: none;
+    border-color: var(--external-primary);
+    box-shadow: 0 0 0 3px var(--g-hover-verde);
+}
+
+.ps-medida-input.is-invalid {
+    border-color: #c0392b;
+}
+
+.ps-medidas-total {
+    margin-top: 0.5rem;
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--external-primary);
+    min-height: 1.2em;
+}
+
+.ps-medidas-error {
+    margin-top: 0.4rem;
+    font-size: var(--fs-small);
+    color: #c0392b;
+}
+
 /* ---- CTAs ---- */
 .ps-acciones {
     display: flex;
