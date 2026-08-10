@@ -96,7 +96,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
                 personalizadas y terminaciones cuidadas.
             </p>
             <p class="about-intro-text">
-                Además, somos representantes oficiales de puertas Oblaka y
+                Además, somos representantes oficiales de puertas Oblak y
                 equipamiento para cocinas TST, lo que nos permite ampliar nuestra oferta con
                 productos reconocidos por su calidad y diseño.
             </p>
