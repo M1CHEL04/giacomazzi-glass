@@ -139,12 +139,15 @@ $waHref = $waNumero
 
         <figure class="home-medida-figure">
             <div class="home-medida-figure-body">
-                <img src="{{ imagen_src('images/producto_medida.JPG', 800) }}"
+                {{-- Sin width/height a propósito: acá el aspect-ratio está sobre la
+                     propia <img> con width:100%, así que el ancho intrínseco entra en
+                     el cálculo de la grilla y declararlo achica la columna. El CLS ya
+                     lo cubre `aspect-ratio: 4/3` en .home-medida-img (home.css:369). --}}
+                <img src="{{ imagen_src('images/producto_medida.JPG', 1400) }}"
                     srcset="{{ imagen_srcset('images/producto_medida.JPG') }}"
-                    sizes="(min-width: 992px) 560px, 100vw"
+                    sizes="(min-width: 992px) 560px, (min-width: 768px) 46vw, 100vw"
                     alt="Mampara fabricada a medida por Aberturas Giacomazzi"
                     class="home-medida-img"
-                    width="800" height="600"
                     loading="lazy" decoding="async">
             </div>
         </figure>
