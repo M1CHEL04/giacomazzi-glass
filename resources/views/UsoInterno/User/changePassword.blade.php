@@ -24,7 +24,7 @@
                 <div class="col-12 col-md-8 col-lg-5">
                     <div class="auth-card">
                         <div class="p-4 p-lg-5">
-                            <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="auth-logo">
+                            <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="auth-logo" width="842" height="113" fetchpriority="high">
                             <hr class="auth-divider">
                             <div class="mb-4">
                                 <h1 class="h4 fw-bold text-success mb-1">Cambiar contraseña</h1>

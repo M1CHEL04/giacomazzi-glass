@@ -98,9 +98,11 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
                         {{-- Imagen existente (solo edición) --}}
                         @if($isEdit && $categoria->imagen_hero)
                         <div id="hero-preview-existente" class="position-relative" style="display:inline-block;">
-                            <img src="{{ asset($categoria->imagen_hero) }}"
+                            <img src="{{ imagen_src($categoria->imagen_hero, 800) }}"
                                 alt="Hero actual"
                                 class="rounded-2 border"
+                                width="80" height="80"
+                                loading="lazy" decoding="async"
                                 style="width:80px;height:80px;object-fit:cover;display:block;">
                             <button type="button" id="btn-quitar-hero"
                                 class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center position-absolute"

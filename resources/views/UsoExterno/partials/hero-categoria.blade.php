@@ -6,7 +6,12 @@
      eso lo metía 9px debajo del navbar. --}}
 <section class="g-hero">
     @if($categoria->imagen_hero)
-    <img src="{{ asset($categoria->imagen_hero) }}" alt="" class="g-hero-bg" aria-hidden="true">
+    <img src="{{ imagen_src($categoria->imagen_hero, 1400) }}"
+        srcset="{{ imagen_srcset($categoria->imagen_hero) }}"
+        sizes="100vw"
+        alt="" class="g-hero-bg" aria-hidden="true"
+        width="2400" height="745"
+        fetchpriority="high" decoding="async">
     @endif
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">

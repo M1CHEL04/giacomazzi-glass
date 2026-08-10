@@ -155,9 +155,11 @@ $formAction = $isEdit
                 @if ($isEdit && $producto->imagenes->where('activa', true)->count() > 0)
                 @foreach ($producto->imagenes->where('activa', true) as $imagen)
                 <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
-                    <img src="{{ route('imagen.show', $imagen) }}"
+                    <img src="{{ $imagen->ruta }}"
                         alt="{{ $imagen->nombre_imagen }}"
-                        class="imagen-thumb">
+                        class="imagen-thumb"
+                        width="100" height="100"
+                        loading="lazy" decoding="async">
                     <div class="imagen-eliminar-overlay">
                         <button type="button"
                             class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"

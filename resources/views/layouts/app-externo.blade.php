@@ -36,7 +36,7 @@
 
                 {{-- Logo --}}
                 <a class="navbar-brand external-logo" href="{{ route('welcome') }}" aria-label="Inicio - Aberturas Giacomazzi">
-                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-logo-img">
+                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-logo-img" width="842" height="113" fetchpriority="high">
                 </a>
 
                 {{-- ── Menú desktop (columna central del grid) ──────────────── --}}
@@ -116,7 +116,7 @@
             {{-- Header del drawer --}}
             <div class="mobile-drawer-header">
                 <a href="{{ route('welcome') }}" class="mobile-drawer-logo" aria-label="Inicio">
-                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="mobile-drawer-logo-img">
+                    <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="mobile-drawer-logo-img" width="842" height="113" decoding="async">
                 </a>
                 <button class="mobile-drawer-close" id="mobile-drawer-close" aria-label="Cerrar menú">
                     <i class="bi bi-x-lg"></i>
@@ -175,7 +175,7 @@
         @endphp
         <div class="container external-footer-inner">
             <a href="{{ route('welcome') }}" class="external-footer-logo" aria-label="Aberturas Giacomazzi">
-                <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-footer-logo-img">
+                <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="external-footer-logo-img" width="842" height="113" loading="lazy" decoding="async">
             </a>
 
             <nav class="external-footer-social" aria-label="Redes sociales">

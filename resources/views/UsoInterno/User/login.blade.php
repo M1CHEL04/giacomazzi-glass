@@ -23,7 +23,7 @@
                 <div class="col-12 col-md-8 col-lg-5">
                     <div class="auth-card">
                         <div class="p-4 p-lg-5">
-                            <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="auth-logo">
+                            <img src="{{ versioned_asset('images/logo.svg') }}" alt="Aberturas Giacomazzi" class="auth-logo" width="842" height="113" fetchpriority="high">
                             <hr class="auth-divider">
                             <div class="mb-4">
                                 <p class="text-uppercase small text-success-emphasis mb-2">Acceso interno</p>

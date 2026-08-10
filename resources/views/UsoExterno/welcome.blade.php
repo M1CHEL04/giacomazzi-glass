@@ -3,6 +3,11 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/home.css') }}">
+{{-- El hero es el LCP: lo pedimos antes de que el parser llegue al <img>. --}}
+<link rel="preload" as="image"
+    href="{{ imagen_src('images/hero_inicio.jpg', 1400) }}"
+    imagesrcset="{{ imagen_srcset('images/hero_inicio.jpg') }}"
+    imagesizes="100vw" fetchpriority="high">
 @endsection
 
 @section('content')
@@ -16,12 +21,12 @@ $waHref = $waNumero
 
 {{-- ── HERO ─────────────────────────────────────────────────────────── --}}
 <section class="home-hero">
-    <picture>
-        <!-- <source media="(max-width: 480px)"
-            srcset="{{ asset('images/posible_hero_mobile.jpg') }}"> -->
-        <img src="{{ asset('images/hero_inicio.jpg') }}" alt=""
-            class="home-hero-bg" aria-hidden="true">
-    </picture>
+    <img src="{{ imagen_src('images/hero_inicio.jpg', 1400) }}"
+        srcset="{{ imagen_srcset('images/hero_inicio.jpg') }}"
+        sizes="100vw"
+        alt="" class="home-hero-bg" aria-hidden="true"
+        width="2400" height="1596"
+        fetchpriority="high" decoding="async">
     <span class="home-hero-scrim"></span>
     <div class="container home-hero-inner">
         <h1 class="home-hero-title">Diseño y solidez en cada abertura</h1>
@@ -64,8 +69,12 @@ $waHref = $waNumero
                     <a href="{{ route('productos.categoria', $categoria->id) }}" class="home-cat">
                         <span class="home-cat-thumb">
                             @if($categoria->imagen_hero)
-                            <img src="{{ asset($categoria->imagen_hero) }}" alt=""
-                                class="home-cat-img" loading="lazy">
+                            <img src="{{ imagen_src($categoria->imagen_hero, 800) }}"
+                                srcset="{{ imagen_srcset($categoria->imagen_hero) }}"
+                                sizes="(min-width: 768px) 380px, (min-width: 576px) 46vw, 72vw"
+                                alt="" class="home-cat-img"
+                                width="800" height="600"
+                                loading="lazy" decoding="async">
                             @else
                             <span class="home-cat-icon"><x-heroicon-o-squares-2x2 /></span>
                             @endif
@@ -130,9 +139,13 @@ $waHref = $waNumero
 
         <figure class="home-medida-figure">
             <div class="home-medida-figure-body">
-                <img src="{{ asset('images/producto_medida.JPG') }}"
+                <img src="{{ imagen_src('images/producto_medida.JPG', 800) }}"
+                    srcset="{{ imagen_srcset('images/producto_medida.JPG') }}"
+                    sizes="(min-width: 992px) 560px, 100vw"
                     alt="Mampara fabricada a medida por Aberturas Giacomazzi"
-                    class="home-medida-img" loading="lazy">
+                    class="home-medida-img"
+                    width="800" height="600"
+                    loading="lazy" decoding="async">
             </div>
         </figure>
     </div>

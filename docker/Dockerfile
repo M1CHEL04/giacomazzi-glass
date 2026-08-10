@@ -18,10 +18,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         libpng-dev \
         libjpeg-dev \
+        libwebp-dev \
         libfreetype6-dev \
         libzip-dev \
         libonig-dev \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install \
         pdo_mysql \
         gd \

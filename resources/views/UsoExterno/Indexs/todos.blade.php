@@ -4,13 +4,22 @@
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
+{{-- El hero es el LCP: lo pedimos antes de que el parser llegue al <img>. --}}
+<link rel="preload" as="image"
+    href="{{ imagen_src('images/heros/hero_todos_productos_2.jpg', 1400) }}"
+    imagesrcset="{{ imagen_srcset('images/heros/hero_todos_productos_2.jpg') }}"
+    imagesizes="100vw" fetchpriority="high">
 @endsection
 
 @section('content')
 
 <section class="g-hero">
-    <img src="{{ asset('images/heros/hero_todos_productos_2.jpg') }}" alt=""
-        class="g-hero-bg" aria-hidden="true">
+    <img src="{{ imagen_src('images/heros/hero_todos_productos_2.jpg', 1400) }}"
+        srcset="{{ imagen_srcset('images/heros/hero_todos_productos_2.jpg') }}"
+        sizes="100vw"
+        alt="" class="g-hero-bg" aria-hidden="true"
+        width="1584" height="672"
+        fetchpriority="high" decoding="async">
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">
         <p class="g-hero-eyebrow">Aberturas Giacomazzi</p>

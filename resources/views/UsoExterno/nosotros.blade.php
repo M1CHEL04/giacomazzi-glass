@@ -4,6 +4,11 @@
 @section('css')
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="{{ versioned_asset('css/nosotros.css') }}">
+{{-- El hero es el LCP: lo pedimos antes de que el parser llegue al <img>. --}}
+<link rel="preload" as="image"
+    href="{{ imagen_src('images/heros/hero_nosotros.png', 1400) }}"
+    imagesrcset="{{ imagen_srcset('images/heros/hero_nosotros.png') }}"
+    imagesizes="100vw" fetchpriority="high">
 @endsection
 
 @section('content')
@@ -67,7 +72,12 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 @endphp
 
 <section class="about-hero">
-    <img src="{{ asset('images/heros/hero_nosotros.png') }}" alt="" class="about-hero-bg" aria-hidden="true">
+    <img src="{{ imagen_src('images/heros/hero_nosotros.png', 1400) }}"
+        srcset="{{ imagen_srcset('images/heros/hero_nosotros.png') }}"
+        sizes="100vw"
+        alt="" class="about-hero-bg" aria-hidden="true"
+        width="2400" height="745"
+        fetchpriority="high" decoding="async">
     <span class="about-hero-scrim"></span>
     <div class="container about-hero-inner">
         <p class="about-hero-eyebrow">Aberturas Giacomazzi</p>
@@ -131,8 +141,13 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
                 <div class="about-rail-item">
                     <figure class="about-obra">
                         <span class="about-obra-thumb">
-                            <img src="{{ asset($obra['imagen']) }}" alt="{{ $obra['nombre'] }}"
-                                class="about-obra-img" loading="lazy">
+                            <img src="{{ imagen_src($obra['imagen'], 800) }}"
+                                srcset="{{ imagen_srcset($obra['imagen']) }}"
+                                sizes="(min-width: 768px) 380px, 72vw"
+                                alt="{{ $obra['nombre'] }}"
+                                class="about-obra-img"
+                                width="800" height="600"
+                                loading="lazy" decoding="async">
                         </span>
                         <figcaption class="about-obra-name">{{ $obra['nombre'] }}</figcaption>
                     </figure>

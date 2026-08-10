@@ -80,10 +80,13 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
             <div class="producto-card-imagen">
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp
                 @if($imagenPrincipal && $imagenPrincipal->ruta)
-                <img src="{{ route('imagen.show', $imagenPrincipal) }}"
+                {{-- Las 2 primeras tarjetas son el LCP en mobile: cargan eager. --}}
+                <img src="{{ $imagenPrincipal->ruta }}"
                     alt="{{ $producto->nombre }}"
                     class="producto-img"
-                    loading="lazy">
+                    width="800" height="600"
+                    decoding="async"
+                    @if($loop->index < 2) fetchpriority="high" @else loading="lazy" @endif>
                 @else
                 <div class="producto-img-placeholder">
                     <i class="bi bi-image"></i>
