@@ -13,6 +13,7 @@ class ImagenProducto extends Model
         'ruta',
         'nombre_imagen',
         'es_principal',
+        'es_tecnica',
         'activa',
     ];
 

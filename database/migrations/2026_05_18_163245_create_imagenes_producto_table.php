@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Producto::class)->constrained()->onDelete('cascade');
             $table->boolean('es_principal')->default(false);
+            $table->boolean('es_tecnica')->default(false);
             $table->boolean('activa')->default(true);
             $table->string('ruta')->nullable();
             $table->string('nombre_imagen')->nullable();

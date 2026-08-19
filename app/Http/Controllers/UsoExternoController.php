@@ -178,6 +178,9 @@ class UsoExternoController extends Controller
                     ->where('activa', true)
                     ->orderByDesc('es_principal')
                     ->select(['id', 'producto_id', 'ruta', 'es_principal']),
+                'imagenesTecnicas' => fn($q) => $q
+                    ->where('activa', true)
+                    ->select(['id', 'producto_id', 'ruta']),
                 'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
                 'valoresVariantes.variante:id,nombre',
             ])

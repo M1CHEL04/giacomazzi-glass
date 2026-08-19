@@ -235,14 +235,69 @@
 @endif
 
 {{-- Descripción técnica --}}
-@if($producto->descripcion_tecnica)
+@php $tecnicas = $producto->imagenesTecnicas; @endphp
+@if($producto->descripcion_tecnica || $tecnicas->isNotEmpty())
 <section class="ps-tecnica-section">
     <div class="container">
-        <p class="ps-seccion-eyebrow">Ficha técnica</p>
-        <h2 class="ps-seccion-titulo">Descripción técnica</h2>
-        <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
+        {{-- Dos columnas en desktop; el eyebrow y el título viven dentro de la
+             columna de texto para que al apilarse en mobile el orden siga siendo
+             título → texto → imágenes. --}}
+        <div class="ps-tecnica-layout">
+
+            <div class="ps-tecnica-texto-col">
+                <p class="ps-seccion-eyebrow">Ficha técnica</p>
+                <h2 class="ps-seccion-titulo">Descripción técnica</h2>
+                @if($producto->descripcion_tecnica)
+                <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
+                @endif
+            </div>
+
+            @if($tecnicas->isNotEmpty())
+            <div class="ps-tecnica-galeria">
+                @foreach($tecnicas as $tecnica)
+                <button type="button"
+                    class="ps-tecnica-figura"
+                    data-tecnica-index="{{ $loop->index }}"
+                    data-src="{{ $tecnica->ruta }}"
+                    aria-label="Ampliar imagen técnica {{ $loop->iteration }}">
+                    <img src="{{ $tecnica->ruta }}"
+                        alt="Detalle técnico de {{ $producto->nombre }}"
+                        class="ps-tecnica-img"
+                        width="600" height="450"
+                        loading="lazy" decoding="async">
+                </button>
+                @endforeach
+            </div>
+            @endif
+
+        </div>
     </div>
 </section>
+
+{{-- Lightbox propio de las técnicas: el de la galería indexa sobre sus
+     thumbs y está atado al carrusel, mezclarlos correría esos índices. --}}
+@if($tecnicas->isNotEmpty())
+<dialog id="ps-tecnica-lightbox" class="ps-lightbox">
+    <div class="ps-lightbox-inner">
+        <button class="ps-lightbox-close" id="ps-tecnica-lightbox-close" aria-label="Cerrar">
+            <x-heroicon-o-x-mark />
+        </button>
+        <div class="ps-lightbox-img-wrap">
+            <img id="ps-tecnica-lightbox-img" src="" alt="">
+        </div>
+        @if($tecnicas->count() > 1)
+        <div class="ps-lightbox-thumbs">
+            @foreach($tecnicas as $tecnica)
+            <button type="button" class="ps-lightbox-thumb ps-tecnica-lightbox-thumb {{ $loop->first ? 'active' : '' }}"
+                data-index="{{ $loop->index }}" data-src="{{ $tecnica->ruta }}">
+                <img src="{{ $tecnica->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+            </button>
+            @endforeach
+        </div>
+        @endif
+    </div>
+</dialog>
+@endif
 @endif
 
 {{-- Productos relacionados --}}

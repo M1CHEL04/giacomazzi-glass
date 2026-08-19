@@ -8,9 +8,11 @@ class Producto extends Model
 {
     protected $table = 'productos';
 
-    /** `descripcion` es un varchar(255); `descripcion_tecnica` es un TEXT. */
     public const MAX_DESCRIPCION = 255;
     public const MAX_DESCRIPCION_TECNICA = 5000;
+
+    public const MAX_IMAGENES = 5;
+    public const MAX_IMAGENES_TECNICAS = 5;
 
     protected $fillable = [
         'categoria_id',
@@ -39,7 +41,12 @@ class Producto extends Model
 
     public function imagenes()
     {
-        return $this->hasMany(ImagenProducto::class, 'producto_id');
+        return $this->hasMany(ImagenProducto::class, 'producto_id')->where('es_tecnica', false);
+    }
+
+    public function imagenesTecnicas()
+    {
+        return $this->hasMany(ImagenProducto::class, 'producto_id')->where('es_tecnica', true);
     }
 
     public function variantes()

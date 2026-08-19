@@ -5,6 +5,7 @@
         initCarousel();
         initVariantes();
         initLightbox();
+        initTecnicaLightbox();
         initCarrito();
     });
 
@@ -128,6 +129,66 @@
             if (total === 0) return;
             if (e.key === 'ArrowRight') lbThumbs[(currentIndex + 1) % total].click();
             if (e.key === 'ArrowLeft')  lbThumbs[(currentIndex - 1 + total) % total].click();
+        });
+    }
+
+    /* ---- Lightbox de las imágenes técnicas ----
+       Va separado de initLightbox() a propósito: aquél indexa por posición
+       sobre .ps-lightbox-thumb y está atado al carrusel de la galería, así
+       que sumar las técnicas ahí correría los índices de las otras. */
+    function initTecnicaLightbox() {
+        var lightbox = document.getElementById('ps-tecnica-lightbox');
+        var lbImg    = document.getElementById('ps-tecnica-lightbox-img');
+        var closeBtn = document.getElementById('ps-tecnica-lightbox-close');
+        var figuras  = document.querySelectorAll('.ps-tecnica-figura');
+        var lbThumbs = document.querySelectorAll('.ps-tecnica-lightbox-thumb');
+
+        if (!lightbox || !lbImg || figuras.length === 0) return;
+
+        var currentIndex = 0;
+
+        function mostrar(index) {
+            var figura = figuras[index];
+            if (!figura) return;
+            currentIndex = index;
+            lbImg.src = figura.dataset.src;
+            lbThumbs.forEach(function (t) { t.classList.remove('active'); });
+            if (lbThumbs[index]) {
+                lbThumbs[index].classList.add('active');
+                lbThumbs[index].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+        }
+
+        figuras.forEach(function (figura, i) {
+            figura.addEventListener('click', function () {
+                mostrar(i);
+                lightbox.showModal();
+            });
+        });
+
+        lbThumbs.forEach(function (thumb, i) {
+            thumb.addEventListener('click', function () {
+                lbImg.style.opacity = '0';
+                setTimeout(function () {
+                    mostrar(i);
+                    lbImg.style.opacity = '1';
+                }, 140);
+            });
+        });
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () { lightbox.close(); });
+        }
+
+        lightbox.addEventListener('click', function (e) {
+            if (e.target === lightbox) lightbox.close();
+        });
+
+        lightbox.addEventListener('keydown', function (e) {
+            var total = figuras.length;
+            if (total < 2) return;
+            if (e.key === 'ArrowRight') mostrar((currentIndex + 1) % total);
+            if (e.key === 'ArrowLeft')  mostrar((currentIndex - 1 + total) % total);
         });
     }
 

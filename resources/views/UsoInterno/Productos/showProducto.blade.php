@@ -32,6 +32,7 @@ $varianteGroups = $producto->valoresVariantes
 ->sortKeys();
 
 $imagenes = $producto->imagenes->where('activa', true)->values();
+$tecnicas = $producto->imagenesTecnicas;
 @endphp
 
 <div class="d-flex flex-column gap-3">
@@ -91,6 +92,34 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                 </div>
                 @else
                 <p class="text-secondary mb-0" style="font-size:13px;">Sin imágenes cargadas.</p>
+                @endif
+            </div>
+
+            {{-- Imágenes técnicas: van aparte de la galería, acompañan a la
+                 descripción técnica en el sitio público. --}}
+            <div class="info-section mt-3">
+                <div class="info-section-title">
+                    <x-heroicon-m-document-text style="width:14px;height:14px;" />
+                    Imágenes técnicas
+                </div>
+
+                @if($tecnicas->isNotEmpty())
+                <div class="prod-photos-grid">
+                    @foreach($tecnicas as $tecnica)
+                    <div class="prod-photo-wrap">
+                        <img src="{{ $tecnica->ruta }}"
+                            alt="{{ $tecnica->nombre_imagen }}"
+                            class="prod-photo-thumb"
+                            width="200" height="200"
+                            loading="lazy" decoding="async"
+                            data-src="{{ $tecnica->ruta }}"
+                            data-alt="{{ $tecnica->nombre_imagen }}"
+                            onclick="openLightbox(this.dataset.src, this.dataset.alt)">
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-secondary mb-0" style="font-size:13px;">Sin imágenes técnicas cargadas.</p>
                 @endif
             </div>
         </div>

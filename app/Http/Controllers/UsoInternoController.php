@@ -311,6 +311,7 @@ class UsoInternoController extends Controller
                 'unidad',
                 'valoresVariantes.variante',
                 'imagenes',
+                'imagenesTecnicas' => fn($q) => $q->where('activa', true),
                 'variantes',
             ])->findOrFail($id);
 
@@ -346,8 +347,10 @@ class UsoInternoController extends Controller
             'codigo'              => 'required|string|max:100|unique:productos,codigo',
             'descripcion'         => 'required|string|max:' . Producto::MAX_DESCRIPCION,
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
-            'imagenes'            => 'nullable|array|max:5',
+            'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
             'imagenes.*'          => 'image|max:5120',
+            'imagenes_tecnicas'   => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
+            'imagenes_tecnicas.*' => 'image|max:5120',
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
         ], [
@@ -362,9 +365,12 @@ class UsoInternoController extends Controller
             'descripcion.required'  => 'La descripción es obligatoria.',
             'descripcion.max'       => 'La descripción no puede superar los ' . Producto::MAX_DESCRIPCION . ' caracteres.',
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
-            'imagenes.max'          => 'Solo se permiten hasta 5 imágenes.',
+            'imagenes.max'          => 'Solo se permiten hasta ' . Producto::MAX_IMAGENES . ' imágenes.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
+            'imagenes_tecnicas.max'     => 'Solo se permiten hasta ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas.',
+            'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
+            'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
         ]);
 
         DB::beginTransaction();
@@ -389,6 +395,12 @@ class UsoInternoController extends Controller
                 }
             }
 
+            // Técnicas: nunca son portada, de ahí el false en el tercer argumento.
+            $tecnicasRequest = array_values(array_filter($request->file('imagenes_tecnicas', [])));
+            foreach ($tecnicasRequest as $imagen) {
+                $this->guardarImagenes($producto, $imagen, false, true);
+            }
+
             $this->skuService->sincronizarVariantes($producto, $request);
 
             DB::commit();
@@ -406,7 +418,13 @@ class UsoInternoController extends Controller
     public function editProducto(String $id)
     {
         try {
-            $producto   = Producto::with(['categoria', 'unidad', 'valoresVariantes.variante', 'imagenes'])->findOrFail($id);
+            $producto   = Producto::with([
+                'categoria',
+                'unidad',
+                'valoresVariantes.variante',
+                'imagenes',
+                'imagenesTecnicas' => fn($q) => $q->where('activa', true),
+            ])->findOrFail($id);
             $categorias = Categoria::orderBy('nombre')->get();
             $unidades   = UnidadMedida::orderBy('id')->get();
 
@@ -444,6 +462,10 @@ class UsoInternoController extends Controller
             'imagenes.*'          => 'image|max:5120',
             'imagenes_eliminar'   => 'nullable|array',
             'imagenes_eliminar.*' => 'exists:imagenes_producto,id',
+            'imagenes_tecnicas'            => 'nullable|array',
+            'imagenes_tecnicas.*'          => 'image|max:5120',
+            'imagenes_tecnicas_eliminar'   => 'nullable|array',
+            'imagenes_tecnicas_eliminar.*' => 'exists:imagenes_producto,id',
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
         ], [
@@ -459,6 +481,8 @@ class UsoInternoController extends Controller
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
+            'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
+            'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
         ]);
 
         DB::beginTransaction();
@@ -476,13 +500,20 @@ class UsoInternoController extends Controller
             if ($request->filled('imagenes_eliminar')) {
                 ImagenProducto::whereIn('id', $request->imagenes_eliminar)
                     ->where('producto_id', $producto->id)
+                    ->where('es_tecnica', false)
                     ->update(['activa' => false, 'es_principal' => false]);
             }
 
             $portadaField = $request->input('imagen_portada', '');
             if (str_starts_with($portadaField, 'existente:')) {
                 $portadaId = (int) substr($portadaField, 10);
-                if (ImagenProducto::where('id', $portadaId)->where('producto_id', $producto->id)->exists()) {
+                // es_tecnica false: una técnica no puede terminar de portada
+                // aunque llegue su id en el hidden.
+                if (ImagenProducto::where('id', $portadaId)
+                    ->where('producto_id', $producto->id)
+                    ->where('es_tecnica', false)
+                    ->exists()
+                ) {
                     $producto->imagenes()->update(['es_principal' => false]);
                     ImagenProducto::where('id', $portadaId)->update(['es_principal' => true]);
                 }
@@ -490,7 +521,7 @@ class UsoInternoController extends Controller
 
             $imagenesNuevas = array_values(array_filter($request->file('imagenes', [])));
             if (!empty($imagenesNuevas)) {
-                $remaining  = 5 - $producto->fresh()->imagenes()->count();
+                $remaining  = Producto::MAX_IMAGENES - $producto->fresh()->imagenes()->count();
                 $portadaIdx = str_starts_with($portadaField, 'nueva:')
                     ? (int) substr($portadaField, 6) : null;
                 if ($portadaIdx !== null) {
@@ -500,6 +531,25 @@ class UsoInternoController extends Controller
                     if ($remaining <= 0) break;
                     $this->guardarImagenes($producto, $imagen, $portadaIdx !== null && $idx === $portadaIdx);
                     $remaining--;
+                }
+            }
+
+            // ── Imágenes técnicas: mismo circuito que las de galería, pero con
+            //    su propio cupo y sin portada de por medio.
+            if ($request->filled('imagenes_tecnicas_eliminar')) {
+                ImagenProducto::whereIn('id', $request->imagenes_tecnicas_eliminar)
+                    ->where('producto_id', $producto->id)
+                    ->where('es_tecnica', true)
+                    ->update(['activa' => false]);
+            }
+
+            $tecnicasNuevas = array_values(array_filter($request->file('imagenes_tecnicas', [])));
+            if (!empty($tecnicasNuevas)) {
+                $remainingTecnicas = Producto::MAX_IMAGENES_TECNICAS - $producto->fresh()->imagenesTecnicas()->count();
+                foreach ($tecnicasNuevas as $imagen) {
+                    if ($remainingTecnicas <= 0) break;
+                    $this->guardarImagenes($producto, $imagen, false, true);
+                    $remainingTecnicas--;
                 }
             }
 
@@ -618,8 +668,12 @@ class UsoInternoController extends Controller
         }
     }
 
-    private function guardarImagenes(Producto $producto, UploadedFile $imagen, bool $esPrincipal = false): ImagenProducto
-    {
+    private function guardarImagenes(
+        Producto $producto,
+        UploadedFile $imagen,
+        bool $esPrincipal = false,
+        bool $esTecnica = false
+    ): ImagenProducto {
         if (!$imagen->isValid()) {
             Log::error('Archivo de imagen invalido en el request', [
                 'producto_id'   => $producto->id,
@@ -631,6 +685,7 @@ class UsoInternoController extends Controller
         $imagenProducto = ImagenProducto::create([
             'producto_id'  => $producto->id,
             'es_principal' => $esPrincipal,
+            'es_tecnica'   => $esTecnica,
         ]);
 
         $imagenProducto->update([

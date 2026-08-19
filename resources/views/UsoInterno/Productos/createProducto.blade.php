@@ -6,6 +6,7 @@ $formAction = $isEdit
 : route('uso-interno.productos.store');
 $maxDescripcion = \App\Models\Producto::MAX_DESCRIPCION;
 $maxDescripcionTecnica = \App\Models\Producto::MAX_DESCRIPCION_TECNICA;
+$maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
 @endphp
 @section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto - Panel interno - Aberturas Giacomazzi')
 @section('page-title', $isEdit ? 'Editar producto' : 'Crear producto')
@@ -227,6 +228,60 @@ $maxDescripcionTecnica = \App\Models\Producto::MAX_DESCRIPCION_TECNICA;
             @enderror
         </div>
 
+        {{-- ── IMÁGENES TÉCNICAS ── --}}
+        <div class="border rounded-3 bg-white p-3">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
+                    Imágenes técnicas
+                    <span class="text-muted fw-normal text-lowercase">(máx. {{ $maxImagenesTecnicas }}, opcional)</span>
+                </p>
+                <button type="button" id="add-imagen-tecnica-btn"
+                    class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
+                    style="font-size:12px;">
+                    <x-fluentui-add-20-o class="me-1" style="width:12px;height:12px;" />
+                    Agregar imagen
+                </button>
+            </div>
+            <p class="text-secondary mb-3" style="font-size:12px;">
+                Planos, cortes, despieces o tablas de medidas.
+            </p>
+
+            <div class="d-flex flex-wrap gap-3">
+                @if ($isEdit && $producto->imagenesTecnicas->count() > 0)
+                @foreach ($producto->imagenesTecnicas as $tecnica)
+                <div class="imagen-existente-card" id="tecnica-card-{{ $tecnica->id }}">
+                    <img src="{{ $tecnica->ruta }}"
+                        alt="{{ $tecnica->nombre_imagen }}"
+                        class="imagen-thumb"
+                        width="100" height="100"
+                        loading="lazy" decoding="async">
+                    <div class="imagen-eliminar-overlay">
+                        <button type="button"
+                            class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width:20px;height:20px;"
+                            data-tecnica-eliminar="{{ $tecnica->id }}"
+                            title="Eliminar">
+                            <x-heroicon-m-x-mark style="width:12px;height:12px;" />
+                        </button>
+                    </div>
+                    <input type="hidden" name="imagenes_tecnicas_eliminar[]"
+                        id="eliminar-tecnica-{{ $tecnica->id }}" value="" disabled>
+                </div>
+                @endforeach
+                @endif
+
+                {{-- Inputs nuevas imágenes técnicas (JS appends here) --}}
+                <div id="tecnicas-container" style="display:contents;"></div>
+            </div>
+
+            @error('imagenes_tecnicas')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+            @error('imagenes_tecnicas.*')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
         {{-- ── VARIANTES ── --}}
         <div class="border rounded-3 bg-white p-3">
             <p class="text-uppercase fw-semibold text-secondary mb-3" style="font-size:11px;letter-spacing:.06em;">
@@ -372,6 +427,7 @@ $portadaExistenteId = $isEdit
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
 'existingImgCount' => $isEdit ? $producto->imagenes->where('activa', true)->count() : 0,
+'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
 'initialVariantes' => $initialVariantes ?? [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
 'portadaExistenteId' => $portadaExistenteId,
