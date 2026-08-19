@@ -136,9 +136,8 @@ $imagenes = $producto->imagenes->where('activa', true)->values();
                     @if($producto->descripcion_tecnica)
                     <div class="col-12">
                         <div class="info-field-label">Descripción técnica</div>
-                        <p class="mb-0 text-secondary" style="font-size:13px; line-height:1.65;">
-                            {{ $producto->descripcion_tecnica }}
-                        </p>
+                        {{-- pre-line: descripcion_tecnica es TEXT y admite varias líneas --}}
+                        <p class="mb-0 text-secondary" style="font-size:13px; line-height:1.65; white-space:pre-line;">{{ $producto->descripcion_tecnica }}</p>
                     </div>
                     @endif
                 </div>

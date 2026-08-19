@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(UnidadMedida::class, 'unidad_id')->index();
             $table->string('nombre');
             $table->string('descripcion');
-            $table->string('descripcion_tecnica')->nullable();
+            $table->text('descripcion_tecnica')->nullable();
             $table->string('codigo')->unique();
             $table->boolean('activo')->default(true)->index();
             $table->timestamps();

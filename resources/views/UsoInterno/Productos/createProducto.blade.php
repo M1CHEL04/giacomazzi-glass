@@ -4,6 +4,8 @@ $isEdit = isset($producto);
 $formAction = $isEdit
 ? route('uso-interno.productos.update', $producto)
 : route('uso-interno.productos.store');
+$maxDescripcion = \App\Models\Producto::MAX_DESCRIPCION;
+$maxDescripcionTecnica = \App\Models\Producto::MAX_DESCRIPCION_TECNICA;
 @endphp
 @section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto - Panel interno - Aberturas Giacomazzi')
 @section('page-title', $isEdit ? 'Editar producto' : 'Crear producto')
@@ -116,7 +118,11 @@ $formAction = $isEdit
                     <textarea id="descripcion" name="descripcion" rows="3"
                         class="form-control form-control-sm py-2 rounded-2 @error('descripcion') is-invalid @enderror"
                         placeholder="Descripción del producto..." required
-                        maxlength="255">{{ old('descripcion', $producto->descripcion ?? '') }}</textarea>
+                        maxlength="{{ $maxDescripcion }}"
+                        data-char-count data-char-max="{{ $maxDescripcion }}"
+                        aria-describedby="descripcion-contador">{{ old('descripcion', $producto->descripcion ?? '') }}</textarea>
+                    <div id="descripcion-contador" class="form-text text-end small"
+                        data-char-count-for="descripcion" aria-live="polite"></div>
                     @error('descripcion')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -128,10 +134,14 @@ $formAction = $isEdit
                         Descripción técnica
                         <span class="text-secondary fw-normal">(opcional)</span>
                     </label>
-                    <textarea id="descripcion_tecnica" name="descripcion_tecnica" rows="3"
+                    <textarea id="descripcion_tecnica" name="descripcion_tecnica" rows="8"
                         class="form-control form-control-sm py-2 rounded-2 @error('descripcion_tecnica') is-invalid @enderror"
-                        placeholder="Especificaciones técnicas..."
-                        maxlength="255">{{ old('descripcion_tecnica', $producto->descripcion_tecnica ?? '') }}</textarea>
+                        placeholder="Especificaciones técnicas, materiales, medidas, terminaciones... Podés usar varias líneas."
+                        maxlength="{{ $maxDescripcionTecnica }}"
+                        data-char-count data-char-max="{{ $maxDescripcionTecnica }}"
+                        aria-describedby="descripcion_tecnica-contador">{{ old('descripcion_tecnica', $producto->descripcion_tecnica ?? '') }}</textarea>
+                    <div id="descripcion_tecnica-contador" class="form-text text-end small"
+                        data-char-count-for="descripcion_tecnica" aria-live="polite"></div>
                     @error('descripcion_tecnica')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

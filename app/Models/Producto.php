@@ -8,6 +8,10 @@ class Producto extends Model
 {
     protected $table = 'productos';
 
+    /** `descripcion` es un varchar(255); `descripcion_tecnica` es un TEXT. */
+    public const MAX_DESCRIPCION = 255;
+    public const MAX_DESCRIPCION_TECNICA = 5000;
+
     protected $fillable = [
         'categoria_id',
         'unidad_id',
