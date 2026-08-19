@@ -60,4 +60,7 @@ Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group
     Route::get('/edit-producto/{id}',  [UsoInternoController::class, 'editProducto'])->name('productos.edit');
     Route::post('/store-producto',     [UsoInternoController::class, 'storeProducto'])->name('productos.store');
     Route::post('/update-producto/{id}', [UsoInternoController::class, 'updateProducto'])->name('productos.update');
+    // El id viaja en el body (hidden del modal), no en la URL.
+    Route::post('/activar-producto',    [UsoInternoController::class, 'activarProducto'])->name('productos.activar');
+    Route::post('/desactivar-producto', [UsoInternoController::class, 'desactivarProducto'])->name('productos.desactivar');
 });

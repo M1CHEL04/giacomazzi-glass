@@ -86,9 +86,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         </span>
                     </div>
                     <div style="width: 100px;">
-                        <span class="badge rounded-pill ${producto.activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle'}" style="font-size: 10px; padding: 3px 10px;">
+                        <button type="button"
+                            class="badge border-0 rounded-pill ${producto.activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle'}"
+                            style="font-size: 10px; padding: 3px 10px; cursor: pointer;"
+                            data-estado-toggle
+                            data-producto-id="${producto.id}"
+                            data-producto-nombre="${escapeHtml(producto.nombre)}"
+                            data-activo="${producto.activo ? '1' : '0'}"
+                            title="${producto.activo ? 'Dar de baja el producto' : 'Dar de alta el producto'}">
                             ${producto.activo ? 'Activo' : 'Inactivo'}
-                        </span>
+                        </button>
                     </div>
                     <div class="text-end" style="width: 60px;">
                         <a

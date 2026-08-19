@@ -522,6 +522,59 @@ class UsoInternoController extends Controller
         }
     }
 
+    /**
+     * Alta desde el badge de estado del listado. El id llega por el hidden
+     * del modal, no por la URL.
+     */
+    public function activarProducto(Request $request)
+    {
+        return $this->cambiarEstadoProducto($request, true);
+    }
+
+    /** Baja desde el badge de estado del listado. */
+    public function desactivarProducto(Request $request)
+    {
+        return $this->cambiarEstadoProducto($request, false);
+    }
+
+    private function cambiarEstadoProducto(Request $request, bool $activo)
+    {
+        $request->validate([
+            'producto_id' => 'required|exists:productos,id',
+        ], [
+            'producto_id.required' => 'No se indicó qué producto modificar.',
+            'producto_id.exists'   => 'El producto indicado no existe.',
+        ]);
+
+        $accion = $activo ? 'alta' : 'baja';
+
+        try {
+            $producto = Producto::with('categoria')->findOrFail($request->producto_id);
+
+            // Dos pestañas abiertas, o el listado sin refrescar: el estado que
+            // vio el usuario al tocar el badge puede no ser el actual.
+            if ((bool) $producto->activo === $activo) {
+                return redirect()->back()
+                    ->with('success', "El producto \"{$producto->nombre}\" ya estaba " . ($activo ? 'activo' : 'inactivo') . '.');
+            }
+
+            $producto->update(['activo' => $activo]);
+
+            $mensaje = "El producto \"{$producto->nombre}\" se dio de {$accion} correctamente.";
+
+            // Un producto activo dentro de una categoría inactiva sigue sin
+            // verse en el sitio; conviene decirlo o parece que el alta falló.
+            if ($activo && $producto->categoria && ! $producto->categoria->activo) {
+                $mensaje .= " Tené en cuenta que la categoría \"{$producto->categoria->nombre}\" está inactiva, así que todavía no se muestra en el sitio.";
+            }
+
+            return redirect()->back()->with('success', $mensaje);
+        } catch (\Exception $e) {
+            Log::error("Error al dar de {$accion} producto (id: " . $request->producto_id . '): ' . $e->getMessage());
+            return redirect()->back()->with('error', "Error al dar de {$accion} el producto.");
+        }
+    }
+
     public function getVariantesByCategoria(String $id)
     {
         try {
