@@ -90,7 +90,7 @@ $formAction = $isEdit
                 {{-- Unidad de cotización --}}
                 <div class="col-12 col-md-6">
                     <label for="unidad_id" class="form-label small mb-1">
-                        Se cotiza por <span class="text-danger">*</span>
+                        Unidad<span class="text-danger">*</span>
                     </label>
                     <select id="unidad_id" name="unidad_id"
                         class="form-select form-select-sm py-2 rounded-2 @error('unidad_id') is-invalid @enderror"
@@ -106,10 +106,6 @@ $formAction = $isEdit
                     @error('unidad_id')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
-                    <div class="form-text small">
-                        Define qué datos pide el cliente al cotizar: cantidad de piezas, una medida
-                        lineal en metros, o alto y ancho para calcular los m².
-                    </div>
                 </div>
 
                 {{-- Descripción --}}

@@ -340,7 +340,7 @@
    alto × ancho). El rótulo repite el patrón de .ps-variante-label para que
    lea como un grupo más del selector. */
 .ps-medidas {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0.85rem;
 }
 
 .ps-medidas-label {
@@ -398,11 +398,16 @@
 }
 
 .ps-medidas-total {
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
     font-size: var(--fs-small);
     font-weight: 700;
     color: var(--external-primary);
-    min-height: 1.2em;
+}
+
+/* Mientras no haya resultado no ocupa nada: el renglón vacío era la mayor
+   parte del hueco entre las medidas y el botón. */
+.ps-medidas-total:empty {
+    display: none;
 }
 
 .ps-medidas-error {
