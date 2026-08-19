@@ -67,6 +67,14 @@ $formAction = $isEdit ? route('uso-interno.categorias.update', $categoria) : rou
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+                    @if (($categoria->productos_activos_count ?? 0) > 0)
+                    <div class="form-text small">
+                        Al dar de baja la categoría también se dan de baja sus
+                        {{ $categoria->productos_activos_count }}
+                        {{ $categoria->productos_activos_count === 1 ? 'producto activo' : 'productos activos' }}.
+                        Volver a activarla no los reactiva: hay que hacerlo producto por producto.
+                    </div>
+                    @endif
                 </div>
                 @endif
 

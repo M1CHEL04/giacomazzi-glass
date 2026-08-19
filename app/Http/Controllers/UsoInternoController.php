@@ -39,11 +39,8 @@ class UsoInternoController extends Controller
         $totalConsultas = Cotizacion::count();
         $consultasMes   = Cotizacion::where('created_at', '>=', now()->startOfMonth())->count();
 
-        // Cotizaciones por mes — timeline continuo desde la primera hasta hoy
-        // (rellena meses sin datos con 0). Se agrupa en PHP para no depender de
-        // funciones de fecha propias de MySQL.
         $conteoPorMes = Cotizacion::get(['created_at'])
-            ->groupBy(fn ($c) => $c->created_at->format('Y-m'))
+            ->groupBy(fn($c) => $c->created_at->format('Y-m'))
             ->map->count();
 
         $cotizacionesMensuales = collect();
@@ -167,7 +164,11 @@ class UsoInternoController extends Controller
     public function editCategoria(int $id)
     {
         try {
-            $categoria = Categoria::findOrFail($id);
+            // El conteo de activos alimenta el aviso del switch: apagar la
+            // categoría se lleva puestos esos productos.
+            $categoria = Categoria::withCount([
+                'productos as productos_activos_count' => fn($q) => $q->where('activo', true),
+            ])->findOrFail($id);
 
             return view('UsoInterno.categorias.createCategoria', [
                 'categoria'  => $categoria,
@@ -199,11 +200,14 @@ class UsoInternoController extends Controller
             'imagen_hero.max'   => 'La imagen no puede superar los 4 MB.',
         ]);
 
+        DB::beginTransaction();
         try {
             $datos = [
                 'nombre' => $request->nombre,
                 'activo' => (bool) $request->input('activo', 0),
             ];
+
+            $sePasaAInactiva = $categoria->activo && ! $datos['activo'];
 
             if ($request->hasFile('imagen_hero')) {
                 if ($categoria->imagen_hero) {
@@ -219,9 +223,27 @@ class UsoInternoController extends Controller
 
             $categoria->update($datos);
 
+            $productosDadosDeBaja = 0;
+            if ($sePasaAInactiva) {
+                $productosDadosDeBaja = Producto::where('categoria_id', $categoria->id)
+                    ->where('activo', true)
+                    ->update(['activo' => false]);
+            }
+
+            DB::commit();
+
             Cache::forget('categorias_menu_externo');
-            return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría actualizada exitosamente.');
+
+            $mensaje = 'Categoría actualizada exitosamente.';
+            if ($productosDadosDeBaja > 0) {
+                $mensaje .= $productosDadosDeBaja === 1
+                    ? ' También se dio de baja 1 producto de la categoría.'
+                    : " También se dieron de baja {$productosDadosDeBaja} productos de la categoría.";
+            }
+
+            return redirect()->route('uso-interno.categorias.index')->with('success', $mensaje);
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('Error al actualizar categoría: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error al actualizar la categoría.');
         }
@@ -575,7 +597,6 @@ class UsoInternoController extends Controller
 
             $baseUrl = rtrim(config('filesystems.disks.' . $disk . '.url', ''), '/');
             $url     = $baseUrl ? $baseUrl . '/' . $rutaDisco : asset('storage/' . $rutaDisco);
-
         } catch (\Exception $e) {
             $imagenProducto->delete();
             Log::error('Error al subir imagen: ' . $e->getMessage());
