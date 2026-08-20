@@ -22,6 +22,53 @@
     white-space: nowrap;
     letter-spacing: .03em;
 }
+
+/* -- Descripcion tecnica plegable ------------------------------
+   El campo admite hasta 5000 caracteres. Sin plegar, una ficha
+   larga empuja Variantes, SKUs y Registro fuera de la pantalla. */
+.desc-tecnica {
+    font-size: 13px;
+    line-height: 1.65;
+    white-space: pre-line;
+}
+
+.desc-tecnica.is-clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Arranca oculto: el JS lo muestra solo si el texto no entra. */
+.desc-tecnica-toggle {
+    display: none;
+    align-items: center;
+    gap: .2rem;
+    margin-top: .4rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 12px;
+    font-weight: 600;
+    color: #287452;
+    cursor: pointer;
+}
+
+.desc-tecnica-toggle.is-visible {
+    display: inline-flex;
+}
+
+.desc-tecnica-toggle:hover {
+    text-decoration: underline;
+}
+
+.desc-tecnica-toggle svg {
+    transition: transform .15s ease;
+}
+
+.desc-tecnica-toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
 </style>
 @endsection
 
@@ -165,8 +212,16 @@ $tecnicas = $producto->imagenesTecnicas;
                     @if($producto->descripcion_tecnica)
                     <div class="col-12">
                         <div class="info-field-label">Descripción técnica</div>
-                        {{-- pre-line: descripcion_tecnica es TEXT y admite varias líneas --}}
-                        <p class="mb-0 text-secondary" style="font-size:13px; line-height:1.65; white-space:pre-line;">{{ $producto->descripcion_tecnica }}</p>
+                        {{-- pre-line: descripcion_tecnica es TEXT y admite varias líneas.
+                             Arranca plegado a 6 líneas; el botón lo revela y solo aparece
+                             si el texto realmente desborda (ver el script al pie). --}}
+                        <p id="desc-tecnica-texto" class="mb-0 text-secondary desc-tecnica is-clamped"
+                            data-desc-tecnica>{{ $producto->descripcion_tecnica }}</p>
+                        <button type="button" class="desc-tecnica-toggle"
+                            data-desc-tecnica-toggle aria-expanded="false" aria-controls="desc-tecnica-texto">
+                            <span data-desc-tecnica-label>Ver más</span>
+                            <x-heroicon-m-chevron-down style="width:12px;height:12px;" />
+                        </button>
                     </div>
                     @endif
                 </div>
@@ -269,5 +324,42 @@ $tecnicas = $producto->imagenesTecnicas;
         document.getElementById('lightbox-img').alt = alt || '';
         bootstrap.Modal.getOrCreateInstance(document.getElementById('imgLightbox')).show();
     }
+
+    // Ver mas / Ver menos de la descripcion tecnica.
+    // El corte lo decide el alto real, no la cantidad de caracteres: el mismo
+    // texto entra en 6 lineas en un monitor ancho y desborda en una notebook,
+    // y ademas el usuario puede haber cargado saltos de linea propios.
+    (function () {
+        var texto = document.querySelector('[data-desc-tecnica]');
+        var boton = document.querySelector('[data-desc-tecnica-toggle]');
+        if (!texto || !boton) return;
+
+        var etiqueta = boton.querySelector('[data-desc-tecnica-label]');
+
+        function sincronizarBoton() {
+            // Desplegado no hay nada que medir: el clamp esta sacado y
+            // scrollHeight siempre igualaria a clientHeight.
+            if (boton.getAttribute('aria-expanded') === 'true') return;
+            var desborda = texto.scrollHeight > texto.clientHeight + 1;
+            boton.classList.toggle('is-visible', desborda);
+        }
+
+        boton.addEventListener('click', function () {
+            var plegado = texto.classList.toggle('is-clamped');
+            boton.setAttribute('aria-expanded', plegado ? 'false' : 'true');
+            if (etiqueta) etiqueta.textContent = plegado ? 'Ver más' : 'Ver menos';
+            if (plegado) sincronizarBoton();
+        });
+
+        sincronizarBoton();
+
+        // Al cambiar el ancho cambia la cantidad de lineas, asi que el boton
+        // puede pasar a sobrar o a hacer falta.
+        var pendiente;
+        window.addEventListener('resize', function () {
+            clearTimeout(pendiente);
+            pendiente = setTimeout(sincronizarBoton, 150);
+        });
+    })();
 </script>
 @endsection

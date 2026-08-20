@@ -137,7 +137,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                     </label>
                     <textarea id="descripcion_tecnica" name="descripcion_tecnica" rows="8"
                         class="form-control form-control-sm py-2 rounded-2 @error('descripcion_tecnica') is-invalid @enderror"
-                        placeholder="Especificaciones técnicas, materiales, medidas, terminaciones... Podés usar varias líneas."
+                        placeholder="Especificaciones tecnicas, técnologias utilizadas en la fabricación, etc."
                         maxlength="{{ $maxDescripcionTecnica }}"
                         data-char-count data-char-max="{{ $maxDescripcionTecnica }}"
                         aria-describedby="descripcion_tecnica-contador">{{ old('descripcion_tecnica', $producto->descripcion_tecnica ?? '') }}</textarea>

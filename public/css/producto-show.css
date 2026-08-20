@@ -605,18 +605,8 @@
     background-color: var(--g-vidrio);
 }
 
-/* Mobile primero: una columna, texto arriba y planos abajo. A partir de
-   lg pasan a convivir lado a lado; align-items:start evita que la columna
-   corta se estire para igualar a la larga. */
-.ps-tecnica-layout {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    align-items: start;
-}
-
 .ps-tecnica-texto {
-    max-width: 760px;
+    max-width: 70ch;
     font-size: var(--fs-body);
     color: var(--external-secondary);
     line-height: 1.85;
@@ -624,20 +614,52 @@
     white-space: pre-line;
 }
 
-/* auto-fill con minmax: con 1 o 2 planos ocupan el ancho cómodo, y con 5
-   se acomodan solos sin dejar una fila huérfana. */
-.ps-tecnica-galeria {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+/* ---- Riel de imágenes técnicas ----
+   Los planos van en una franja horizontal a todo el ancho, debajo del
+   texto. Antes compartían fila con él en dos columnas, pero el texto
+   puede ser largo y los planos son cinco como mucho: la columna corta
+   dejaba un hueco muerto que crecía con cada párrafo.
+
+   El mecanismo es el mismo que las obras de Nosotros: scroll nativo con
+   snap (rail.js), swipe con el pulgar en teléfono, y flechas y puntos
+   como ayuda encima desde tablet. */
+.ps-tecnica-rail-wrap {
+    --rail-pad: 0.75rem;
+    margin-top: 2.5rem;
+}
+
+.ps-tecnica-rail {
+    display: flex;
     gap: 0.75rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--rail-pad);
+    margin: 0 calc(var(--rail-pad) * -1);
+    padding: 0.5rem var(--rail-pad) 0.75rem;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+.ps-tecnica-rail::-webkit-scrollbar {
+    display: none;
+}
+
+/* 78% deja asomar el borde de la siguiente: sin ese recorte visible nadie
+   descubre que el riel se desplaza. */
+.ps-tecnica-rail-item {
+    flex: 0 0 78%;
+    scroll-snap-align: start;
 }
 
 .ps-tecnica-figura {
+    position: relative;
     display: block;
     width: 100%;
     padding: 0;
-    background: #ffffff;
+    background: var(--external-white);
     border: 1px solid rgba(0, 0, 0, 0.07);
+    border-bottom: 3px solid var(--external-primary);
     border-radius: 3px;
     overflow: hidden;
     cursor: zoom-in;
@@ -645,14 +667,13 @@
 }
 
 .ps-tecnica-figura:hover {
-    border-color: rgba(40, 116, 82, 0.28);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
 }
 
 .ps-tecnica-figura:focus-visible {
     outline: 2px solid var(--external-primary);
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 
 /* contain, no cover: un plano o una tabla de medidas se vuelve ilegible
@@ -663,13 +684,141 @@
     height: auto;
     aspect-ratio: 4 / 3;
     object-fit: contain;
-    background: #ffffff;
+    background: var(--external-white);
 }
 
-@media (min-width: 992px) {
-    .ps-tecnica-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        gap: 3rem;
+/* Pista de que la imagen se amplía. En touch no hay hover, así que
+   arranca visible y sólo se esconde donde el hover existe de verdad. */
+.ps-tecnica-zoom {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--external-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: opacity 0.2s ease;
+}
+
+.ps-tecnica-zoom svg {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+@media (hover: hover) {
+    .ps-tecnica-zoom {
+        opacity: 0;
+    }
+
+    .ps-tecnica-figura:hover .ps-tecnica-zoom,
+    .ps-tecnica-figura:focus-visible .ps-tecnica-zoom {
+        opacity: 1;
+    }
+}
+
+.ps-tecnica-rail-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.85rem;
+    margin-top: 1rem;
+    min-height: 12px;
+}
+
+.ps-tecnica-rail-arrow {
+    display: none;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: var(--external-white);
+    color: var(--external-primary);
+    cursor: pointer;
+    transition: color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ps-tecnica-rail-arrow:hover {
+    color: var(--external-primary-dark);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
+}
+
+.ps-tecnica-rail-arrow[hidden] {
+    display: none;
+}
+
+.ps-tecnica-rail-arrow svg {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.ps-tecnica-rail-dots {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.ps-tecnica-rail-dots[hidden] {
+    display: none;
+}
+
+/* Los crea rail.js, así que se estilan acá igual que en Inicio y Nosotros */
+.ps-tecnica-rail-dots .rail-dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--external-secondary-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.ps-tecnica-rail-dots .rail-dot:hover {
+    opacity: 0.85;
+}
+
+.ps-tecnica-rail-dots .rail-dot.is-active {
+    background: var(--external-primary);
+    opacity: 1;
+    transform: scale(1.45);
+}
+
+.ps-tecnica-rail-arrow:focus-visible,
+.ps-tecnica-rail-dots .rail-dot:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: 3px;
+}
+
+@media (min-width: 576px) {
+    .ps-tecnica-rail-item {
+        flex-basis: 46%;
+    }
+}
+
+@media (min-width: 768px) {
+    .ps-tecnica-rail-item {
+        flex-basis: 31.5%;
+    }
+
+    .ps-tecnica-rail-arrow {
+        display: inline-flex;
+    }
+}
+
+/* Con cinco planos como máximo, a 24% entran cuatro y el quinto asoma:
+   el riel se sigue leyendo como una franja, no como una grilla suelta. */
+@media (min-width: 1200px) {
+    .ps-tecnica-rail-item {
+        flex-basis: 24%;
     }
 }
 
@@ -819,12 +968,58 @@
 }
 
 .ps-lightbox-img-wrap {
+    position: relative;
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     max-height: calc(100vh - 120px);
     overflow: hidden;
+}
+
+/* Flechas sobre la imagen ampliada. Comparten el vidrio translúcido del
+   botón de cerrar para que la capa del lightbox se lea como una sola. */
+.ps-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: background 0.18s ease;
+    z-index: 5;
+}
+
+.ps-lightbox-nav:hover {
+    background: var(--g-hover-blanco);
+}
+
+.ps-lightbox-nav:focus-visible {
+    outline: 2px solid white;
+    outline-offset: 2px;
+}
+
+.ps-lightbox-nav svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.ps-lightbox-nav--prev { left: 0.5rem; }
+.ps-lightbox-nav--next { right: 0.5rem; }
+
+/* En teléfono el swipe es el gesto natural y las flechas taparían la
+   imagen, que es justo lo que se vino a mirar. */
+@media (max-width: 575.98px) {
+    .ps-lightbox-nav {
+        display: none;
+    }
 }
 
 .ps-lightbox-img-wrap img {
@@ -1017,11 +1212,7 @@
     .ps-relacionados-section,
     .ps-banner-personalizar { padding: 3.5rem 0; }
 
-    .ps-tecnica-layout { gap: 2rem; }
-
-    .ps-tecnica-galeria {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    }
+    .ps-tecnica-rail-wrap { margin-top: 2rem; }
 
     .ps-thumb { width: 50px; height: 50px; min-width: 50px; }
 }

@@ -239,38 +239,58 @@
 @if($producto->descripcion_tecnica || $tecnicas->isNotEmpty())
 <section class="ps-tecnica-section">
     <div class="container">
-        {{-- Dos columnas en desktop; el eyebrow y el título viven dentro de la
-             columna de texto para que al apilarse en mobile el orden siga siendo
-             título → texto → imágenes. --}}
-        <div class="ps-tecnica-layout">
+        {{-- Texto a ancho de lectura y planos en un riel horizontal debajo.
+             Antes eran dos columnas, pero el texto puede ser largo y los
+             planos son cinco como mucho: la columna corta dejaba un hueco
+             muerto a la derecha que crecía con cada párrafo. --}}
+        <div class="ps-tecnica-head">
+            <p class="ps-seccion-eyebrow">Ficha técnica</p>
+            <h2 class="ps-seccion-titulo">Descripción técnica</h2>
+        </div>
 
-            <div class="ps-tecnica-texto-col">
-                <p class="ps-seccion-eyebrow">Ficha técnica</p>
-                <h2 class="ps-seccion-titulo">Descripción técnica</h2>
-                @if($producto->descripcion_tecnica)
-                <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
-                @endif
-            </div>
+        @if($producto->descripcion_tecnica)
+        <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
+        @endif
 
-            @if($tecnicas->isNotEmpty())
-            <div class="ps-tecnica-galeria">
+        @if($tecnicas->isNotEmpty())
+        {{-- Mismo riel con scroll-snap que las obras de Nosotros (rail.js):
+             swipe nativo en teléfono, flechas y puntos desde tablet. --}}
+        <div class="ps-tecnica-rail-wrap" data-rail>
+            <div class="ps-tecnica-rail" data-rail-track tabindex="0" role="group"
+                aria-label="Imágenes técnicas de {{ $producto->nombre }}">
                 @foreach($tecnicas as $tecnica)
-                <button type="button"
-                    class="ps-tecnica-figura"
-                    data-tecnica-index="{{ $loop->index }}"
-                    data-src="{{ $tecnica->ruta }}"
-                    aria-label="Ampliar imagen técnica {{ $loop->iteration }}">
-                    <img src="{{ $tecnica->ruta }}"
-                        alt="Detalle técnico de {{ $producto->nombre }}"
-                        class="ps-tecnica-img"
-                        width="600" height="450"
-                        loading="lazy" decoding="async">
-                </button>
+                <div class="ps-tecnica-rail-item">
+                    <button type="button"
+                        class="ps-tecnica-figura"
+                        data-tecnica-index="{{ $loop->index }}"
+                        data-src="{{ $tecnica->ruta }}"
+                        aria-label="Ampliar imagen técnica {{ $loop->iteration }} de {{ $tecnicas->count() }}">
+                        <img src="{{ $tecnica->ruta }}"
+                            alt="Detalle técnico de {{ $producto->nombre }}"
+                            class="ps-tecnica-img"
+                            width="600" height="450"
+                            loading="lazy" decoding="async">
+                        <span class="ps-tecnica-zoom" aria-hidden="true">
+                            <x-heroicon-o-arrows-pointing-out />
+                        </span>
+                    </button>
+                </div>
                 @endforeach
             </div>
-            @endif
 
+            <div class="ps-tecnica-rail-controls">
+                <button class="ps-tecnica-rail-arrow" type="button"
+                    data-rail-prev aria-label="Imágenes técnicas anteriores">
+                    <x-heroicon-o-chevron-left />
+                </button>
+                <div class="ps-tecnica-rail-dots" data-rail-dots></div>
+                <button class="ps-tecnica-rail-arrow" type="button"
+                    data-rail-next aria-label="Imágenes técnicas siguientes">
+                    <x-heroicon-o-chevron-right />
+                </button>
+            </div>
         </div>
+        @endif
     </div>
 </section>
 
@@ -283,6 +303,18 @@
             <x-heroicon-o-x-mark />
         </button>
         <div class="ps-lightbox-img-wrap">
+            @if($tecnicas->count() > 1)
+            {{-- Flechas sobre la imagen ampliada: mismo gesto que el carrusel
+                 de la galería del producto, que se navega con chevrones. --}}
+            <button type="button" class="ps-lightbox-nav ps-lightbox-nav--prev"
+                id="ps-tecnica-lightbox-prev" aria-label="Imagen técnica anterior">
+                <x-heroicon-o-chevron-left />
+            </button>
+            <button type="button" class="ps-lightbox-nav ps-lightbox-nav--next"
+                id="ps-tecnica-lightbox-next" aria-label="Imagen técnica siguiente">
+                <x-heroicon-o-chevron-right />
+            </button>
+            @endif
             <img id="ps-tecnica-lightbox-img" src="" alt="">
         </div>
         @if($tecnicas->count() > 1)
@@ -370,4 +402,5 @@
 
 @section('script')
 <script src="{{ versioned_asset('js/modules/producto-show.js') }}"></script>
+<script src="{{ versioned_asset('js/modules/rail.js') }}"></script>
 @endsection

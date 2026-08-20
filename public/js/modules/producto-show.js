@@ -140,6 +140,8 @@
         var lightbox = document.getElementById('ps-tecnica-lightbox');
         var lbImg    = document.getElementById('ps-tecnica-lightbox-img');
         var closeBtn = document.getElementById('ps-tecnica-lightbox-close');
+        var prevBtn  = document.getElementById('ps-tecnica-lightbox-prev');
+        var nextBtn  = document.getElementById('ps-tecnica-lightbox-next');
         var figuras  = document.querySelectorAll('.ps-tecnica-figura');
         var lbThumbs = document.querySelectorAll('.ps-tecnica-lightbox-thumb');
 
@@ -159,6 +161,14 @@
             }
         }
 
+        // Circular, igual que las flechas del riel: en la última, "siguiente"
+        // vuelve a la primera. Nunca queda un botón muerto contra un extremo.
+        function paso(dir) {
+            var total = figuras.length;
+            if (total < 2) return;
+            mostrar((currentIndex + dir + total) % total);
+        }
+
         figuras.forEach(function (figura, i) {
             figura.addEventListener('click', function () {
                 mostrar(i);
@@ -176,6 +186,31 @@
             });
         });
 
+        if (prevBtn) prevBtn.addEventListener('click', function () { paso(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { paso(1); });
+
+        // En teléfono las flechas están ocultas para no tapar el plano, así
+        // que el swipe es la única forma de pasar de una imagen a la otra.
+        var touchX = null;
+        var touchY = null;
+
+        lbImg.addEventListener('touchstart', function (e) {
+            touchX = e.changedTouches[0].clientX;
+            touchY = e.changedTouches[0].clientY;
+        }, { passive: true });
+
+        lbImg.addEventListener('touchend', function (e) {
+            if (touchX === null) return;
+            var dx = e.changedTouches[0].clientX - touchX;
+            var dy = e.changedTouches[0].clientY - touchY;
+            touchX = null;
+            touchY = null;
+            // Sólo si el gesto fue claramente horizontal: si no, un scroll
+            // en diagonal cambiaría de imagen sin que nadie lo pida.
+            if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+            paso(dx < 0 ? 1 : -1);
+        }, { passive: true });
+
         if (closeBtn) {
             closeBtn.addEventListener('click', function () { lightbox.close(); });
         }
@@ -185,10 +220,8 @@
         });
 
         lightbox.addEventListener('keydown', function (e) {
-            var total = figuras.length;
-            if (total < 2) return;
-            if (e.key === 'ArrowRight') mostrar((currentIndex + 1) % total);
-            if (e.key === 'ArrowLeft')  mostrar((currentIndex - 1 + total) % total);
+            if (e.key === 'ArrowRight') paso(1);
+            if (e.key === 'ArrowLeft')  paso(-1);
         });
     }
 
