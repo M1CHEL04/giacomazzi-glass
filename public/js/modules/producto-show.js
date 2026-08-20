@@ -5,9 +5,79 @@
         initCarousel();
         initVariantes();
         initLightbox();
+        initTecnicaTexto();
         initTecnicaLightbox();
         initCarrito();
     });
+
+    /* ---- Ver más / Ver menos de la descripción técnica ----
+       El recorte no es una cantidad fija de líneas: el texto se corta a la
+       altura que ocupa la grilla de planos de al lado, para que las dos
+       columnas terminen parejas. Por eso hay que medir en el navegador y no
+       se puede resolver sólo con CSS. */
+    function initTecnicaTexto() {
+        var wrap    = document.querySelector('[data-tecnica-texto-wrap]');
+        var boton   = document.querySelector('[data-tecnica-toggle]');
+        var galeria = document.querySelector('[data-tecnica-galeria]');
+
+        if (!wrap || !boton) return;
+
+        var etiqueta = boton.querySelector('[data-tecnica-toggle-label]');
+        var ALTO_MINIMO = 220;
+
+        function medir() {
+            // Apilado (o sin planos) la grilla no marca ninguna altura útil:
+            // ahí manda el fallback de la hoja de estilos.
+            var dosColumnas = window.matchMedia('(min-width: 992px)').matches;
+
+            if (galeria && dosColumnas) {
+                var alto = galeria.getBoundingClientRect().height;
+                // Con un solo plano chico el recorte sería absurdo.
+                if (alto > ALTO_MINIMO) {
+                    wrap.style.setProperty('--tecnica-alto', Math.round(alto) + 'px');
+                } else {
+                    wrap.style.removeProperty('--tecnica-alto');
+                }
+            } else {
+                wrap.style.removeProperty('--tecnica-alto');
+            }
+
+            sincronizarBoton();
+        }
+
+        function sincronizarBoton() {
+            // Desplegado no hay nada que medir: el recorte está sacado y
+            // scrollHeight siempre igualaría a clientHeight.
+            if (boton.getAttribute('aria-expanded') === 'true') return;
+            var desborda = wrap.scrollHeight > wrap.clientHeight + 1;
+            boton.classList.toggle('is-visible', desborda);
+        }
+
+        boton.addEventListener('click', function () {
+            var recortado = wrap.classList.toggle('is-clamped');
+            boton.setAttribute('aria-expanded', recortado ? 'false' : 'true');
+            if (etiqueta) etiqueta.textContent = recortado ? 'Ver más' : 'Ver menos';
+            if (recortado) sincronizarBoton();
+        });
+
+        medir();
+
+        // Los planos son lazy: hasta que cargan, la grilla mide de menos y el
+        // recorte quedaría más corto que la columna de al lado.
+        if (galeria) {
+            galeria.querySelectorAll('img').forEach(function (img) {
+                if (img.complete) return;
+                img.addEventListener('load', medir, { once: true });
+                img.addEventListener('error', medir, { once: true });
+            });
+        }
+
+        var pendiente;
+        window.addEventListener('resize', function () {
+            clearTimeout(pendiente);
+            pendiente = setTimeout(medir, 150);
+        });
+    }
 
     /* ---- Carrusel + sincronización de thumbnails ---- */
     function initCarousel() {

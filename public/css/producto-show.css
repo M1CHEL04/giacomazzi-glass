@@ -605,8 +605,22 @@
     background-color: var(--g-vidrio);
 }
 
+/* Dos columnas desde lg: texto a la izquierda, planos a la derecha.
+   align-items:start evita que la columna corta se estire para igualar
+   a la larga. Debajo de lg se apilan, texto primero. */
+.ps-tecnica-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: start;
+}
+
+/* min-width:0 para que una palabra larga no estire la celda del grid. */
+.ps-tecnica-texto-col {
+    min-width: 0;
+}
+
 .ps-tecnica-texto {
-    max-width: 70ch;
     font-size: var(--fs-body);
     color: var(--external-secondary);
     line-height: 1.85;
@@ -614,42 +628,83 @@
     white-space: pre-line;
 }
 
-/* ---- Riel de imágenes técnicas ----
-   Los planos van en una franja horizontal a todo el ancho, debajo del
-   texto. Antes compartían fila con él en dos columnas, pero el texto
-   puede ser largo y los planos son cinco como mucho: la columna corta
-   dejaba un hueco muerto que crecía con cada párrafo.
-
-   El mecanismo es el mismo que las obras de Nosotros: scroll nativo con
-   snap (rail.js), swipe con el pulgar en teléfono, y flechas y puntos
-   como ayuda encima desde tablet. */
-.ps-tecnica-rail-wrap {
-    --rail-pad: 0.75rem;
-    margin-top: 2.5rem;
+/* El recorte lo hace este wrapper, no el párrafo: la altura la calcula
+   producto-show.js midiendo la grilla de imágenes y la escribe en
+   --tecnica-alto, así las dos columnas terminan a la misma altura.
+   El fallback de 22rem cubre el instante previo a que corra el script y
+   el caso de un producto sin planos cargados. */
+.ps-tecnica-texto-wrap.is-clamped {
+    max-height: var(--tecnica-alto, 22rem);
+    overflow: hidden;
+    position: relative;
 }
 
-.ps-tecnica-rail {
-    display: flex;
-    gap: 0.75rem;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
-    scroll-padding-left: var(--rail-pad);
-    margin: 0 calc(var(--rail-pad) * -1);
-    padding: 0.5rem var(--rail-pad) 0.75rem;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+/* Difuminado al pie del recorte: corta el texto sin que parezca que la
+   última línea se perdió. Sobre --g-vidrio, que es el fondo de la sección. */
+.ps-tecnica-texto-wrap.is-clamped::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4.5rem;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(246, 248, 249, 0), var(--g-vidrio));
 }
 
-.ps-tecnica-rail::-webkit-scrollbar {
+/* Arranca oculto: el JS lo muestra sólo si el texto realmente desborda. */
+.ps-tecnica-vermas {
     display: none;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 1rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--external-primary);
+    cursor: pointer;
+    transition: color 0.2s ease;
 }
 
-/* 78% deja asomar el borde de la siguiente: sin ese recorte visible nadie
-   descubre que el riel se desplaza. */
-.ps-tecnica-rail-item {
-    flex: 0 0 78%;
-    scroll-snap-align: start;
+.ps-tecnica-vermas.is-visible {
+    display: inline-flex;
+}
+
+.ps-tecnica-vermas:hover {
+    color: var(--external-primary-dark);
+}
+
+.ps-tecnica-vermas:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: 3px;
+}
+
+.ps-tecnica-vermas svg {
+    width: 1rem;
+    height: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.ps-tecnica-vermas[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+}
+
+/* ---- Grilla de imágenes técnicas ----
+   Dos columnas fijas. Con cantidad impar, .has-destacada le da el ancho
+   completo al primer plano: 1 → una sola grande; 3 → una grande y dos;
+   5 → una grande y dos filas de dos. Nunca queda una fila a medias. */
+.ps-tecnica-galeria {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.ps-tecnica-galeria.has-destacada > .ps-tecnica-figura:first-child {
+    grid-column: 1 / -1;
 }
 
 .ps-tecnica-figura {
@@ -663,7 +718,7 @@
     border-radius: 3px;
     overflow: hidden;
     cursor: zoom-in;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .ps-tecnica-figura:hover {
@@ -721,104 +776,10 @@
     }
 }
 
-.ps-tecnica-rail-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.85rem;
-    margin-top: 1rem;
-    min-height: 12px;
-}
-
-.ps-tecnica-rail-arrow {
-    display: none;
-    width: 44px;
-    height: 44px;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    border: 1px solid rgba(0, 0, 0, 0.12);
-    background: var(--external-white);
-    color: var(--external-primary);
-    cursor: pointer;
-    transition: color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.ps-tecnica-rail-arrow:hover {
-    color: var(--external-primary-dark);
-    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.12);
-}
-
-.ps-tecnica-rail-arrow[hidden] {
-    display: none;
-}
-
-.ps-tecnica-rail-arrow svg {
-    width: 1.15rem;
-    height: 1.15rem;
-}
-
-.ps-tecnica-rail-dots {
-    display: flex;
-    align-items: center;
-    gap: 0.45rem;
-}
-
-.ps-tecnica-rail-dots[hidden] {
-    display: none;
-}
-
-/* Los crea rail.js, así que se estilan acá igual que en Inicio y Nosotros */
-.ps-tecnica-rail-dots .rail-dot {
-    width: 7px;
-    height: 7px;
-    padding: 0;
-    border: none;
-    border-radius: 50%;
-    background: var(--external-secondary-soft);
-    opacity: 0.5;
-    cursor: pointer;
-    transition: background 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
-}
-
-.ps-tecnica-rail-dots .rail-dot:hover {
-    opacity: 0.85;
-}
-
-.ps-tecnica-rail-dots .rail-dot.is-active {
-    background: var(--external-primary);
-    opacity: 1;
-    transform: scale(1.45);
-}
-
-.ps-tecnica-rail-arrow:focus-visible,
-.ps-tecnica-rail-dots .rail-dot:focus-visible {
-    outline: 2px solid var(--external-primary);
-    outline-offset: 3px;
-}
-
-@media (min-width: 576px) {
-    .ps-tecnica-rail-item {
-        flex-basis: 46%;
-    }
-}
-
-@media (min-width: 768px) {
-    .ps-tecnica-rail-item {
-        flex-basis: 31.5%;
-    }
-
-    .ps-tecnica-rail-arrow {
-        display: inline-flex;
-    }
-}
-
-/* Con cinco planos como máximo, a 24% entran cuatro y el quinto asoma:
-   el riel se sigue leyendo como una franja, no como una grilla suelta. */
-@media (min-width: 1200px) {
-    .ps-tecnica-rail-item {
-        flex-basis: 24%;
+@media (min-width: 992px) {
+    .ps-tecnica-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 3rem;
     }
 }
 
@@ -1212,7 +1173,7 @@
     .ps-relacionados-section,
     .ps-banner-personalizar { padding: 3.5rem 0; }
 
-    .ps-tecnica-rail-wrap { margin-top: 2rem; }
+    .ps-tecnica-layout { gap: 2rem; }
 
     .ps-thumb { width: 50px; height: 50px; min-width: 50px; }
 }

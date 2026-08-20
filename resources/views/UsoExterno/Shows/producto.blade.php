@@ -45,7 +45,7 @@
                                     width="1200" height="900"
                                     decoding="async"
                                     @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
-                                    title="Clic para ampliar">
+                                title="Clic para ampliar">
                             </div>
                             @endforeach
                             @else
@@ -239,63 +239,49 @@
 @if($producto->descripcion_tecnica || $tecnicas->isNotEmpty())
 <section class="ps-tecnica-section">
     <div class="container">
-        {{-- Texto a ancho de lectura y planos en un riel horizontal debajo.
-             Antes eran dos columnas, pero el texto puede ser largo y los
-             planos son cinco como mucho: la columna corta dejaba un hueco
-             muerto a la derecha que crecía con cada párrafo. --}}
-        <div class="ps-tecnica-head">
-            <p class="ps-seccion-eyebrow">Ficha técnica</p>
-            <h2 class="ps-seccion-titulo">Descripción técnica</h2>
-        </div>
+        <div class="ps-tecnica-layout">
 
-        @if($producto->descripcion_tecnica)
-        <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
-        @endif
+            <div class="ps-tecnica-texto-col">
+                <p class="ps-seccion-eyebrow">Ficha técnica</p>
+                <h2 class="ps-seccion-titulo">Descripción técnica</h2>
 
-        @if($tecnicas->isNotEmpty())
-        {{-- Mismo riel con scroll-snap que las obras de Nosotros (rail.js):
-             swipe nativo en teléfono, flechas y puntos desde tablet. --}}
-        <div class="ps-tecnica-rail-wrap" data-rail>
-            <div class="ps-tecnica-rail" data-rail-track tabindex="0" role="group"
-                aria-label="Imágenes técnicas de {{ $producto->nombre }}">
-                @foreach($tecnicas as $tecnica)
-                <div class="ps-tecnica-rail-item">
-                    <button type="button"
-                        class="ps-tecnica-figura"
-                        data-tecnica-index="{{ $loop->index }}"
-                        data-src="{{ $tecnica->ruta }}"
-                        aria-label="Ampliar imagen técnica {{ $loop->iteration }} de {{ $tecnicas->count() }}">
-                        <img src="{{ $tecnica->ruta }}"
-                            alt="Detalle técnico de {{ $producto->nombre }}"
-                            class="ps-tecnica-img"
-                            width="600" height="450"
-                            loading="lazy" decoding="async">
-                        <span class="ps-tecnica-zoom" aria-hidden="true">
-                            <x-heroicon-o-arrows-pointing-out />
-                        </span>
-                    </button>
+                @if($producto->descripcion_tecnica)
+                <div id="ps-tecnica-texto" class="ps-tecnica-texto-wrap is-clamped" data-tecnica-texto-wrap>
+                    <p class="ps-tecnica-texto">{{ $producto->descripcion_tecnica }}</p>
                 </div>
+                <button type="button" class="ps-tecnica-vermas"
+                    data-tecnica-toggle aria-expanded="false" aria-controls="ps-tecnica-texto">
+                    <span data-tecnica-toggle-label>Ver más</span>
+                    <x-heroicon-o-chevron-down />
+                </button>
+                @endif
+            </div>
+
+            @if($tecnicas->isNotEmpty())
+            <div class="ps-tecnica-galeria{{ $tecnicas->count() % 2 === 1 ? ' has-destacada' : '' }}"
+                data-tecnica-galeria>
+                @foreach($tecnicas as $tecnica)
+                <button type="button"
+                    class="ps-tecnica-figura"
+                    data-tecnica-index="{{ $loop->index }}"
+                    data-src="{{ $tecnica->ruta }}"
+                    aria-label="Ampliar imagen técnica {{ $loop->iteration }} de {{ $tecnicas->count() }}">
+                    <img src="{{ $tecnica->ruta }}"
+                        alt="Detalle técnico de {{ $producto->nombre }}"
+                        class="ps-tecnica-img"
+                        width="600" height="450"
+                        loading="lazy" decoding="async">
+                    <span class="ps-tecnica-zoom" aria-hidden="true">
+                        <x-heroicon-o-arrows-pointing-out />
+                    </span>
+                </button>
                 @endforeach
             </div>
-
-            <div class="ps-tecnica-rail-controls">
-                <button class="ps-tecnica-rail-arrow" type="button"
-                    data-rail-prev aria-label="Imágenes técnicas anteriores">
-                    <x-heroicon-o-chevron-left />
-                </button>
-                <div class="ps-tecnica-rail-dots" data-rail-dots></div>
-                <button class="ps-tecnica-rail-arrow" type="button"
-                    data-rail-next aria-label="Imágenes técnicas siguientes">
-                    <x-heroicon-o-chevron-right />
-                </button>
-            </div>
+            @endif
         </div>
-        @endif
     </div>
 </section>
 
-{{-- Lightbox propio de las técnicas: el de la galería indexa sobre sus
-     thumbs y está atado al carrusel, mezclarlos correría esos índices. --}}
 @if($tecnicas->isNotEmpty())
 <dialog id="ps-tecnica-lightbox" class="ps-lightbox">
     <div class="ps-lightbox-inner">
@@ -402,5 +388,4 @@
 
 @section('script')
 <script src="{{ versioned_asset('js/modules/producto-show.js') }}"></script>
-<script src="{{ versioned_asset('js/modules/rail.js') }}"></script>
 @endsection
