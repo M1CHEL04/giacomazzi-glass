@@ -12,7 +12,8 @@
 /* ---- Galería ---- */
 .ps-galeria {
     position: sticky;
-    top: 1.5rem;
+    /* Se pega debajo del navbar, que ahora también viaja con el scroll */
+    top: calc(var(--g-nav-h) + 1.5rem);
 }
 
 .ps-carousel {

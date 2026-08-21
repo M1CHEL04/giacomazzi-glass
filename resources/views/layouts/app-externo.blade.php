@@ -29,7 +29,9 @@
 <body class="external-body d-flex flex-column min-vh-100">
     @include('layouts.partials.toast')
 
-    <header>
+    {{-- El header es el que va pegado arriba (no el <nav>): sticky necesita
+         que el elemento tenga lugar para desplazarse dentro de su padre. --}}
+    <header class="external-header">
         {{-- ── Navbar ──────────────────────────────────────────────────────── --}}
         <nav class="navbar navbar-expand-lg external-navbar py-2">
             <div class="container external-nav-container">

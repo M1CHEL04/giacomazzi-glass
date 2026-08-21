@@ -89,6 +89,18 @@
        que tiene su propia escala y no toma el verde Giacomazzi. */
     --g-whatsapp: #25d366;
     --g-whatsapp-dark: #1da851;
+
+    /* Alto del navbar pegado (58px de .external-nav-container + 0.5rem
+       de padding arriba y abajo del <nav>). Lo usan el scroll-padding de
+       los anclajes y todo lo que se pega debajo del header —la barra de
+       filtros del catálogo, el sidebar, la galería de la ficha— para no
+       quedar tapado. Si cambia el alto de la barra, se cambia acá. */
+    --g-nav-h: 74px;
+}
+
+/* Los anclajes internos (#seccion) frenan debajo del navbar, no atrás */
+html {
+    scroll-padding-top: calc(var(--g-nav-h) + 0.5rem);
 }
 
 .external-body {
@@ -472,9 +484,42 @@
     }
 }
 
+/* ── Navbar pegado ────────────────────────────────────────────────────
+   El header acompaña el scroll: el catálogo y la ficha de producto son
+   páginas largas y el carrito tiene que estar siempre a un toque.
+
+   Va sobre el <header> y no sobre el <nav>: el nav mide exactamente lo
+   que el header, así que pegado ahí no tendría recorrido. El header es
+   un flex item de .external-body, y sticky en un flex item se resuelve
+   contra el contenedor —el body—, que sí es más alto que la pantalla.
+
+   z-index 1030 (el mismo que .sticky-top de Bootstrap) lo deja arriba
+   del contenido y del botón de WhatsApp (1000), pero abajo del backdrop
+   del offcanvas del carrito (1040) y del drawer móvil (2000): cuando se
+   abre un panel, el navbar se oscurece con el resto. */
+.external-header {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
 .external-navbar {
     background: #dbdad9;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    /* La sombra solo aparece cuando hay contenido pasando por debajo
+       (la clase la pone layout.js); sin scroll el navbar es parte de la
+       página, no una capa flotando encima. */
+    transition: box-shadow 0.2s ease;
+}
+
+.external-header.is-scrolled .external-navbar {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .external-navbar {
+        transition: none;
+    }
 }
 
 .external-nav-container {
@@ -1125,11 +1170,14 @@
 
 /* Responsive para móviles pequeños */
 @media (max-width: 575.98px) {
+    /* Mismo padding que en escritorio: ahora la barra viaja con el scroll
+       y en teléfono cada píxel que ocupa es alto de contenido perdido.
+       También mantiene el alto real igual a --g-nav-h en todo el rango. */
     .external-navbar {
-        padding-top: 0.75rem !important;
-        padding-bottom: 0.75rem !important;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
     }
-    
+
     .external-logo-img {
         height: 28px;
     }

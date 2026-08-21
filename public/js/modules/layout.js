@@ -29,6 +29,29 @@
         }
     });
 
+    // ── Sombra del navbar pegado ──────────────────────────────────────────────
+    // El header acompaña el scroll; la sombra aparece recién cuando hay
+    // contenido pasando por debajo, para que se lea como capa y no como
+    // una barra flotando desde el principio.
+    var header = document.querySelector('.external-header');
+
+    if (header) {
+        var ticking = false;
+
+        function syncHeaderShadow() {
+            header.classList.toggle('is-scrolled', window.scrollY > 4);
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function () {
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(syncHeaderShadow);
+        }, { passive: true });
+
+        syncHeaderShadow();
+    }
+
     // ── Mobile drawer ─────────────────────────────────────────────────────────
     var menuBtn  = document.getElementById('mobile-menu-btn');
     var drawer   = document.getElementById('mobile-nav-drawer');

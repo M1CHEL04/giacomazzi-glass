@@ -23,8 +23,8 @@ class UserSeeder extends Seeder
 
         User::create([
             'name' => 'Azul',
-            'email' => '@gmail.com',
-            'password' => Hash::make('azul123'),
+            'email' => 'azul@aberturasgiacomazzi.com.ar',
+            'password' => Hash::make('admin123'),
             'cambio_contraseña' => false,
         ]);
 

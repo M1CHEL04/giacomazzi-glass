@@ -97,7 +97,11 @@
                 updateSidebarBadge();
                 syncStickyCount();
                 if (scrollGrid && container) {
-                    var top = container.getBoundingClientRect().top + window.scrollY - 20;
+                    // El navbar es sticky: si no se le descuenta el alto, la
+                    // primera fila del grid queda escondida detrás.
+                    var navH = parseInt(getComputedStyle(document.documentElement)
+                        .getPropertyValue('--g-nav-h'), 10) || 0;
+                    var top = container.getBoundingClientRect().top + window.scrollY - navH - 20;
                     window.scrollTo({ top: top, behavior: 'smooth' });
                 }
             })
