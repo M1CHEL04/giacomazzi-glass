@@ -11,10 +11,10 @@
     });
 
     /* ---- Ver más / Ver menos de la descripción técnica ----
-       El recorte no es una cantidad fija de líneas: el texto se corta a la
-       altura que ocupa la grilla de planos de al lado, para que las dos
-       columnas terminen parejas. Por eso hay que medir en el navegador y no
-       se puede resolver sólo con CSS. */
+       El recorte no es una cantidad fija de líneas: el texto se corta donde
+       terminan los planos de al lado, para que las dos columnas cierren a la
+       misma altura. Por eso hay que medir en el navegador y no se puede
+       resolver sólo con CSS. */
     function initTecnicaTexto() {
         var wrap    = document.querySelector('[data-tecnica-texto-wrap]');
         var boton   = document.querySelector('[data-tecnica-toggle]');
@@ -23,7 +23,12 @@
         if (!wrap || !boton) return;
 
         var etiqueta = boton.querySelector('[data-tecnica-toggle-label]');
-        var ALTO_MINIMO = 220;
+        // Debajo de esto el recorte deja dos o tres líneas sueltas: no vale
+        // la pena esconder texto para emparejar tan poco.
+        var ALTO_MINIMO = 160;
+        // Alto del botón "Ver más" más su margen, para el momento en que
+        // todavía está oculto y no se puede medir.
+        var ALTO_BOTON = 38;
 
         function medir() {
             // Apilado (o sin planos) la grilla no marca ninguna altura útil:
@@ -31,8 +36,15 @@
             var dosColumnas = window.matchMedia('(min-width: 992px)').matches;
 
             if (galeria && dosColumnas) {
-                var alto = galeria.getBoundingClientRect().height;
-                // Con un solo plano chico el recorte sería absurdo.
+                // Se mide hasta dónde llegan los planos, no cuánto miden: el
+                // recorte arranca debajo del título de la sección, así que
+                // igualar las alturas a secas dejaba la columna de texto más
+                // abajo que la de imágenes. Y al botón hay que reservarle el
+                // lugar aunque todavía esté oculto: aparece justo ahí.
+                var alto = galeria.getBoundingClientRect().bottom
+                    - wrap.getBoundingClientRect().top
+                    - reservaBoton();
+
                 if (alto > ALTO_MINIMO) {
                     wrap.style.setProperty('--tecnica-alto', Math.round(alto) + 'px');
                 } else {
@@ -43,6 +55,12 @@
             }
 
             sincronizarBoton();
+        }
+
+        function reservaBoton() {
+            if (!boton.offsetHeight) return ALTO_BOTON;
+            var margen = parseFloat(getComputedStyle(boton).marginTop) || 0;
+            return boton.offsetHeight + margen;
         }
 
         function sincronizarBoton() {

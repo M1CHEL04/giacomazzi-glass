@@ -258,7 +258,9 @@
             </div>
 
             @if($tecnicas->isNotEmpty())
-            <div class="ps-tecnica-galeria{{ $tecnicas->count() % 2 === 1 ? ' has-destacada' : '' }}"
+            {{-- Un solo plano se muestra grande; de dos en adelante, cuadrícula
+                 pareja: fichas del mismo tamaño, legibles sin ampliar. --}}
+            <div class="ps-tecnica-galeria{{ $tecnicas->count() === 1 ? ' ps-tecnica-galeria--unica' : '' }}"
                 data-tecnica-galeria>
                 @foreach($tecnicas as $tecnica)
                 <button type="button"

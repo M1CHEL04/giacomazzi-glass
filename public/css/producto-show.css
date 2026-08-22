@@ -695,17 +695,30 @@
 }
 
 /* ---- Grilla de imágenes técnicas ----
-   Dos columnas fijas. Con cantidad impar, .has-destacada le da el ancho
-   completo al primer plano: 1 → una sola grande; 3 → una grande y dos;
-   5 → una grande y dos filas de dos. Nunca queda una fila a medias. */
+   Dos tamaños, no más: uno solo va grande y de dos en adelante es una
+   cuadrícula pareja de dos columnas. Antes el primer plano se agrandaba
+   con cualquier cantidad impar (3 → uno grande y dos chicos), y eso
+   jerarquizaba una imagen que no tiene por qué ser más importante que
+   las otras: son todas el mismo tipo de plano. */
 .ps-tecnica-galeria {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
 }
 
-.ps-tecnica-galeria.has-destacada > .ps-tecnica-figura:first-child {
-    grid-column: 1 / -1;
+/* Un solo plano ocupa toda la columna, al lado del texto */
+.ps-tecnica-galeria--unica {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* Y se muestra a su proporción real: el 4/3 de la cuadrícula existe para
+   que las fichas midan todas igual, y con una sola no hay a qué
+   emparejarse — el marco fijo sólo agregaría franjas vacías arriba y
+   abajo de un plano vertical. El tope evita que un plano muy alto empuje
+   el texto de al lado más de lo que se lee de una. */
+.ps-tecnica-galeria--unica .ps-tecnica-img {
+    aspect-ratio: auto;
+    max-height: 32rem;
 }
 
 .ps-tecnica-figura {
