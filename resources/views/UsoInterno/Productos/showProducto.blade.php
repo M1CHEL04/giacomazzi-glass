@@ -97,6 +97,35 @@ $tecnicas = $producto->imagenesTecnicas;
                 style="font-size:11px; padding:3px 12px; font-weight:600;">
                 {{ $producto->activo ? 'Activo' : 'Inactivo' }}
             </span>
+
+            {{-- Ver la ficha como la ve el cliente. La vista pública exige
+                 producto y categoría activos: si alguno está de baja el link
+                 daría 404, así que ahí se dice por qué no hay nada que ver. --}}
+            @php
+            $categoriaActiva = (bool) $producto->categoria?->activo;
+            $visiblePublico  = $producto->activo && $categoriaActiva;
+            $motivoOculto    = !$producto->activo
+                ? 'El producto está inactivo: no aparece en el sitio.'
+                : 'La categoría no está activa: el producto no aparece en el sitio.';
+            @endphp
+
+            @if($visiblePublico)
+            <a href="{{ route('productos.show', $producto->id) }}"
+                target="_blank" rel="noopener"
+                class="btn btn-outline-secondary btn-sm px-2 d-inline-flex align-items-center gap-1"
+                style="font-size:12px; padding-top:3px; padding-bottom:3px;"
+                title="Abrir la ficha pública en una pestaña nueva">
+                <x-heroicon-m-arrow-top-right-on-square style="width:13px;height:13px;" />
+                Ver en el sitio
+            </a>
+            @else
+            <span class="d-inline-flex align-items-center gap-1 text-secondary"
+                style="font-size:12px;" title="{{ $motivoOculto }}">
+                <x-heroicon-m-eye-slash style="width:13px;height:13px;" />
+                Sin ficha pública
+            </span>
+            @endif
+
             <a href="{{ route('uso-interno.productos.edit', $producto) }}"
                 class="btn btn-outline-success btn-sm px-2 d-inline-flex align-items-center gap-1"
                 style="font-size:12px; padding-top:3px; padding-bottom:3px;">

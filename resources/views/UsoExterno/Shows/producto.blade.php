@@ -138,7 +138,9 @@
                         <div class="ps-personalizar-texto">
                             <strong>¿Necesitás otras medidas, colores o terminaciones?</strong>
                             Todos nuestros productos se fabrican completamente a medida y pueden adaptarse a tus requerimientos específicos.
-                            <a href="{{ route('contacto') }}" class="ps-personalizar-link">Consultanos sin compromiso</a>
+                            <a href="{{ whatsapp_href('¡Hola! Quería consultar por ' . $producto->nombre . ' con otras medidas, colores o terminaciones.') }}"
+                                class="ps-personalizar-link"
+                                @if(whatsapp_numero()) target="_blank" rel="noopener" @endif>Consultanos sin compromiso</a>
                         </div>
                     </div>
                     @endif
@@ -378,7 +380,9 @@
                     Además de las variantes disponibles, podemos fabricar este producto con cualquier medida, color, material o terminación que necesités. Cada pieza se produce en nuestro taller con total flexibilidad.
                 </p>
             </div>
-            <a href="{{ route('contacto') }}" class="ps-banner-personalizar-cta">
+            <a href="{{ whatsapp_href('¡Hola! Quería consultar por la fabricación a medida de ' . $producto->nombre . '.') }}"
+                class="ps-banner-personalizar-cta"
+                @if(whatsapp_numero()) target="_blank" rel="noopener" @endif>
                 Consultar personalización
                 <x-heroicon-o-arrow-right />
             </a>

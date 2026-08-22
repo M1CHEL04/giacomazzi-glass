@@ -1,9 +1,8 @@
 @php
-    $waNumero  = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
     $waMensaje = '¡Hola! Te escribo desde la web de Aberturas Giacomazzi, quería hacer una consulta.';
 @endphp
-@if($waNumero)
-<a href="https://wa.me/{{ $waNumero }}?text={{ rawurlencode($waMensaje) }}"
+@if(whatsapp_numero())
+<a href="{{ whatsapp_href($waMensaje) }}"
     class="whatsapp-float" target="_blank" rel="noopener"
     aria-label="Contactar por WhatsApp">
     <i class="bi bi-whatsapp"></i>

@@ -16,6 +16,39 @@ if (! function_exists('versioned_asset')) {
     }
 }
 
+if (! function_exists('whatsapp_numero')) {
+    /** El número de WhatsApp como lo quiere wa.me: sólo dígitos, o '' si no hay. */
+    function whatsapp_numero(): string
+    {
+        return preg_replace('/\D/', '', (string) config('app.whatsapp_number', ''));
+    }
+}
+
+if (! function_exists('whatsapp_href')) {
+    /**
+     * Link de consulta por WhatsApp con el mensaje ya escrito.
+     *
+     * Todas las invitaciones a consultar del sitio público abren el chat
+     * —es el canal por el que la fábrica atiende—, así que el link se arma
+     * en un solo lugar y cada vista sólo pone el texto que corresponde a su
+     * contexto.
+     *
+     * Sin WHATSAPP_NUMBER configurado cae a /contacto, que redirige a
+     * Nosotros: el link queda peor pero nunca muerto.
+     */
+    function whatsapp_href(string $mensaje = ''): string
+    {
+        $numero = whatsapp_numero();
+
+        if ($numero === '') {
+            return route('contacto');
+        }
+
+        return 'https://wa.me/' . $numero
+            . ($mensaje === '' ? '' : '?text=' . rawurlencode($mensaje));
+    }
+}
+
 if (! function_exists('imagen_anchos')) {
     /** Anchos de las variantes que genera `php artisan images:optimizar`. */
     function imagen_anchos(): array

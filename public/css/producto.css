@@ -5,6 +5,10 @@
         gap: 0.45rem;
     }
 
+    /* height:auto es lo que hace que el recorte sea cuadrado. Las <img>
+       traen height="200" y ese atributo cuenta como alto definido: con
+       ancho y alto puestos, el navegador ignora el aspect-ratio y las
+       miniaturas salían de 200px de alto, estiradas en vertical. */
     .prod-photo-thumb {
         aspect-ratio: 1;
         object-fit: cover;
@@ -12,6 +16,7 @@
         border: 1.5px solid var(--internal-border);
         cursor: zoom-in;
         width: 100%;
+        height: auto;
         display: block;
         transition: opacity .15s, border-color .15s, transform .12s;
     }

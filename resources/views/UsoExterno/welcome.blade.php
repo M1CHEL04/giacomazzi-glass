@@ -12,11 +12,8 @@
 
 @section('content')
 @php
-$waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
-$waMedida = '¡Hola! tengo un proyecto y quiero cotizarlo con ustedes.';
-$waHref = $waNumero
-? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMedida)
-: route('contacto');
+$waNumero = whatsapp_numero();
+$waHref = whatsapp_href('¡Hola! tengo un proyecto y quiero cotizarlo con ustedes.');
 @endphp
 
 {{-- ── HERO ─────────────────────────────────────────────────────────── --}}
@@ -30,19 +27,10 @@ $waHref = $waNumero
     <span class="home-hero-scrim"></span>
     <div class="container home-hero-inner">
         <h1 class="home-hero-title">Diseño y solidez en cada abertura</h1>
-        <p class="home-cota home-hero-cota"><span>Aluminio y PVC</span></p>
+        <!-- <p class="home-cota home-hero-cota"><span>Aluminio y PVC</span></p> -->
         <p class="home-hero-text">
             Fabricamos con la misma calidad tanto productos de catálogo como diseños a medida para tu obra o proyecto arquitectónico.
         </p>
-        <div class="home-hero-actions">
-            <a href="#catalogo" class="home-btn home-btn--primary">
-                Ver el catálogo
-            </a>
-            <a href="{{ $waHref }}" class="home-btn home-btn--ghost"
-                @if($waNumero) target="_blank" rel="noopener" @endif>
-                <i class="bi bi-whatsapp"></i> Cotizar a medida
-            </a>
-        </div>
     </div>
 </section>
 

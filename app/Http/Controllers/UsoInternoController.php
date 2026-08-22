@@ -404,7 +404,9 @@ class UsoInternoController extends Controller
             $this->skuService->sincronizarVariantes($producto, $request);
 
             DB::commit();
-            return redirect()->route('uso-interno.productos.index')
+            // A la ficha del producto y no al listado: recién creado, lo
+            // primero que se quiere es ver cómo quedó.
+            return redirect()->route('uso-interno.productos.show', $producto->id)
                 ->with('success', 'Producto creado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -561,7 +563,7 @@ class UsoInternoController extends Controller
             $this->skuService->sincronizarVariantes($producto, $request);
 
             DB::commit();
-            return redirect()->route('uso-interno.productos.index')
+            return redirect()->route('uso-interno.productos.show', $producto->id)
                 ->with('success', 'Producto actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack();

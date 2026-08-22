@@ -173,7 +173,7 @@
 
     <footer class="external-footer mt-auto">
         @php
-            $footerWa = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
+            $footerWa = whatsapp_numero();
         @endphp
         <div class="container external-footer-inner">
             <a href="{{ route('welcome') }}" class="external-footer-logo" aria-label="Aberturas Giacomazzi">
