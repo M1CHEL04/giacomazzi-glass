@@ -33,7 +33,7 @@ class UsoExternoController extends Controller
 
             $query = Producto::with([
                 'categoria:id,nombre',
-                'imagenes' => fn($q) => $q->where('activa', true)->where('es_principal', true)->select(['id', 'producto_id', 'ruta']),
+                'imagenes' => fn($q) => $q->where('es_principal', true)->select(['id', 'producto_id', 'ruta']),
             ])
                 ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
                 ->where('activo', true)
@@ -107,7 +107,6 @@ class UsoExternoController extends Controller
 
             $query = Producto::with([
                 'imagenes' => fn($q) => $q
-                    ->where('activa', true)
                     ->where('es_principal', true)
                     ->select(['id', 'producto_id', 'ruta']),
             ])
@@ -175,11 +174,9 @@ class UsoExternoController extends Controller
                 'categoria:id,nombre,activo',
                 'unidad',
                 'imagenes' => fn($q) => $q
-                    ->where('activa', true)
                     ->orderByDesc('es_principal')
                     ->select(['id', 'producto_id', 'ruta', 'es_principal']),
                 'imagenesTecnicas' => fn($q) => $q
-                    ->where('activa', true)
                     ->select(['id', 'producto_id', 'ruta']),
                 'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
                 'valoresVariantes.variante:id,nombre',
@@ -204,7 +201,6 @@ class UsoExternoController extends Controller
 
             $relacionados = Producto::with([
                 'imagenes' => fn($q) => $q
-                    ->where('activa', true)
                     ->where('es_principal', true)
                     ->select(['id', 'producto_id', 'ruta']),
             ])

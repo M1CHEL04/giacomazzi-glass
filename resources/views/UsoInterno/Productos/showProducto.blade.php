@@ -78,7 +78,7 @@ $varianteGroups = $producto->valoresVariantes
 ->groupBy(fn($vv) => $vv->variante?->nombre ?? 'Sin variante')
 ->sortKeys();
 
-$imagenes = $producto->imagenes->where('activa', true)->values();
+$imagenes = $producto->imagenes->values();
 $tecnicas = $producto->imagenesTecnicas;
 @endphp
 

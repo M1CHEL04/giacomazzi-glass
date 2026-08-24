@@ -311,7 +311,7 @@ class UsoInternoController extends Controller
                 'unidad',
                 'valoresVariantes.variante',
                 'imagenes',
-                'imagenesTecnicas' => fn($q) => $q->where('activa', true),
+                'imagenesTecnicas',
                 'variantes',
             ])->findOrFail($id);
 
@@ -365,10 +365,10 @@ class UsoInternoController extends Controller
             'descripcion.required'  => 'La descripción es obligatoria.',
             'descripcion.max'       => 'La descripción no puede superar los ' . Producto::MAX_DESCRIPCION . ' caracteres.',
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
-            'imagenes.max'          => 'Solo se permiten hasta ' . Producto::MAX_IMAGENES . ' imágenes.',
+            'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
-            'imagenes_tecnicas.max'     => 'Solo se permiten hasta ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas.',
+            'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
         ]);
@@ -425,7 +425,7 @@ class UsoInternoController extends Controller
                 'unidad',
                 'valoresVariantes.variante',
                 'imagenes',
-                'imagenesTecnicas' => fn($q) => $q->where('activa', true),
+                'imagenesTecnicas',
             ])->findOrFail($id);
             $categorias = Categoria::orderBy('nombre')->get();
             $unidades   = UnidadMedida::orderBy('id')->get();
@@ -460,11 +460,11 @@ class UsoInternoController extends Controller
             'descripcion'         => 'required|string|max:' . Producto::MAX_DESCRIPCION,
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
             'activo'              => 'nullable|in:0,1',
-            'imagenes'            => 'nullable|array',
+            'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
             'imagenes.*'          => 'image|max:5120',
             'imagenes_eliminar'   => 'nullable|array',
             'imagenes_eliminar.*' => 'exists:imagenes_producto,id',
-            'imagenes_tecnicas'            => 'nullable|array',
+            'imagenes_tecnicas'            => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
             'imagenes_tecnicas.*'          => 'image|max:5120',
             'imagenes_tecnicas_eliminar'   => 'nullable|array',
             'imagenes_tecnicas_eliminar.*' => 'exists:imagenes_producto,id',
@@ -481,8 +481,10 @@ class UsoInternoController extends Controller
             'descripcion.required'  => 'La descripción es obligatoria.',
             'descripcion.max'       => 'La descripción no puede superar los ' . Producto::MAX_DESCRIPCION . ' caracteres.',
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
+            'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
+            'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
         ]);
@@ -523,6 +525,8 @@ class UsoInternoController extends Controller
 
             $imagenesNuevas = array_values(array_filter($request->file('imagenes', [])));
             if (!empty($imagenesNuevas)) {
+                // Cupo sobre las imágenes activas: las eliminadas siguen en la
+                // tabla con activa = false y no ocupan lugar.
                 $remaining  = Producto::MAX_IMAGENES - $producto->fresh()->imagenes()->count();
                 $portadaIdx = str_starts_with($portadaField, 'nueva:')
                     ? (int) substr($portadaField, 6) : null;
@@ -547,6 +551,8 @@ class UsoInternoController extends Controller
 
             $tecnicasNuevas = array_values(array_filter($request->file('imagenes_tecnicas', [])));
             if (!empty($tecnicasNuevas)) {
+                // Igual que arriba: cuentan sólo las técnicas activas, que son
+                // las que el formulario muestra.
                 $remainingTecnicas = Producto::MAX_IMAGENES_TECNICAS - $producto->fresh()->imagenesTecnicas()->count();
                 foreach ($tecnicasNuevas as $imagen) {
                     if ($remainingTecnicas <= 0) break;

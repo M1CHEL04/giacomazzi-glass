@@ -184,8 +184,8 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
 
             {{-- Imágenes existentes + inputs nuevos en el mismo flex row --}}
             <div class="d-flex flex-wrap gap-3">
-                @if ($isEdit && $producto->imagenes->where('activa', true)->count() > 0)
-                @foreach ($producto->imagenes->where('activa', true) as $imagen)
+                @if ($isEdit && $producto->imagenes->count() > 0)
+                @foreach ($producto->imagenes as $imagen)
                 <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
                     <img src="{{ $imagen->ruta }}"
                         alt="{{ $imagen->nombre_imagen }}"
@@ -426,7 +426,7 @@ $portadaExistenteId = $isEdit
 : null;
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
-'existingImgCount' => $isEdit ? $producto->imagenes->where('activa', true)->count() : 0,
+'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
 'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
 'initialVariantes' => $initialVariantes ?? [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),

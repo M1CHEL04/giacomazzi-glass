@@ -39,14 +39,30 @@ class Producto extends Model
         return $this->belongsToMany(ValorVariante::class, 'productos_valores_variantes', 'producto_id', 'valor_variante_id');
     }
 
+    /**
+     * Las dos relaciones devuelven sólo imágenes activas.
+     *
+     * Eliminar una imagen es una baja lógica (activa = false): la fila queda
+     * en la tabla con el archivo ya subido. Si la relación las trajera, cada
+     * consumidor tendría que acordarse de filtrar por su cuenta —y el que se
+     * olvidara contaría imágenes que el usuario ya borró—. Con el filtro acá,
+     * lo que se muestra y lo que se cuenta son siempre lo mismo.
+     *
+     * Para llegar a las dadas de baja hay que ir por ImagenProducto, que es
+     * lo que hace el propio borrado.
+     */
     public function imagenes()
     {
-        return $this->hasMany(ImagenProducto::class, 'producto_id')->where('es_tecnica', false);
+        return $this->hasMany(ImagenProducto::class, 'producto_id')
+            ->where('es_tecnica', false)
+            ->where('activa', true);
     }
 
     public function imagenesTecnicas()
     {
-        return $this->hasMany(ImagenProducto::class, 'producto_id')->where('es_tecnica', true);
+        return $this->hasMany(ImagenProducto::class, 'producto_id')
+            ->where('es_tecnica', true)
+            ->where('activa', true);
     }
 
     public function variantes()

@@ -138,7 +138,7 @@
                         <div class="ps-personalizar-texto">
                             <strong>¿Necesitás otras medidas, colores o terminaciones?</strong>
                             Todos nuestros productos se fabrican completamente a medida y pueden adaptarse a tus requerimientos específicos.
-                            <a href="{{ whatsapp_href('¡Hola! Quería consultar por ' . $producto->nombre . ' con otras medidas, colores o terminaciones.') }}"
+                            <a href="{{ whatsapp_href('¡Hola! Quería consultar por ' . $producto->nombre . ' con otras medidas y/o colores.') }}"
                                 class="ps-personalizar-link"
                                 @if(whatsapp_numero()) target="_blank" rel="noopener" @endif>Consultanos sin compromiso</a>
                         </div>

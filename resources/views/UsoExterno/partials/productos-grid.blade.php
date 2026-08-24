@@ -4,38 +4,38 @@ $chipsActivos = [];
 
 // Chips de categorías (sólo en "todos los productos", cuando $categoriasFiltro está definido)
 foreach (($categoriasFiltro ?? []) as $catId) {
-    $cat = ($todasCategorias ?? collect())->firstWhere('id', (int) $catId);
-    if (!$cat) continue;
-    $sinEsta = array_values(array_filter($categoriasFiltro, fn($c) => (int) $c !== (int) $catId));
-    $params = [];
-    if (!empty($filtros)) $params['variantes'] = $filtros;
-    if (!empty($sinEsta)) $params['categorias'] = $sinEsta;
-    $chipsActivos[] = [
-        'label' => $cat->nombre,
-        'url'   => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
-    ];
+$cat = ($todasCategorias ?? collect())->firstWhere('id', (int) $catId);
+if (!$cat) continue;
+$sinEsta = array_values(array_filter($categoriasFiltro, fn($c) => (int) $c !== (int) $catId));
+$params = [];
+if (!empty($filtros)) $params['variantes'] = $filtros;
+if (!empty($sinEsta)) $params['categorias'] = $sinEsta;
+$chipsActivos[] = [
+'label' => $cat->nombre,
+'url' => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
+];
 }
 
 // Chips de variantes
 foreach (($filtros ?? []) as $varianteId => $valores) {
-    $variante = $variantes->firstWhere('id', (int) $varianteId);
-    if (!$variante) continue;
-    foreach ((array) $valores as $valorId) {
-        $valor = $variante->valores->firstWhere('id', (int) $valorId);
-        if (!$valor) continue;
-        $sinEste = $filtros;
-        $sinEste[$varianteId] = array_values(
-            array_filter((array) $sinEste[$varianteId], fn ($v) => (int) $v !== (int) $valorId)
-        );
-        if (empty($sinEste[$varianteId])) unset($sinEste[$varianteId]);
-        $params = [];
-        if (!empty($sinEste)) $params['variantes'] = $sinEste;
-        if (!empty($categoriasFiltro ?? [])) $params['categorias'] = $categoriasFiltro;
-        $chipsActivos[] = [
-            'label' => $variante->nombre . ': ' . $valor->valor,
-            'url'   => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
-        ];
-    }
+$variante = $variantes->firstWhere('id', (int) $varianteId);
+if (!$variante) continue;
+foreach ((array) $valores as $valorId) {
+$valor = $variante->valores->firstWhere('id', (int) $valorId);
+if (!$valor) continue;
+$sinEste = $filtros;
+$sinEste[$varianteId] = array_values(
+array_filter((array) $sinEste[$varianteId], fn ($v) => (int) $v !== (int) $valorId)
+);
+if (empty($sinEste[$varianteId])) unset($sinEste[$varianteId]);
+$params = [];
+if (!empty($sinEste)) $params['variantes'] = $sinEste;
+if (!empty($categoriasFiltro ?? [])) $params['categorias'] = $categoriasFiltro;
+$chipsActivos[] = [
+'label' => $variante->nombre . ': ' . $valor->valor,
+'url' => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
+];
+}
 }
 @endphp
 
@@ -69,7 +69,7 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
     <p>
         <strong>Todos nuestros productos pueden ser fabricados a medida.</strong>
         ¿Necesitás otras medidas, colores o terminaciones?
-        <a href="{{ whatsapp_href('¡Hola! No encontré lo que buscaba en el catálogo y quería consultar por un producto a medida.') }}"
+        <a href="{{ whatsapp_href('¡Hola! quería consultar por un producto a medida.') }}"
             @if(whatsapp_numero()) target="_blank" rel="noopener" @endif>Consultanos</a>
         y lo producimos especialmente para vos.
     </p>
@@ -89,11 +89,11 @@ foreach (($filtros ?? []) as $varianteId => $valores) {
                     width="800" height="600"
                     decoding="async"
                     @if($loop->index < 2) fetchpriority="high" @else loading="lazy" @endif>
-                @else
-                <div class="producto-img-placeholder">
-                    <i class="bi bi-image"></i>
-                </div>
-                @endif
+                    @else
+                    <div class="producto-img-placeholder">
+                        <i class="bi bi-image"></i>
+                    </div>
+                    @endif
             </div>
             <div class="producto-card-body">
                 {{-- Tag de categoría — sólo en "todos los productos" --}}
