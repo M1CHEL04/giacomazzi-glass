@@ -629,20 +629,14 @@
     white-space: pre-line;
 }
 
-/* El recorte lo hace este wrapper, no el párrafo: la altura la calcula
-   producto-show.js midiendo la grilla de imágenes y la escribe en
-   --tecnica-alto, así las dos columnas terminan a la misma altura.
-   El fallback de 22rem cubre el instante previo a que corra el script y
-   el caso de un producto sin planos cargados. */
+
 .ps-tecnica-texto-wrap.is-clamped {
     max-height: var(--tecnica-alto, 22rem);
     overflow: hidden;
     position: relative;
 }
 
-/* Difuminado al pie del recorte: corta el texto sin que parezca que la
-   última línea se perdió. Sobre --g-vidrio, que es el fondo de la sección. */
-.ps-tecnica-texto-wrap.is-clamped::after {
+.ps-tecnica-texto-wrap.is-clamped.is-desbordado::after {
     content: '';
     position: absolute;
     left: 0;
@@ -915,14 +909,18 @@
     gap: 1rem;
 }
 
+/* Mismo fondo oscuro que las flechas, y por el mismo motivo: sobre un plano
+   blanco ampliado, el vidrio claro se perdía. */
 .ps-lightbox-close {
     position: fixed;
     top: 1.25rem;
     right: 1.25rem;
     width: 38px;
     height: 38px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 20, 15, 0.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -934,7 +932,7 @@
 }
 
 .ps-lightbox-close:hover {
-    background: var(--g-hover-blanco);
+    background: rgba(15, 20, 15, 0.85);
 }
 
 .ps-lightbox-close svg {
@@ -952,10 +950,18 @@
     overflow: hidden;
 }
 
-/* Flechas sobre la imagen ampliada. Comparten el vidrio translúcido del
-   botón de cerrar para que la capa del lightbox se lea como una sola. */
+/* Flechas sobre la imagen ampliada.
+
+   position:fixed y no absolute: pegadas al borde de la pantalla y no al de
+   la imagen, no tapan lo que se vino a mirar —que en un plano técnico es
+   justamente el dibujo—. El lightbox es un <dialog> en la top layer, así
+   que fixed lo posiciona contra el viewport sin pelearse con nada.
+
+   El fondo es oscuro y no el vidrio blanco del resto de la capa: la mitad
+   de las imágenes técnicas son planos sobre blanco, y ahí un círculo
+   blanco translúcido con un ícono blanco adentro directamente no existe. */
 .ps-lightbox-nav {
-    position: absolute;
+    position: fixed;
     top: 50%;
     transform: translateY(-50%);
     width: 44px;
@@ -963,17 +969,19 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(15, 20, 15, 0.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.38);
     border-radius: 50%;
     color: white;
     cursor: pointer;
     transition: background 0.18s ease;
-    z-index: 5;
+    z-index: 10;
 }
 
 .ps-lightbox-nav:hover {
-    background: var(--g-hover-blanco);
+    background: rgba(15, 20, 15, 0.85);
 }
 
 .ps-lightbox-nav:focus-visible {
@@ -986,14 +994,24 @@
     height: 1.2rem;
 }
 
-.ps-lightbox-nav--prev { left: 0.5rem; }
-.ps-lightbox-nav--next { right: 0.5rem; }
+.ps-lightbox-nav--prev { left: 1rem; }
+.ps-lightbox-nav--next { right: 1rem; }
 
-/* En teléfono el swipe es el gesto natural y las flechas taparían la
-   imagen, que es justo lo que se vino a mirar. */
+/* En teléfono el swipe sigue siendo el gesto principal, pero las flechas se
+   quedan: son la única pista de que hay más de una imagen. Achican y se
+   corren al borde para robarle lo menos posible al plano. */
 @media (max-width: 575.98px) {
     .ps-lightbox-nav {
-        display: none;
+        width: 38px;
+        height: 38px;
+    }
+
+    .ps-lightbox-nav--prev { left: 0.35rem; }
+    .ps-lightbox-nav--next { right: 0.35rem; }
+
+    .ps-lightbox-nav svg {
+        width: 1.05rem;
+        height: 1.05rem;
     }
 }
 

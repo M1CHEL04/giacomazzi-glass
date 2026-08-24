@@ -221,6 +221,19 @@
             <x-heroicon-o-x-mark />
         </button>
         <div class="ps-lightbox-img-wrap">
+            @if($imagenes->count() > 1)
+            {{-- Mismas flechas que el lightbox técnico: en escritorio son la
+                 forma de pasar de una foto a otra, en teléfono acompañan al
+                 swipe avisando que hay más. --}}
+            <button type="button" class="ps-lightbox-nav ps-lightbox-nav--prev"
+                id="ps-lightbox-prev" aria-label="Imagen anterior">
+                <x-heroicon-o-chevron-left />
+            </button>
+            <button type="button" class="ps-lightbox-nav ps-lightbox-nav--next"
+                id="ps-lightbox-next" aria-label="Imagen siguiente">
+                <x-heroicon-o-chevron-right />
+            </button>
+            @endif
             <img id="ps-lightbox-img" src="" alt="">
         </div>
         @if($imagenes->count() > 1)

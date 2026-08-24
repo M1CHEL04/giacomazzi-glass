@@ -69,6 +69,9 @@
             if (boton.getAttribute('aria-expanded') === 'true') return;
             var desborda = wrap.scrollHeight > wrap.clientHeight + 1;
             boton.classList.toggle('is-visible', desborda);
+            // El difuminado del pie va con el botón: los dos dicen "hay más
+            // texto abajo". Con el texto entero no se dibuja ninguno.
+            wrap.classList.toggle('is-desbordado', desborda);
         }
 
         boton.addEventListener('click', function () {
@@ -144,25 +147,87 @@
         });
     }
 
-    /* ---- Lightbox ---- */
+    /* ---- Deslizar para cambiar de imagen ----
+       El mismo gesto en los dos lightbox. Se cuelga del contenedor y no de
+       la <img>: arrancar el swipe un poco afuera de la foto es lo normal, y
+       si el listener vive en la imagen ese arranque se pierde. */
+    function initSwipe(zona, alDeslizar) {
+        if (!zona) return;
+
+        var x0 = null;
+        var y0 = null;
+
+        zona.addEventListener('touchstart', function (e) {
+            x0 = e.changedTouches[0].clientX;
+            y0 = e.changedTouches[0].clientY;
+        }, { passive: true });
+
+        zona.addEventListener('touchend', function (e) {
+            if (x0 === null) return;
+            var dx = e.changedTouches[0].clientX - x0;
+            var dy = e.changedTouches[0].clientY - y0;
+            x0 = null;
+            y0 = null;
+            // Sólo si el gesto fue claramente horizontal: si no, un movimiento
+            // en diagonal cambiaría de imagen sin que nadie lo pida.
+            if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
+            alDeslizar(dx < 0 ? 1 : -1);
+        }, { passive: true });
+    }
+
+    /** Cambia la imagen del lightbox con un fundido corto. */
+    function pintar(lbImg, src, conFundido) {
+        if (!conFundido) {
+            lbImg.src = src;
+            lbImg.style.opacity = '1';
+            return;
+        }
+        lbImg.style.opacity = '0';
+        setTimeout(function () {
+            lbImg.src = src;
+            lbImg.style.opacity = '1';
+        }, 140);
+    }
+
+    /* ---- Lightbox de la galería ---- */
     function initLightbox() {
         var lightbox   = document.getElementById('ps-lightbox');
         var lbImg      = document.getElementById('ps-lightbox-img');
         var closeBtn   = document.getElementById('ps-lightbox-close');
-        var lbThumbs   = document.querySelectorAll('.ps-lightbox-thumb');
+        var prevBtn    = document.getElementById('ps-lightbox-prev');
+        var nextBtn    = document.getElementById('ps-lightbox-next');
         var carouselEl = document.getElementById('ps-carousel');
 
         if (!lightbox || !lbImg) return;
 
+        // Acotado al propio <dialog>: las miniaturas del lightbox técnico
+        // también llevan .ps-lightbox-thumb, así que buscándolas en todo el
+        // documento se mezclaban con éstas y corrían los índices.
+        var lbThumbs = lightbox.querySelectorAll('.ps-lightbox-thumb');
+
+        // Las fuentes salen del carrusel y no de las miniaturas: con una sola
+        // imagen no hay miniaturas y esa imagen igual tiene que ampliarse.
+        var fuentes = Array.prototype.map.call(
+            document.querySelectorAll('.ps-carousel-img'),
+            function (img) { return img.getAttribute('src'); }
+        );
+
+        if (fuentes.length === 0) return;
+
         var currentIndex = 0;
 
-        function openLightbox(index) {
-            var thumbs = document.querySelectorAll('.ps-lightbox-thumb');
-            if (!thumbs[index]) return;
+        function mostrar(index, conFundido) {
+            if (!fuentes[index]) return;
             currentIndex = index;
-            lbImg.src = thumbs[index].dataset.src;
+            pintar(lbImg, fuentes[index], conFundido);
             syncLbThumbs(index);
-            lightbox.showModal();
+        }
+
+        // Circular: en la última, "siguiente" vuelve a la primera. Nunca
+        // queda un botón muerto contra un extremo.
+        function paso(dir) {
+            if (fuentes.length < 2) return;
+            mostrar((currentIndex + dir + fuentes.length) % fuentes.length, true);
         }
 
         function syncLbThumbs(index) {
@@ -173,36 +238,36 @@
             }
         }
 
-        if (carouselEl) {
-            carouselEl.addEventListener('click', function (e) {
-                var img = e.target.closest('.ps-carousel-img');
-                if (!img) return;
-                var activeItem = carouselEl.querySelector('.carousel-item.active');
-                var items = carouselEl.querySelectorAll('.carousel-item');
-                openLightbox(Array.from(items).indexOf(activeItem));
-            });
+        function abrir(index) {
+            mostrar(index);
+            lightbox.showModal();
         }
 
-        var ampliarBtn = document.getElementById('ps-ampliar-btn');
-        if (ampliarBtn && carouselEl) {
-            ampliarBtn.addEventListener('click', function () {
-                var activeItem = carouselEl.querySelector('.carousel-item.active');
-                var items = carouselEl.querySelectorAll('.carousel-item');
-                openLightbox(Array.from(items).indexOf(activeItem));
+        function indiceActivo() {
+            var items = carouselEl.querySelectorAll('.carousel-item');
+            return Array.prototype.indexOf.call(items, carouselEl.querySelector('.carousel-item.active'));
+        }
+
+        if (carouselEl) {
+            carouselEl.addEventListener('click', function (e) {
+                if (!e.target.closest('.ps-carousel-img')) return;
+                abrir(indiceActivo());
             });
+
+            var ampliarBtn = document.getElementById('ps-ampliar-btn');
+            if (ampliarBtn) {
+                ampliarBtn.addEventListener('click', function () { abrir(indiceActivo()); });
+            }
         }
 
         lbThumbs.forEach(function (thumb, i) {
-            thumb.addEventListener('click', function () {
-                currentIndex = i;
-                lbImg.style.opacity = '0';
-                setTimeout(function () {
-                    lbImg.src = thumb.dataset.src;
-                    lbImg.style.opacity = '1';
-                }, 140);
-                syncLbThumbs(i);
-            });
+            thumb.addEventListener('click', function () { mostrar(i, true); });
         });
+
+        if (prevBtn) prevBtn.addEventListener('click', function () { paso(-1); });
+        if (nextBtn) nextBtn.addEventListener('click', function () { paso(1); });
+
+        initSwipe(lightbox.querySelector('.ps-lightbox-img-wrap'), paso);
 
         if (closeBtn) {
             closeBtn.addEventListener('click', function () { lightbox.close(); });
@@ -213,10 +278,8 @@
         });
 
         lightbox.addEventListener('keydown', function (e) {
-            var total = lbThumbs.length;
-            if (total === 0) return;
-            if (e.key === 'ArrowRight') lbThumbs[(currentIndex + 1) % total].click();
-            if (e.key === 'ArrowLeft')  lbThumbs[(currentIndex - 1 + total) % total].click();
+            if (e.key === 'ArrowRight') paso(1);
+            if (e.key === 'ArrowLeft')  paso(-1);
         });
     }
 
@@ -231,17 +294,18 @@
         var prevBtn  = document.getElementById('ps-tecnica-lightbox-prev');
         var nextBtn  = document.getElementById('ps-tecnica-lightbox-next');
         var figuras  = document.querySelectorAll('.ps-tecnica-figura');
-        var lbThumbs = document.querySelectorAll('.ps-tecnica-lightbox-thumb');
 
         if (!lightbox || !lbImg || figuras.length === 0) return;
 
+        var lbThumbs = lightbox.querySelectorAll('.ps-tecnica-lightbox-thumb');
+
         var currentIndex = 0;
 
-        function mostrar(index) {
+        function mostrar(index, conFundido) {
             var figura = figuras[index];
             if (!figura) return;
             currentIndex = index;
-            lbImg.src = figura.dataset.src;
+            pintar(lbImg, figura.dataset.src, conFundido);
             lbThumbs.forEach(function (t) { t.classList.remove('active'); });
             if (lbThumbs[index]) {
                 lbThumbs[index].classList.add('active');
@@ -254,7 +318,7 @@
         function paso(dir) {
             var total = figuras.length;
             if (total < 2) return;
-            mostrar((currentIndex + dir + total) % total);
+            mostrar((currentIndex + dir + total) % total, true);
         }
 
         figuras.forEach(function (figura, i) {
@@ -265,39 +329,13 @@
         });
 
         lbThumbs.forEach(function (thumb, i) {
-            thumb.addEventListener('click', function () {
-                lbImg.style.opacity = '0';
-                setTimeout(function () {
-                    mostrar(i);
-                    lbImg.style.opacity = '1';
-                }, 140);
-            });
+            thumb.addEventListener('click', function () { mostrar(i, true); });
         });
 
         if (prevBtn) prevBtn.addEventListener('click', function () { paso(-1); });
         if (nextBtn) nextBtn.addEventListener('click', function () { paso(1); });
 
-        // En teléfono las flechas están ocultas para no tapar el plano, así
-        // que el swipe es la única forma de pasar de una imagen a la otra.
-        var touchX = null;
-        var touchY = null;
-
-        lbImg.addEventListener('touchstart', function (e) {
-            touchX = e.changedTouches[0].clientX;
-            touchY = e.changedTouches[0].clientY;
-        }, { passive: true });
-
-        lbImg.addEventListener('touchend', function (e) {
-            if (touchX === null) return;
-            var dx = e.changedTouches[0].clientX - touchX;
-            var dy = e.changedTouches[0].clientY - touchY;
-            touchX = null;
-            touchY = null;
-            // Sólo si el gesto fue claramente horizontal: si no, un scroll
-            // en diagonal cambiaría de imagen sin que nadie lo pida.
-            if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy)) return;
-            paso(dx < 0 ? 1 : -1);
-        }, { passive: true });
+        initSwipe(lightbox.querySelector('.ps-lightbox-img-wrap'), paso);
 
         if (closeBtn) {
             closeBtn.addEventListener('click', function () { lightbox.close(); });
