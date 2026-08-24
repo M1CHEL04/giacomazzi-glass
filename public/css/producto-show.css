@@ -950,16 +950,6 @@
     overflow: hidden;
 }
 
-/* Flechas sobre la imagen ampliada.
-
-   position:fixed y no absolute: pegadas al borde de la pantalla y no al de
-   la imagen, no tapan lo que se vino a mirar —que en un plano técnico es
-   justamente el dibujo—. El lightbox es un <dialog> en la top layer, así
-   que fixed lo posiciona contra el viewport sin pelearse con nada.
-
-   El fondo es oscuro y no el vidrio blanco del resto de la capa: la mitad
-   de las imágenes técnicas son planos sobre blanco, y ahí un círculo
-   blanco translúcido con un ícono blanco adentro directamente no existe. */
 .ps-lightbox-nav {
     position: fixed;
     top: 50%;
@@ -997,17 +987,30 @@
 .ps-lightbox-nav--prev { left: 1rem; }
 .ps-lightbox-nav--next { right: 1rem; }
 
-/* En teléfono el swipe sigue siendo el gesto principal, pero las flechas se
-   quedan: son la única pista de que hay más de una imagen. Achican y se
-   corren al borde para robarle lo menos posible al plano. */
+/* Fila de controles debajo de la imagen: flecha, miniaturas, flecha.
+   En escritorio las flechas son fixed, o sea que salen del flujo y esta fila
+   termina siendo sólo las miniaturas, igual que antes. */
+.ps-lightbox-controles {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    max-width: 100%;
+    min-width: 0;
+}
+
+/* En teléfono las flechas bajan a la fila de controles en vez de flotar
+   sobre la imagen. Entran en el alto que ya ocupaban las miniaturas (50px),
+   así que la imagen no pierde ni un píxel y deja de quedar tapada.
+   El swipe sigue siendo el gesto principal; las flechas son la pista de que
+   hay más de una imagen. */
 @media (max-width: 575.98px) {
     .ps-lightbox-nav {
+        position: static;
+        transform: none;
         width: 38px;
         height: 38px;
+        flex: 0 0 38px;
     }
-
-    .ps-lightbox-nav--prev { left: 0.35rem; }
-    .ps-lightbox-nav--next { right: 0.35rem; }
 
     .ps-lightbox-nav svg {
         width: 1.05rem;
@@ -1039,6 +1042,9 @@
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    /* Es lo único que cede ancho en la fila de controles: las flechas
+       conservan su tamaño y las miniaturas se desplazan de costado. */
+    min-width: 0;
 }
 
 .ps-lightbox-thumbs::-webkit-scrollbar { display: none; }

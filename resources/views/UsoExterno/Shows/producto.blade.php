@@ -221,28 +221,27 @@
             <x-heroicon-o-x-mark />
         </button>
         <div class="ps-lightbox-img-wrap">
-            @if($imagenes->count() > 1)
-            {{-- Mismas flechas que el lightbox técnico: en escritorio son la
-                 forma de pasar de una foto a otra, en teléfono acompañan al
-                 swipe avisando que hay más. --}}
+            <img id="ps-lightbox-img" src="" alt="">
+        </div>
+        @if($imagenes->count() > 1)
+        <div class="ps-lightbox-controles">
             <button type="button" class="ps-lightbox-nav ps-lightbox-nav--prev"
                 id="ps-lightbox-prev" aria-label="Imagen anterior">
                 <x-heroicon-o-chevron-left />
             </button>
+
+            <div class="ps-lightbox-thumbs">
+                @foreach($imagenes as $imagen)
+                <button type="button" class="ps-lightbox-thumb {{ $loop->first ? 'active' : '' }}" data-index="{{ $loop->index }}" data-src="{{ $imagen->ruta }}">
+                    <img src="{{ $imagen->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+                </button>
+                @endforeach
+            </div>
+
             <button type="button" class="ps-lightbox-nav ps-lightbox-nav--next"
                 id="ps-lightbox-next" aria-label="Imagen siguiente">
                 <x-heroicon-o-chevron-right />
             </button>
-            @endif
-            <img id="ps-lightbox-img" src="" alt="">
-        </div>
-        @if($imagenes->count() > 1)
-        <div class="ps-lightbox-thumbs">
-            @foreach($imagenes as $imagen)
-            <button type="button" class="ps-lightbox-thumb {{ $loop->first ? 'active' : '' }}" data-index="{{ $loop->index }}" data-src="{{ $imagen->ruta }}">
-                <img src="{{ $imagen->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
-            </button>
-            @endforeach
         </div>
         @endif
     </div>
@@ -306,28 +305,29 @@
             <x-heroicon-o-x-mark />
         </button>
         <div class="ps-lightbox-img-wrap">
-            @if($tecnicas->count() > 1)
-            {{-- Flechas sobre la imagen ampliada: mismo gesto que el carrusel
-                 de la galería del producto, que se navega con chevrones. --}}
+            <img id="ps-tecnica-lightbox-img" src="" alt="">
+        </div>
+        @if($tecnicas->count() > 1)
+        {{-- Misma fila de controles que el lightbox de la galería --}}
+        <div class="ps-lightbox-controles">
             <button type="button" class="ps-lightbox-nav ps-lightbox-nav--prev"
                 id="ps-tecnica-lightbox-prev" aria-label="Imagen técnica anterior">
                 <x-heroicon-o-chevron-left />
             </button>
+
+            <div class="ps-lightbox-thumbs">
+                @foreach($tecnicas as $tecnica)
+                <button type="button" class="ps-lightbox-thumb ps-tecnica-lightbox-thumb {{ $loop->first ? 'active' : '' }}"
+                    data-index="{{ $loop->index }}" data-src="{{ $tecnica->ruta }}">
+                    <img src="{{ $tecnica->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+                </button>
+                @endforeach
+            </div>
+
             <button type="button" class="ps-lightbox-nav ps-lightbox-nav--next"
                 id="ps-tecnica-lightbox-next" aria-label="Imagen técnica siguiente">
                 <x-heroicon-o-chevron-right />
             </button>
-            @endif
-            <img id="ps-tecnica-lightbox-img" src="" alt="">
-        </div>
-        @if($tecnicas->count() > 1)
-        <div class="ps-lightbox-thumbs">
-            @foreach($tecnicas as $tecnica)
-            <button type="button" class="ps-lightbox-thumb ps-tecnica-lightbox-thumb {{ $loop->first ? 'active' : '' }}"
-                data-index="{{ $loop->index }}" data-src="{{ $tecnica->ruta }}">
-                <img src="{{ $tecnica->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
-            </button>
-            @endforeach
         </div>
         @endif
     </div>
