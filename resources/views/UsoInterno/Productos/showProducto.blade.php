@@ -6,69 +6,79 @@
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/producto.css') }}">
 <style>
-.sku-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .3rem;
-    max-height: 168px;
-    overflow-y: auto;
-}
-.sku-chip {
-    font-size: 11px;
-    color: #287452;
-    background: rgba(40, 116, 82, .07);
-    border-radius: 4px;
-    padding: 3px 8px;
-    white-space: nowrap;
-    letter-spacing: .03em;
-}
+    .sku-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .3rem;
+        max-height: 168px;
+        overflow-y: auto;
+    }
 
-/* -- Descripcion tecnica plegable ------------------------------
+    .sku-chip {
+        font-size: 11px;
+        color: #287452;
+        background: rgba(40, 116, 82, .07);
+        border-radius: 4px;
+        padding: 3px 8px;
+        white-space: nowrap;
+        letter-spacing: .03em;
+    }
+
+    /* -- Descripcion tecnica plegable ------------------------------
    El campo admite hasta 5000 caracteres. Sin plegar, una ficha
    larga empuja Variantes, SKUs y Registro fuera de la pantalla. */
-.desc-tecnica {
-    font-size: 13px;
-    line-height: 1.65;
-    white-space: pre-line;
-}
+    .desc-tecnica {
+        font-size: 13px;
+        line-height: 1.65;
+        white-space: pre-line;
+    }
 
-.desc-tecnica.is-clamped {
-    display: -webkit-box;
-    -webkit-line-clamp: 6;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
+    .desc-tecnica.is-clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
 
-/* Arranca oculto: el JS lo muestra solo si el texto no entra. */
-.desc-tecnica-toggle {
-    display: none;
-    align-items: center;
-    gap: .2rem;
-    margin-top: .4rem;
-    padding: 0;
-    border: 0;
-    background: none;
-    font-size: 12px;
-    font-weight: 600;
-    color: #287452;
-    cursor: pointer;
-}
+    /* -- Lista de variantes plegable ------------------------------
+   Se muestran dos renglones y el resto queda detras del boton, para que
+   un producto con cinco variantes no empuje SKUs y Registro fuera de la
+   pantalla. El alto lo calcula el script sobre los renglones reales: uno
+   con muchos valores ocupa mas de una linea. */
+    .variantes-lista.is-clamped {
+        max-height: var(--variantes-alto, none);
+        overflow: hidden;
+    }
 
-.desc-tecnica-toggle.is-visible {
-    display: inline-flex;
-}
+    .ver-mas-toggle {
+        display: none;
+        align-items: center;
+        gap: .2rem;
+        margin-top: .4rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: #287452;
+        cursor: pointer;
+    }
 
-.desc-tecnica-toggle:hover {
-    text-decoration: underline;
-}
+    .ver-mas-toggle.is-visible {
+        display: inline-flex;
+    }
 
-.desc-tecnica-toggle svg {
-    transition: transform .15s ease;
-}
+    .ver-mas-toggle:hover {
+        text-decoration: underline;
+    }
 
-.desc-tecnica-toggle[aria-expanded="true"] svg {
-    transform: rotate(180deg);
-}
+    .ver-mas-toggle svg {
+        transition: transform .15s ease;
+    }
+
+    .ver-mas-toggle[aria-expanded="true"] svg {
+        transform: rotate(180deg);
+    }
 </style>
 @endsection
 
@@ -103,10 +113,10 @@ $tecnicas = $producto->imagenesTecnicas;
                  daría 404, así que ahí se dice por qué no hay nada que ver. --}}
             @php
             $categoriaActiva = (bool) $producto->categoria?->activo;
-            $visiblePublico  = $producto->activo && $categoriaActiva;
-            $motivoOculto    = !$producto->activo
-                ? 'El producto está inactivo: no aparece en el sitio.'
-                : 'La categoría no está activa: el producto no aparece en el sitio.';
+            $visiblePublico = $producto->activo && $categoriaActiva;
+            $motivoOculto = !$producto->activo
+            ? 'El producto está inactivo: no aparece en el sitio.'
+            : 'La categoría no está activa: el producto no aparece en el sitio.';
             @endphp
 
             @if($visiblePublico)
@@ -246,7 +256,7 @@ $tecnicas = $producto->imagenesTecnicas;
                              si el texto realmente desborda (ver el script al pie). --}}
                         <p id="desc-tecnica-texto" class="mb-0 text-secondary desc-tecnica is-clamped"
                             data-desc-tecnica>{{ $producto->descripcion_tecnica }}</p>
-                        <button type="button" class="desc-tecnica-toggle"
+                        <button type="button" class="ver-mas-toggle"
                             data-desc-tecnica-toggle aria-expanded="false" aria-controls="desc-tecnica-texto">
                             <span data-desc-tecnica-label>Ver más</span>
                             <x-heroicon-m-chevron-down style="width:12px;height:12px;" />
@@ -264,7 +274,9 @@ $tecnicas = $producto->imagenesTecnicas;
                 </div>
 
                 @if($varianteGroups->isNotEmpty())
-                <div>
+                {{-- Plegado a dos renglones; el botón aparece solo si hay un
+                     tercero (ver el script al pie). --}}
+                <div id="variantes-lista" class="variantes-lista is-clamped" data-variantes-lista>
                     @foreach($varianteGroups as $nombre => $valores)
                     <div class="variante-row">
                         <span class="variante-name">{{ $nombre }}</span>
@@ -272,6 +284,11 @@ $tecnicas = $producto->imagenesTecnicas;
                     </div>
                     @endforeach
                 </div>
+                <button type="button" class="ver-mas-toggle"
+                    data-variantes-toggle aria-expanded="false" aria-controls="variantes-lista">
+                    <span data-variantes-label>Ver más</span>
+                    <x-heroicon-m-chevron-down style="width:12px;height:12px;" />
+                </button>
                 @else
                 <p class="text-secondary mb-0" style="font-size:13px;">Sin variantes asociadas.</p>
                 @endif
@@ -358,7 +375,7 @@ $tecnicas = $producto->imagenesTecnicas;
     // El corte lo decide el alto real, no la cantidad de caracteres: el mismo
     // texto entra en 6 lineas en un monitor ancho y desborda en una notebook,
     // y ademas el usuario puede haber cargado saltos de linea propios.
-    (function () {
+    (function() {
         var texto = document.querySelector('[data-desc-tecnica]');
         var boton = document.querySelector('[data-desc-tecnica-toggle]');
         if (!texto || !boton) return;
@@ -373,7 +390,7 @@ $tecnicas = $producto->imagenesTecnicas;
             boton.classList.toggle('is-visible', desborda);
         }
 
-        boton.addEventListener('click', function () {
+        boton.addEventListener('click', function() {
             var plegado = texto.classList.toggle('is-clamped');
             boton.setAttribute('aria-expanded', plegado ? 'false' : 'true');
             if (etiqueta) etiqueta.textContent = plegado ? 'Ver más' : 'Ver menos';
@@ -385,9 +402,59 @@ $tecnicas = $producto->imagenesTecnicas;
         // Al cambiar el ancho cambia la cantidad de lineas, asi que el boton
         // puede pasar a sobrar o a hacer falta.
         var pendiente;
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', function() {
             clearTimeout(pendiente);
             pendiente = setTimeout(sincronizarBoton, 150);
+        });
+    })();
+
+    // Ver mas / Ver menos de las variantes.
+    // Se muestran dos renglones y el resto queda plegado. El corte no es una
+    // cantidad fija de pixeles: se mide donde arranca el tercer renglon, que
+    // depende de cuantos valores tenga cada variante y de cuanto envuelven.
+    (function() {
+        var lista = document.querySelector('[data-variantes-lista]');
+        var boton = document.querySelector('[data-variantes-toggle]');
+        if (!lista || !boton) return;
+
+        var etiqueta = boton.querySelector('[data-variantes-label]');
+        var VISIBLES = 2;
+
+        function medir() {
+            var filas = lista.querySelectorAll('.variante-row');
+
+            // Con dos renglones o menos no hay nada que plegar.
+            if (filas.length <= VISIBLES) {
+                lista.classList.remove('is-clamped');
+                lista.style.removeProperty('--variantes-alto');
+                boton.classList.remove('is-visible');
+                return;
+            }
+
+            // getBoundingClientRect y no offsetTop: los dos elementos pueden
+            // colgar de padres posicionados distintos.
+            var corte = filas[VISIBLES].getBoundingClientRect().top -
+                lista.getBoundingClientRect().top;
+
+            lista.style.setProperty('--variantes-alto', Math.round(corte) + 'px');
+            boton.classList.add('is-visible');
+        }
+
+        boton.addEventListener('click', function() {
+            var plegado = lista.classList.toggle('is-clamped');
+            boton.setAttribute('aria-expanded', plegado ? 'false' : 'true');
+            if (etiqueta) etiqueta.textContent = plegado ? 'Ver más' : 'Ver menos';
+        });
+
+        medir();
+
+        // Se puede medir en cualquier momento: plegar recorta con overflow,
+        // no mueve los renglones, asi que el tercero esta en el mismo lugar
+        // este plegado o desplegado.
+        var pendienteVariantes;
+        window.addEventListener('resize', function() {
+            clearTimeout(pendienteVariantes);
+            pendienteVariantes = setTimeout(medir, 150);
         });
     })();
 </script>
