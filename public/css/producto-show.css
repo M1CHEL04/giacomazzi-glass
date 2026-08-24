@@ -889,6 +889,19 @@
     max-height: 100vh;
     width: 100%;
     height: 100%;
+    /* pinch-zoom y nada más: el arrastre con un dedo deja de desplazar
+       —sin esto, deslizar por el fondo, al costado de la imagen, scrolleaba
+       la página de atrás—, pero se conserva el pellizco para agrandar, que
+       en un plano técnico es justo lo que se necesita.
+
+       El bloqueo por JS (body overflow) no alcanza solo: en iOS, cuando el
+       gesto arranca sobre un elemento que no scrollea, Safari igual mueve
+       el documento. Esto lo resuelve antes, en el navegador.
+
+       El swipe para cambiar de imagen no se ve afectado: se resuelve con
+       touchstart/touchend, no con el gesto nativo de desplazamiento. */
+    touch-action: pinch-zoom;
+    overscroll-behavior: contain;
 }
 
 .ps-lightbox::backdrop {
@@ -1045,6 +1058,9 @@
     /* Es lo único que cede ancho en la fila de controles: las flechas
        conservan su tamaño y las miniaturas se desplazan de costado. */
     min-width: 0;
+    /* Y la única excepción al touch-action: none del lightbox: acá el dedo
+       sí tiene que poder correr el riel, aunque sólo en horizontal. */
+    touch-action: pan-x;
 }
 
 .ps-lightbox-thumbs::-webkit-scrollbar { display: none; }

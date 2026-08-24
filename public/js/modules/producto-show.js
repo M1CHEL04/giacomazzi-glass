@@ -189,6 +189,26 @@
         }, 140);
     }
 
+    /* ---- Abrir el lightbox sin que se mueva la página de atrás ----
+       Un <dialog> modal tapa la página y le bloquea los clics, pero no le
+       frena el scroll: con la imagen ampliada, arrastrar el dedo por el
+       fondo —o girar la rueda— movía el contenido de abajo. Se apaga
+       mientras está abierto y se devuelve al cerrar. Escucha el evento
+       'close' del propio dialog, así también cubre el cierre con Esc.
+
+       El complemento en CSS es touch-action: en teléfono el navegador
+       decide el gesto antes de que corra ningún script. */
+    function abrirModal(dialogo) {
+        dialogo.showModal();
+        document.body.style.overflow = 'hidden';
+    }
+
+    function initScrollDeFondo(dialogo) {
+        dialogo.addEventListener('close', function () {
+            document.body.style.overflow = '';
+        });
+    }
+
     /* ---- Lightbox de la galería ---- */
     function initLightbox() {
         var lightbox   = document.getElementById('ps-lightbox');
@@ -240,8 +260,10 @@
 
         function abrir(index) {
             mostrar(index);
-            lightbox.showModal();
+            abrirModal(lightbox);
         }
+
+        initScrollDeFondo(lightbox);
 
         function indiceActivo() {
             var items = carouselEl.querySelectorAll('.carousel-item');
@@ -321,10 +343,12 @@
             mostrar((currentIndex + dir + total) % total, true);
         }
 
+        initScrollDeFondo(lightbox);
+
         figuras.forEach(function (figura, i) {
             figura.addEventListener('click', function () {
                 mostrar(i);
-                lightbox.showModal();
+                abrirModal(lightbox);
             });
         });
 
