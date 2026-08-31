@@ -16,6 +16,15 @@ class OptimizadorImagen
 
     private const CALIDAD = 85;
 
+    /**
+     * Techo de memoria mientras dura la conversión, sólo para este servicio.
+     *
+     * Medido: 8000x6000 (48 MP) pica en 212 MB y 8000x8000 —el tope que deja
+     * pasar la validación— en 280 MB. Si se sube el tope de `dimensions` en
+     * UsoInternoController hay que volver a medir y ajustar esto.
+     */
+    private const MEMORIA = '512M';
+
     private const CALIDAD_THUMB = 80;
 
     /**
@@ -23,14 +32,15 @@ class OptimizadorImagen
      */
     public function variantes(UploadedFile $archivo): array
     {
-        // Se lee desde el path temporal y no con getContent(): así el archivo no
-        // queda además entero en memoria al lado del bitmap descomprimido.
-        // orient() aplica el EXIF de rotación — las fotos de celular vienen acostadas.
-        $imagen = (new ImageManager(new Driver()))
-            ->read($archivo->getRealPath())
-            ->orient();
+
+        $limiteOriginal = ini_get('memory_limit');
+        ini_set('memory_limit', self::MEMORIA);
 
         try {
+            $imagen = (new ImageManager(new Driver()))
+                ->read($archivo->getRealPath())
+                ->orient();
+
             $imagen->scaleDown(width: self::ANCHO_FULL);
 
             $full = $imagen->toWebp(self::CALIDAD)->toString();
@@ -42,8 +52,8 @@ class OptimizadorImagen
 
             return ['full' => $full, 'thumb' => $thumb];
         } finally {
-
             unset($imagen);
+            ini_set('memory_limit', $limiteOriginal);
         }
     }
 }

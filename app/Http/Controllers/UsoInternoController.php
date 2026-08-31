@@ -25,11 +25,14 @@ class UsoInternoController extends Controller
      * `mimes` acota lo que acepta la regla `image` a secas (svg, gif y bmp
      * incluidos): GD no puede leer un SVG y la conversión a WebP explotaría.
      *
-     * `dimensions` es la guarda de memoria: GD descomprime a 4 bytes por píxel
-     * y el memory_limit es de 256 MB. Medido con OptimizadorImagen, el tope de
-     * 6000x6000 pica en ~170 MB — si se sube este número hay que volver a medir.
+     * `dimensions` es la guarda de memoria, y va en megapíxeles porque es lo que
+     * cuesta: GD descomprime a 4 bytes por píxel, así que el peso del archivo no
+     * predice nada (una foto de 50 MP pesa 3,5 MB y pica en 216 MB). El tope de
+     * 8000x8000 deja entrar a los celulares de 48/50 MP y pica en 280 MB contra
+     * el techo de 512M que OptimizadorImagen se pone durante la conversión.
+     * Si se sube este número hay que volver a medir y ajustar allá.
      */
-    private const REGLAS_IMAGEN = 'image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=6000,max_height=6000';
+    private const REGLAS_IMAGEN = 'image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=8000,max_height=8000';
 
     public function __construct(
         private SkuService $skuService,
@@ -385,12 +388,12 @@ class UsoInternoController extends Controller
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
-            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 6000 px de ancho o alto.',
+            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 8000 px de ancho o alto.',
             'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
             'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
-            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 6000 px de ancho o alto.',
+            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 8000 px de ancho o alto.',
         ]);
 
         DB::beginTransaction();
@@ -505,12 +508,12 @@ class UsoInternoController extends Controller
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
             'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
-            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 6000 px de ancho o alto.',
+            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 8000 px de ancho o alto.',
             'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
             'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
-            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 6000 px de ancho o alto.',
+            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 8000 px de ancho o alto.',
         ]);
 
         DB::beginTransaction();
