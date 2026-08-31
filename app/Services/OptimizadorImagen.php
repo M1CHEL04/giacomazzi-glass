@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use GdImage;
 use Illuminate\Http\UploadedFile;
 use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\ImageManager;
@@ -32,28 +33,78 @@ class OptimizadorImagen
      */
     public function variantes(UploadedFile $archivo): array
     {
-
         $limiteOriginal = ini_get('memory_limit');
         ini_set('memory_limit', self::MEMORIA);
 
         try {
-            $imagen = (new ImageManager(new Driver()))
+            // Intervention se usa sólo para decodificar y aplicar la orientación
+            // EXIF. El resize se hace con imagescale porque su ResizeModifier de
+            // GD va por imagecopyresampled: medido sobre un JPEG de 5712x4284,
+            // 1348 ms contra 466 ms. Requiere ext-exif para que orient() haga algo.
+            $original = (new ImageManager(new Driver()))
                 ->read($archivo->getRealPath())
-                ->orient();
+                ->orient()
+                ->core()
+                ->native();
 
-            $imagen->scaleDown(width: self::ANCHO_FULL);
+            $full = $this->escalar($original, self::ANCHO_FULL);
 
-            $full = $imagen->toWebp(self::CALIDAD)->toString();
+            // El original es el recurso más pesado (una foto de 24 MP son ~100 MB
+            // en memoria). Soltarlo acá baja el pico: de la línea de abajo en
+            // adelante ya no hace falta. Si la imagen entraba en ANCHO_FULL,
+            // escalar() devolvió el mismo recurso y $full lo mantiene vivo.
+            unset($original);
 
-            $thumb = (clone $imagen)
-                ->scaleDown(width: self::ANCHO_THUMB)
-                ->toWebp(self::CALIDAD_THUMB)
-                ->toString();
+            // El thumb sale del full ya reducido, no del original: reescalar de
+            // 1600 a 600 cuesta una fracción de partir de la imagen completa.
+            $thumb = $this->escalar($full, self::ANCHO_THUMB);
 
-            return ['full' => $full, 'thumb' => $thumb];
+            return [
+                'full'  => $this->aWebp($full, self::CALIDAD),
+                'thumb' => $this->aWebp($thumb, self::CALIDAD_THUMB),
+            ];
         } finally {
-            unset($imagen);
+            // Los GdImage se liberan solos al salir del scope (refcount);
+            // imagedestroy() está deprecada desde PHP 8 y no hace falta.
             ini_set('memory_limit', $limiteOriginal);
         }
+    }
+
+    /**
+     * Reduce a lo ancho manteniendo la proporción. Nunca agranda: si ya entra,
+     * devuelve el mismo recurso.
+     */
+    private function escalar(GdImage $imagen, int $ancho): GdImage
+    {
+        if (imagesx($imagen) <= $ancho) {
+            return $imagen;
+        }
+
+        // IMG_BICUBIC y no el filtro por defecto (IMG_BILINEAR_FIXED): en un
+        // catálogo de producto la reducción es grande y el bilineal aliasa.
+        $escalada = imagescale($imagen, $ancho, -1, IMG_BICUBIC);
+
+        if ($escalada === false) {
+            throw new \RuntimeException('No se pudo redimensionar la imagen a ' . $ancho . 'px.');
+        }
+
+        return $escalada;
+    }
+
+    /** Codifica a WebP en memoria, preservando la transparencia si la había. */
+    private function aWebp(GdImage $imagen, int $calidad): string
+    {
+        imagealphablending($imagen, false);
+        imagesavealpha($imagen, true);
+
+        ob_start();
+        $ok = imagewebp($imagen, null, $calidad);
+        $binario = (string) ob_get_clean();
+
+        if ($ok === false || $binario === '') {
+            throw new \RuntimeException('No se pudo codificar la imagen a WebP.');
+        }
+
+        return $binario;
     }
 }

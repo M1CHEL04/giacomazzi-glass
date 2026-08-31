@@ -742,11 +742,6 @@ class UsoInternoController extends Controller
 
             Storage::disk($disk)->put($rutaDisco, $variantes['full']);
 
-            if (!Storage::disk($disk)->exists($rutaDisco)) {
-                $imagenProducto->delete();
-                throw new \Exception('La imagen no se encontró en el servidor tras subirla.');
-            }
-
             $url = $this->urlDelDisco($disk, $rutaDisco);
         } catch (\Exception $e) {
             $imagenProducto->delete();
