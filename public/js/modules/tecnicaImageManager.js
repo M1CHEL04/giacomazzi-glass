@@ -41,7 +41,7 @@ export function initTecnicaImageManager({ cfg, iconXMark, iconArrowBack }) {
         wrapper.innerHTML = `
             <button type="button" class="imagen-remove-card-btn" title="Quitar">${iconXMark}</button>
             <label class="imagen-dropzone">
-                <input type="file" name="imagenes_tecnicas[]" accept="image/*" class="imagen-file-input">
+                <input type="file" name="imagenes_tecnicas[]" accept="image/jpeg,image/png,image/webp" class="imagen-file-input">
                 <div class="imagen-dropzone-placeholder">
                     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4">

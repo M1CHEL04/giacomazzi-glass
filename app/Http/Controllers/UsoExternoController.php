@@ -33,7 +33,7 @@ class UsoExternoController extends Controller
 
             $query = Producto::with([
                 'categoria:id,nombre',
-                'imagenes' => fn($q) => $q->where('es_principal', true)->select(['id', 'producto_id', 'ruta']),
+                'imagenes' => fn($q) => $q->where('es_principal', true)->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
             ])
                 ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
                 ->where('activo', true)
@@ -108,7 +108,7 @@ class UsoExternoController extends Controller
             $query = Producto::with([
                 'imagenes' => fn($q) => $q
                     ->where('es_principal', true)
-                    ->select(['id', 'producto_id', 'ruta']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
             ])
                 ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
                 ->where('categoria_id', $id)
@@ -175,9 +175,9 @@ class UsoExternoController extends Controller
                 'unidad',
                 'imagenes' => fn($q) => $q
                     ->orderByDesc('es_principal')
-                    ->select(['id', 'producto_id', 'ruta', 'es_principal']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb', 'es_principal']),
                 'imagenesTecnicas' => fn($q) => $q
-                    ->select(['id', 'producto_id', 'ruta']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
                 'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
                 'valoresVariantes.variante:id,nombre',
             ])
@@ -202,7 +202,7 @@ class UsoExternoController extends Controller
             $relacionados = Producto::with([
                 'imagenes' => fn($q) => $q
                     ->where('es_principal', true)
-                    ->select(['id', 'producto_id', 'ruta']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
             ])
                 ->select(['id', 'categoria_id', 'nombre'])
                 ->where('categoria_id', $producto->categoria_id)

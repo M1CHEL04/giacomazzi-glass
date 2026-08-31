@@ -19,6 +19,10 @@ return new class extends Migration
             $table->boolean('es_tecnica')->default(false);
             $table->boolean('activa')->default(true);
             $table->string('ruta')->nullable();
+            // Variante reducida (~600px) que usan grids y miniaturas. Nullable
+            // porque el thumb es una optimización: si su subida falla, la imagen
+            // igual queda usable y las vistas caen a `ruta`.
+            $table->string('ruta_thumb')->nullable();
             $table->string('nombre_imagen')->nullable();
             $table->timestamps();
 

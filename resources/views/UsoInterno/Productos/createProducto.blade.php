@@ -187,7 +187,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 @if ($isEdit && $producto->imagenes->count() > 0)
                 @foreach ($producto->imagenes as $imagen)
                 <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
-                    <img src="{{ $imagen->ruta }}"
+                    <img src="{{ $imagen->ruta_miniatura }}"
                         alt="{{ $imagen->nombre_imagen }}"
                         class="imagen-thumb"
                         width="100" height="100"
@@ -250,7 +250,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 @if ($isEdit && $producto->imagenesTecnicas->count() > 0)
                 @foreach ($producto->imagenesTecnicas as $tecnica)
                 <div class="imagen-existente-card" id="tecnica-card-{{ $tecnica->id }}">
-                    <img src="{{ $tecnica->ruta }}"
+                    <img src="{{ $tecnica->ruta_miniatura }}"
                         alt="{{ $tecnica->nombre_imagen }}"
                         class="imagen-thumb"
                         width="100" height="100"

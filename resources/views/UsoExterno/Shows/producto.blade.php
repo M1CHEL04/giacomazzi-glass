@@ -81,7 +81,7 @@
                             data-bs-target="#ps-carousel"
                             data-bs-slide-to="{{ $loop->index }}"
                             aria-label="Ver imagen {{ $loop->iteration }}">
-                            <img src="{{ $imagen->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+                            <img src="{{ $imagen->ruta_miniatura }}" alt="" width="58" height="58" loading="lazy" decoding="async">
                         </button>
                         @endforeach
                     </div>
@@ -233,7 +233,7 @@
             <div class="ps-lightbox-thumbs">
                 @foreach($imagenes as $imagen)
                 <button type="button" class="ps-lightbox-thumb {{ $loop->first ? 'active' : '' }}" data-index="{{ $loop->index }}" data-src="{{ $imagen->ruta }}">
-                    <img src="{{ $imagen->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+                    <img src="{{ $imagen->ruta_miniatura }}" alt="" width="58" height="58" loading="lazy" decoding="async">
                 </button>
                 @endforeach
             </div>
@@ -319,7 +319,7 @@
                 @foreach($tecnicas as $tecnica)
                 <button type="button" class="ps-lightbox-thumb ps-tecnica-lightbox-thumb {{ $loop->first ? 'active' : '' }}"
                     data-index="{{ $loop->index }}" data-src="{{ $tecnica->ruta }}">
-                    <img src="{{ $tecnica->ruta }}" alt="" width="58" height="58" loading="lazy" decoding="async">
+                    <img src="{{ $tecnica->ruta_miniatura }}" alt="" width="58" height="58" loading="lazy" decoding="async">
                 </button>
                 @endforeach
             </div>
@@ -358,7 +358,7 @@
                     <div class="ps-mini-imagen">
                         @php $imagenPrincipal = $relacionado->imagenes->first(); @endphp
                         @if($imagenPrincipal && $imagenPrincipal->ruta)
-                        <img src="{{ $imagenPrincipal->ruta }}" alt="{{ $relacionado->nombre }}" width="60" height="60" loading="lazy" decoding="async">
+                        <img src="{{ $imagenPrincipal->ruta_miniatura }}" alt="{{ $relacionado->nombre }}" width="60" height="60" loading="lazy" decoding="async">
                         @else
                         <span class="ps-mini-placeholder">
                             <x-heroicon-o-photo />

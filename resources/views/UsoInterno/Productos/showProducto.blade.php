@@ -160,7 +160,7 @@ $tecnicas = $producto->imagenesTecnicas;
                 <div class="prod-photos-grid">
                     @foreach($imagenes->sortByDesc('es_principal') as $img)
                     <div class="prod-photo-wrap{{ $img->es_principal ? ' is-portada' : '' }}">
-                        <img src="{{ $img->ruta }}"
+                        <img src="{{ $img->ruta_miniatura }}"
                             alt="{{ $img->nombre_imagen }}"
                             class="prod-photo-thumb"
                             width="200" height="200"
@@ -193,7 +193,7 @@ $tecnicas = $producto->imagenesTecnicas;
                 <div class="prod-photos-grid">
                     @foreach($tecnicas as $tecnica)
                     <div class="prod-photo-wrap">
-                        <img src="{{ $tecnica->ruta }}"
+                        <img src="{{ $tecnica->ruta_miniatura }}"
                             alt="{{ $tecnica->nombre_imagen }}"
                             class="prod-photo-thumb"
                             width="200" height="200"

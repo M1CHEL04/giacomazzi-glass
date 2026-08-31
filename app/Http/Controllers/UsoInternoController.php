@@ -7,6 +7,7 @@ use App\Models\Cotizacion;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Models\UnidadMedida;
+use App\Services\OptimizadorImagen;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -18,7 +19,22 @@ use Illuminate\Support\Str;
 
 class UsoInternoController extends Controller
 {
-    public function __construct(private SkuService $skuService) {}
+    /**
+     * Reglas de cada archivo de imagen de producto.
+     *
+     * `mimes` acota lo que acepta la regla `image` a secas (svg, gif y bmp
+     * incluidos): GD no puede leer un SVG y la conversión a WebP explotaría.
+     *
+     * `dimensions` es la guarda de memoria: GD descomprime a 4 bytes por píxel
+     * y el memory_limit es de 256 MB. Medido con OptimizadorImagen, el tope de
+     * 6000x6000 pica en ~170 MB — si se sube este número hay que volver a medir.
+     */
+    private const REGLAS_IMAGEN = 'image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=6000,max_height=6000';
+
+    public function __construct(
+        private SkuService $skuService,
+        private OptimizadorImagen $optimizador,
+    ) {}
 
     public function estadisticas()
     {
@@ -348,9 +364,9 @@ class UsoInternoController extends Controller
             'descripcion'         => 'required|string|max:' . Producto::MAX_DESCRIPCION,
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
             'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
-            'imagenes.*'          => 'image|max:5120',
+            'imagenes.*'          => self::REGLAS_IMAGEN,
             'imagenes_tecnicas'   => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
-            'imagenes_tecnicas.*' => 'image|max:5120',
+            'imagenes_tecnicas.*' => self::REGLAS_IMAGEN,
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
         ], [
@@ -367,10 +383,14 @@ class UsoInternoController extends Controller
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
             'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
+            'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
+            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 6000 px de ancho o alto.',
             'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
+            'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
+            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 6000 px de ancho o alto.',
         ]);
 
         DB::beginTransaction();
@@ -461,11 +481,11 @@ class UsoInternoController extends Controller
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
             'activo'              => 'nullable|in:0,1',
             'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
-            'imagenes.*'          => 'image|max:5120',
+            'imagenes.*'          => self::REGLAS_IMAGEN,
             'imagenes_eliminar'   => 'nullable|array',
             'imagenes_eliminar.*' => 'exists:imagenes_producto,id',
             'imagenes_tecnicas'            => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
-            'imagenes_tecnicas.*'          => 'image|max:5120',
+            'imagenes_tecnicas.*'          => self::REGLAS_IMAGEN,
             'imagenes_tecnicas_eliminar'   => 'nullable|array',
             'imagenes_tecnicas_eliminar.*' => 'exists:imagenes_producto,id',
             'variantes_json'      => 'nullable|string',
@@ -483,10 +503,14 @@ class UsoInternoController extends Controller
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
             'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
             'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
+            'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
             'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
+            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 6000 px de ancho o alto.',
             'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
             'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
+            'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
             'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
+            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 6000 px de ancho o alto.',
         ]);
 
         DB::beginTransaction();
@@ -696,31 +720,60 @@ class UsoInternoController extends Controller
             'es_tecnica'   => $esTecnica,
         ]);
 
-        $imagenProducto->update([
-            'nombre_imagen' => $imagenProducto->id . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $imagen->getClientOriginalName()),
-        ]);
+        // Se descarta la extensión original: lo que se sube siempre es WebP.
+        $base = $imagenProducto->id . '_' . preg_replace(
+            '/[^a-zA-Z0-9._-]/',
+            '_',
+            pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)
+        );
 
-        $disk        = config('filesystems.image_disk', 'sftp');
-        $rutaDisco   = 'imagenes_producto/' . $producto->id . '/' . $imagenProducto->nombre_imagen;
+        $imagenProducto->update(['nombre_imagen' => $base . '.webp']);
+
+        $disk       = config('filesystems.image_disk', 'sftp');
+        $carpeta    = 'imagenes_producto/' . $producto->id . '/';
+        $rutaDisco  = $carpeta . $base . '.webp';
+        $rutaThumb  = $carpeta . $base . '-thumb.webp';
 
         try {
-            Storage::disk($disk)->put($rutaDisco, $imagen->getContent());
+            $variantes = $this->optimizador->variantes($imagen);
+
+            Storage::disk($disk)->put($rutaDisco, $variantes['full']);
 
             if (!Storage::disk($disk)->exists($rutaDisco)) {
                 $imagenProducto->delete();
                 throw new \Exception('La imagen no se encontró en el servidor tras subirla.');
             }
 
-            $baseUrl = rtrim(config('filesystems.disks.' . $disk . '.url', ''), '/');
-            $url     = $baseUrl ? $baseUrl . '/' . $rutaDisco : asset('storage/' . $rutaDisco);
+            $url = $this->urlDelDisco($disk, $rutaDisco);
         } catch (\Exception $e) {
             $imagenProducto->delete();
             Log::error('Error al subir imagen: ' . $e->getMessage());
             throw new \Exception('Error al subir la imagen al servidor de archivos: ' . $e->getMessage());
         }
 
-        $imagenProducto->update(['ruta' => $url]);
+        // El thumb es una optimización, no contenido: si falla, se registra y se
+        // sigue. La vista cae a la imagen grande (ImagenProducto::rutaMiniatura).
+        $urlThumb = null;
+        try {
+            Storage::disk($disk)->put($rutaThumb, $variantes['thumb']);
+            $urlThumb = $this->urlDelDisco($disk, $rutaThumb);
+        } catch (\Exception $e) {
+            Log::warning('No se pudo subir la miniatura de la imagen ' . $imagenProducto->id . ': ' . $e->getMessage());
+        }
+
+        $imagenProducto->update([
+            'ruta'       => $url,
+            'ruta_thumb' => $urlThumb,
+        ]);
 
         return $imagenProducto;
+    }
+
+    /** URL pública de un archivo del file server, o del disco local si no hay una configurada. */
+    private function urlDelDisco(string $disk, string $ruta): string
+    {
+        $baseUrl = rtrim(config('filesystems.disks.' . $disk . '.url', ''), '/');
+
+        return $baseUrl ? $baseUrl . '/' . $ruta : asset('storage/' . $ruta);
     }
 }

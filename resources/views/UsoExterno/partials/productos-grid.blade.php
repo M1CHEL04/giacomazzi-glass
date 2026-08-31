@@ -83,7 +83,7 @@ $chipsActivos[] = [
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp
                 @if($imagenPrincipal && $imagenPrincipal->ruta)
                 {{-- Las 2 primeras tarjetas son el LCP en mobile: cargan eager. --}}
-                <img src="{{ $imagenPrincipal->ruta }}"
+                <img src="{{ $imagenPrincipal->ruta_miniatura }}"
                     alt="{{ $producto->nombre }}"
                     class="producto-img"
                     width="800" height="600"
