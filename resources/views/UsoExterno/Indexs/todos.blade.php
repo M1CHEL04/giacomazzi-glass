@@ -5,23 +5,36 @@ $esLineaSingular = $esLineaSingular ?? false;
 // Sólo lo pasa indexTodos() cuando se llama directo (no vía la entrada de
 // línea singular, que siempre lo manda): fallback por las dudas.
 $gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
+
+// Hero por sección, cada una con su propia imagen y título: nada de reciclar
+// un único bloque entre "todos" y "línea adapta" con un ternario. Hoy las dos
+// entradas apuntan al mismo archivo porque todavía no hay una foto propia
+// por línea, pero el día que la haya alcanza con cambiar 'imagen' acá abajo,
+// sin tocar el markup. Si en el futuro "línea estándar" pasa a tener su
+// propia entrada (hoy es sólo "todos" sin el tipo especial filtrado), suma
+// una tercera clave siguiendo el mismo patrón.
+$heroPorSeccion = [
+    'todos'  => ['imagen' => 'images/heros/hero_todos_productos_2.jpg', 'titulo' => 'Todos los productos'],
+    'adapta' => ['imagen' => 'images/heros/hero_todos_productos_2.jpg', 'titulo' => 'Línea adapta'],
+];
+$hero = $heroPorSeccion[$esLineaSingular ? 'adapta' : 'todos'];
 @endphp
 
-@section('title', $esLineaSingular ? 'Línea adapta - Aberturas Giacomazzi' : 'Todos los Productos - Aberturas Giacomazzi')
+@section('title', $hero['titulo'] . ' - Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
 <link rel="preload" as="image"
-    href="{{ imagen_src('images/heros/hero_todos_productos_2.jpg', 1400) }}"
-    imagesrcset="{{ imagen_srcset('images/heros/hero_todos_productos_2.jpg') }}"
+    href="{{ imagen_src($hero['imagen'], 1400) }}"
+    imagesrcset="{{ imagen_srcset($hero['imagen']) }}"
     imagesizes="100vw" fetchpriority="high">
 @endsection
 
 @section('content')
 
 <section class="g-hero">
-    <img src="{{ imagen_src('images/heros/hero_todos_productos_2.jpg', 1400) }}"
-        srcset="{{ imagen_srcset('images/heros/hero_todos_productos_2.jpg') }}"
+    <img src="{{ imagen_src($hero['imagen'], 1400) }}"
+        srcset="{{ imagen_srcset($hero['imagen']) }}"
         sizes="100vw"
         alt="" class="g-hero-bg" aria-hidden="true"
         width="1584" height="672"
@@ -29,7 +42,7 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">
         <p class="g-hero-eyebrow">Aberturas Giacomazzi</p>
-        <h1 class="g-hero-title">{{ $esLineaSingular ? 'Línea adapta' : 'Línea estándar' }}</h1>
+        <h1 class="g-hero-title">{{ $hero['titulo'] }}</h1>
     </div>
 </section>
 
@@ -43,7 +56,7 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
                     <a href="{{ route('welcome') }}">Inicio</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">
-                    {{ $esLineaSingular ? 'Línea adapta' : 'Línea estándar' }}
+                    {{ $hero['titulo'] }}
                 </li>
             </ol>
         </nav>
