@@ -1,12 +1,4 @@
 @extends('layouts.app-externo')
-
-{{-- Misma vista para el catálogo estándar (indexCategoria) y para una
-     categoría de la línea singular (indexEspecialesCategoria): ver el
-     comentario equivalente en todos.blade.php. Acá sí hay dos queries
-     distintas del lado del controlador (Producto::estandar() vs
-     ProductoEspecial), porque el filtro Tipo no existe en esta vista —la
-     categoría ya viene fija por la URL— así que no hay forma de elegir el
-     tipo *dentro* de la página como en todos.blade.php. --}}
 @php
 $esLineaSingular = $esLineaSingular ?? false;
 $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
@@ -37,8 +29,6 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
             </ol>
         </nav>
 
-        {{-- Qué es la línea singular, en un renglón: la única diferencia de
-             contenido entre las dos líneas en toda esta vista. --}}
         @if($esLineaSingular)
         <div class="singular-linea-alert">
             <span class="singular-linea-alert-icono"><i class="bi bi-stars"></i></span>
@@ -53,8 +43,10 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
 
         <div class="row g-4">
 
-            {{-- Botón filtros sólo en móvil --}}
-            @if($variantes->count() > 0)
+            {{-- Sidebar de filtros: siempre presente, igual que en todos.blade.php.
+                 Sin variantes (línea adapta por categoría) filtros-categoria.blade.php
+                 ya se achica solo a la búsqueda por texto, así que no hace falta
+                 ocultar nada acá. --}}
             <div class="col-12 d-lg-none">
                 <button class="btn-filtros-mobile" id="filtros-mobile-btn" type="button">
                     <i class="bi bi-funnel"></i>
@@ -65,19 +57,15 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
                     @endif
                 </button>
             </div>
-            @endif
 
-            {{-- Sidebar de filtros --}}
-            @if($variantes->count() > 0)
             <div class="col-lg-3">
                 @include('UsoExterno.partials.filtros-categoria', [
                 'filtrosLimpiarUrl' => $gridBaseUrl,
                 ])
             </div>
-            @endif
 
             {{-- Grid de productos --}}
-            <div class="{{ $variantes->count() > 0 ? 'col-lg-9' : 'col-12' }}" id="productos-container">
+            <div class="col-lg-9" id="productos-container">
                 @include('UsoExterno.partials.productos-grid', [
                 'gridBaseUrl' => $gridBaseUrl,
                 'esLineaSingular' => $esLineaSingular,
@@ -88,15 +76,6 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
     </div>
 </section>
 
-{{-- Franja de "también fabricamos X a medida": sólo tiene sentido en la
-     categoría estándar (invita a cruzar a la línea singular). Si ya estamos
-     viendo la categoría DESDE la línea singular, $especiales no llega —
-     mostrar acá los mismos productos que ya están arriba sería redundante. --}}
-@if(($especiales ?? collect())->isNotEmpty())
-@include('UsoExterno.partials.especiales-seccion')
-@endif
-
-@if($variantes->count() > 0)
 <div class="filtros-sticky-bar" id="filtros-sticky-bar">
     <div class="container">
         <div class="filtros-sticky-bar-inner">
@@ -108,7 +87,6 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.categoria', $categoria->id);
         </div>
     </div>
 </div>
-@endif
 
 <div class="filtros-overlay" id="filtros-overlay" aria-hidden="true"></div>
 

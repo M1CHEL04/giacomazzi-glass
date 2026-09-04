@@ -147,8 +147,6 @@ class UsoExternoController extends Controller
         try {
             $categoria = Categoria::where('activo', true)->findOrFail($id);
 
-            // El grid filtrable es el catálogo estándar; los especiales van
-            // aparte, en su propia franja debajo (ver $especiales).
             $query = Producto::estandar()
                 ->with([
                     'imagenes' => fn($q) => $q
@@ -194,27 +192,13 @@ class UsoExternoController extends Controller
                 ->values();
 
             if ($request->ajax()) {
-                // La franja de especiales vive fuera de #productos-container,
-                // así que el filtrado por AJAX no la toca ni la recalcula.
                 $gridBaseUrl = route('productos.categoria', $id);
                 return response()->json([
                     'html' => view('UsoExterno.partials.productos-grid', compact('productos', 'variantes', 'filtros', 'categoria', 'gridBaseUrl'))->render(),
                 ]);
             }
 
-            // Son pocos por categoría: se traen todos, sin paginar ni filtrar.
-            $especiales = ProductoEspecial::with([
-                'imagenes' => fn($q) => $q
-                    ->where('es_principal', true)
-                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
-            ])
-                ->select(['id', 'categoria_id', 'nombre', 'descripcion'])
-                ->where('categoria_id', $id)
-                ->where('activo', true)
-                ->latest()
-                ->get();
-
-            return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros', 'buscar', 'especiales'));
+            return view('UsoExterno.Indexs.categoria', compact('categoria', 'productos', 'variantes', 'filtros', 'buscar'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             throw $e;
         } catch (\Exception $e) {

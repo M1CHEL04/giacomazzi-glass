@@ -993,8 +993,7 @@
 
 /* ══════════════════════════════════════════════════════════════════════════
    PRODUCTOS A MEDIDA
-   Badge sobre la card del catálogo mezclado, y la franja propia que va
-   debajo del grid en la página de categoría.
+   Badge sobre la card del catálogo mezclado.
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* El badge se apoya en la esquina de la imagen, por encima del scrim de hover */
@@ -1016,133 +1015,6 @@
     /* Es un pill de una sola línea: en la card más angosta (col-6 mobile)
        envolver el texto lo deformaría. */
     white-space: nowrap;
-}
-
-/* ── Franja de la página de categoría ─────────────────────────────────── */
-
-.especiales-franja {
-    /* Fondo distinto al del catálogo: es otra clase de producto, no más filas */
-    background: var(--g-vidrio);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    padding: 3rem 0 3.5rem;
-}
-
-.especiales-franja-header {
-    max-width: 46rem;
-    margin-bottom: 2rem;
-}
-
-.especiales-franja-titulo {
-    margin: 0.35rem 0 0.75rem;
-}
-
-.especiales-franja-bajada {
-    font-family: var(--font-body);
-    font-size: var(--fs-body);
-    line-height: 1.6;
-    color: var(--external-secondary);
-    margin: 0;
-}
-
-/* Card más grande que la estándar: menos por fila, imagen más ancha */
-.especial-card {
-    position: relative;
-    background: var(--external-white);
-    border-radius: 3px;
-    overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.07);
-    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    animation: fadeInUp 0.45s ease both;
-    animation-delay: var(--card-delay, 0s);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.especial-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
-    border-color: rgba(40, 116, 82, 0.18);
-}
-
-.especial-card-imagen {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
-    background: linear-gradient(135deg, #edf5f1 0%, #d4e8df 100%);
-    flex-shrink: 0;
-}
-
-.especial-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.42s ease;
-    display: block;
-}
-
-.especial-card:hover .especial-img {
-    transform: scale(1.07);
-}
-
-.especial-card-body {
-    padding: 1rem 1.1rem 1.2rem;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-}
-
-.especial-nombre {
-    font-family: var(--font-display);
-    font-size: var(--fs-sub);
-    font-weight: 700;
-    line-height: 1.25;
-    color: var(--g-carbon);
-    margin: 0 0 0.45rem;
-}
-
-.especial-descripcion {
-    font-family: var(--font-body);
-    font-size: var(--fs-small);
-    line-height: 1.55;
-    color: var(--external-secondary);
-    margin: 0 0 0.9rem;
-    flex-grow: 1;
-}
-
-.especial-cta {
-    font-family: var(--font-display);
-    font-size: var(--fs-small);
-    font-weight: 700;
-    color: var(--external-primary);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    transition: gap 0.25s ease;
-}
-
-.especial-card:hover .especial-cta {
-    gap: 0.75rem;
-}
-
-.especiales-franja-pie {
-    margin-top: 2rem;
-}
-
-@media (max-width: 575.98px) {
-    .especiales-franja {
-        padding: 2.25rem 0 2.5rem;
-    }
-
-    .especiales-franja-header {
-        margin-bottom: 1.5rem;
-    }
-
-    .especial-card-body {
-        padding: 0.85rem 0.9rem 1rem;
-    }
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
