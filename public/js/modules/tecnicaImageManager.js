@@ -17,7 +17,7 @@ export function initTecnicaImageManager({ cfg, iconXMark, iconArrowBack }) {
     const container = document.getElementById('tecnicas-container');
     const addBtn = document.getElementById('add-imagen-tecnica-btn');
 
-    if (!container) return;
+    if (!container) return { addFile: () => false, collectFiles: () => [] };
 
     const MAX_TECNICAS = 5;
 
@@ -98,6 +98,32 @@ export function initTecnicaImageManager({ cfg, iconXMark, iconArrowBack }) {
 
     if (addBtn) addBtn.addEventListener('click', addTecnicaRow);
 
+    /** Reutiliza la primera tarjeta vacía si hay una; si no, crea una nueva. */
+    function addFile(file) {
+        const cardsAntes = container.querySelectorAll('.imagen-input-card');
+        let card = Array.from(cardsAntes).find(c => !c.querySelector('.imagen-file-input').files.length);
+
+        if (!card) {
+            addTecnicaRow();
+            const cardsDespues = container.querySelectorAll('.imagen-input-card');
+            if (cardsDespues.length === cardsAntes.length) return false; // MAX_TECNICAS alcanzado
+            card = cardsDespues[cardsDespues.length - 1];
+        }
+
+        const input = card.querySelector('.imagen-file-input');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+        return true;
+    }
+
+    function collectFiles() {
+        return Array.from(container.querySelectorAll('.imagen-file-input'))
+            .map(input => input.files[0])
+            .filter(Boolean);
+    }
+
     // ── Baja de las técnicas ya guardadas (solo edición) ─────────
     // Delegado: el botón vive en el blade y no se vuelve a dibujar, pero
     // así queda un solo listener en vez de uno por tarjeta.
@@ -131,4 +157,6 @@ export function initTecnicaImageManager({ cfg, iconXMark, iconArrowBack }) {
     });
 
     syncAddBtn();
+
+    return { addFile, collectFiles };
 }

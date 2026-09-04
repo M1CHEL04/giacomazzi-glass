@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\ImagenProducto;
 use App\Models\Producto;
+use App\Rules\ImagenProductoValida;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -20,17 +21,22 @@ class GestorImagenesProducto
     /**
      * Reglas de cada archivo de imagen de producto.
      *
-     * `mimes` acota lo que acepta la regla `image` a secas (svg, gif y bmp
-     * incluidos): GD no puede leer un SVG y la conversión a WebP explotaría.
+     * Delegadas en ImagenProductoValida en lugar de la tira de reglas nativas
+     * "image|mimes:...|max:...|dimensions:..." para que el mensaje de error
+     * incluya el nombre del archivo: con varias imágenes en el mismo request,
+     * "cada imagen no puede superar los 5 MB" no dice cuál hay que corregir.
      *
-     * `dimensions` es la guarda de memoria, y va en megapíxeles porque es lo que
-     * cuesta: GD descomprime a 4 bytes por píxel, así que el peso del archivo no
-     * predice nada (una foto de 50 MP pesa 3,5 MB y pica en 216 MB). El tope de
-     * 8000x8000 deja entrar a los celulares de 48/50 MP y pica en 280 MB contra
-     * el techo de 512M que OptimizadorImagen se pone durante la conversión.
-     * Si se sube este número hay que volver a medir y ajustar allá.
+     * El tope de tamaño (5 MB) y de dimensiones (8000x8000 px) que aplica esa
+     * regla es el mismo de siempre: 8000x8000 es la guarda de memoria de GD al
+     * decodificar (ver comentario en OptimizadorImagen) y deja entrar a los
+     * celulares de 48/50 MP sin pasar el techo de 512M que ese servicio se
+     * pone durante la conversión. Si se sube ese número hay que volver a medir
+     * y ajustar allá.
      */
-    public const REGLAS_IMAGEN = 'image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=8000,max_height=8000';
+    public static function reglasImagen(): array
+    {
+        return [new ImagenProductoValida()];
+    }
 
     public function __construct(private OptimizadorImagen $optimizador) {}
 

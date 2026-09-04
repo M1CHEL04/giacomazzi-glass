@@ -288,6 +288,8 @@ $portadaExistenteId = $isEdit
 : null;
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
+'productoId' => $producto->id ?? null,
+'hasErrors' => $errors->any(),
 'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
 'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
 'initialVariantes' => [],

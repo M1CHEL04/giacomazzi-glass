@@ -2,7 +2,7 @@
 $chipsActivos = [];
 
 $tiposActivos = $tipos ?? [];
-$etiquetasTipo = ['estandar' => 'De catálogo', 'especial' => 'Línea adapta'];
+$etiquetasTipo = ['estandar' => 'Línea estandar', 'especial' => 'Línea adapta'];
 
 // Chips de tipo (sólo en "todos los productos", cuando $tipos está definido)
 foreach ($tiposActivos as $tipo) {

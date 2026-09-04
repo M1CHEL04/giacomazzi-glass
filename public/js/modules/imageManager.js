@@ -116,6 +116,32 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     if (addImagenBtn) addImagenBtn.addEventListener('click', addImagenRow);
     if (existingImgCount === 0) addImagenRow();
 
+    /** Reutiliza la primera tarjeta vacía si hay una; si no, crea una nueva. */
+    function addFile(file) {
+        const cardsAntes = imagenesContainer.querySelectorAll('.imagen-input-card');
+        let card = Array.from(cardsAntes).find(c => !c.querySelector('.imagen-file-input').files.length);
+
+        if (!card) {
+            addImagenRow();
+            const cardsDespues = imagenesContainer.querySelectorAll('.imagen-input-card');
+            if (cardsDespues.length === cardsAntes.length) return false; // MAX_IMG alcanzado
+            card = cardsDespues[cardsDespues.length - 1];
+        }
+
+        const input = card.querySelector('.imagen-file-input');
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+        return true;
+    }
+
+    function collectFiles() {
+        return Array.from(imagenesContainer.querySelectorAll('.imagen-file-input'))
+            .map(input => input.files[0])
+            .filter(Boolean);
+    }
+
     // ── Funciones globales (llamadas desde onclick en el blade) ──
 
     window.toggleEliminarImagen = function (id, btn) {
@@ -208,4 +234,6 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             }
         });
     }
+
+    return { addFile, collectFiles };
 }

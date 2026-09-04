@@ -1,12 +1,5 @@
 @extends('layouts.app-externo')
 
-{{-- Esta misma vista sirve al catálogo completo (indexTodos) y a la línea
-     singular (indexEspeciales, que es indexTodos() con el Tipo pre-armado
-     en "especial"): la única diferencia entre las dos es el renglón de
-     "$esLineaSingular", que explica qué es la línea cuando corresponde.
-     Todo lo demás —hero, breadcrumb, filtros (Tipo incluido), grid, sticky
-     bar— es literalmente el mismo código para las dos, así que no hay
-     forma de que se desalineen con el tiempo. --}}
 @php
 $esLineaSingular = $esLineaSingular ?? false;
 // Sólo lo pasa indexTodos() cuando se llama directo (no vía la entrada de
@@ -18,7 +11,6 @@ $gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
-{{-- El hero es el LCP: lo pedimos antes de que el parser llegue al <img>. --}}
 <link rel="preload" as="image"
     href="{{ imagen_src('images/heros/hero_todos_productos_2.jpg', 1400) }}"
     imagesrcset="{{ imagen_srcset('images/heros/hero_todos_productos_2.jpg') }}"

@@ -19,9 +19,6 @@ use Illuminate\Support\Str;
 
 class UsoInternoController extends Controller
 {
-    /** @see GestorImagenesProducto::REGLAS_IMAGEN */
-    private const REGLAS_IMAGEN = GestorImagenesProducto::REGLAS_IMAGEN;
-
     public function __construct(
         private SkuService $skuService,
         private GestorImagenesProducto $gestorImagenes,
@@ -362,9 +359,9 @@ class UsoInternoController extends Controller
             'descripcion'         => 'required|string|max:' . Producto::MAX_DESCRIPCION,
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
             'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
-            'imagenes.*'          => self::REGLAS_IMAGEN,
+            'imagenes.*'          => GestorImagenesProducto::reglasImagen(),
             'imagenes_tecnicas'   => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
-            'imagenes_tecnicas.*' => self::REGLAS_IMAGEN,
+            'imagenes_tecnicas.*' => GestorImagenesProducto::reglasImagen(),
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
         ], [
@@ -380,15 +377,7 @@ class UsoInternoController extends Controller
             'descripcion.max'       => 'La descripción no puede superar los ' . Producto::MAX_DESCRIPCION . ' caracteres.',
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
             'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
-            'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
-            'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
-            'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
-            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 8000 px de ancho o alto.',
-            'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
-            'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
-            'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
-            'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
-            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 8000 px de ancho o alto.',
+            'imagenes_tecnicas.max' => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
         ]);
 
         DB::beginTransaction();
@@ -483,11 +472,11 @@ class UsoInternoController extends Controller
             'descripcion_tecnica' => 'nullable|string|max:' . Producto::MAX_DESCRIPCION_TECNICA,
             'activo'              => 'nullable|in:0,1',
             'imagenes'            => 'nullable|array|max:' . Producto::MAX_IMAGENES,
-            'imagenes.*'          => self::REGLAS_IMAGEN,
+            'imagenes.*'          => GestorImagenesProducto::reglasImagen(),
             'imagenes_eliminar'   => 'nullable|array',
             'imagenes_eliminar.*' => 'exists:imagenes_producto,id',
             'imagenes_tecnicas'            => 'nullable|array|max:' . Producto::MAX_IMAGENES_TECNICAS,
-            'imagenes_tecnicas.*'          => self::REGLAS_IMAGEN,
+            'imagenes_tecnicas.*'          => GestorImagenesProducto::reglasImagen(),
             'imagenes_tecnicas_eliminar'   => 'nullable|array',
             'imagenes_tecnicas_eliminar.*' => 'exists:imagenes_producto,id',
             'variantes_json'      => 'nullable|string',
@@ -504,15 +493,7 @@ class UsoInternoController extends Controller
             'descripcion.max'       => 'La descripción no puede superar los ' . Producto::MAX_DESCRIPCION . ' caracteres.',
             'descripcion_tecnica.max' => 'La descripción técnica no puede superar los ' . number_format(Producto::MAX_DESCRIPCION_TECNICA, 0, ',', '.') . ' caracteres.',
             'imagenes.max'          => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES . ' imágenes por producto.',
-            'imagenes.*.image'      => 'Cada archivo debe ser una imagen.',
-            'imagenes.*.mimes'      => 'Las imágenes deben ser JPG, PNG o WebP.',
-            'imagenes.*.max'        => 'Cada imagen no puede superar los 5 MB.',
-            'imagenes.*.dimensions' => 'Cada imagen no puede superar los 8000 px de ancho o alto.',
-            'imagenes_tecnicas.max'     => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
-            'imagenes_tecnicas.*.image' => 'Cada archivo técnico debe ser una imagen.',
-            'imagenes_tecnicas.*.mimes' => 'Las imágenes técnicas deben ser JPG, PNG o WebP.',
-            'imagenes_tecnicas.*.max'   => 'Cada imagen técnica no puede superar los 5 MB.',
-            'imagenes_tecnicas.*.dimensions' => 'Cada imagen técnica no puede superar los 8000 px de ancho o alto.',
+            'imagenes_tecnicas.max' => 'No se pueden cargar más de ' . Producto::MAX_IMAGENES_TECNICAS . ' imágenes técnicas por producto.',
         ]);
 
         DB::beginTransaction();
