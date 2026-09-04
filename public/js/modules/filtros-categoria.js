@@ -92,6 +92,14 @@
             .then(function (res) { return res.json(); })
             .then(function (data) {
                 if (container) container.innerHTML = data.html;
+                // El Tipo cambia qué categorías tienen sentido ofrecer; el
+                // servidor manda el HTML actualizado de esa lista aparte
+                // porque el fetch sólo reemplaza el grid, nunca el resto
+                // del sidebar.
+                if (data.categoriasHtml != null) {
+                    var grupoCategorias = document.getElementById('filtro-grupo-categorias');
+                    if (grupoCategorias) grupoCategorias.innerHTML = data.categoriasHtml;
+                }
                 history.pushState(null, '', url);
                 syncFormFromUrl(url);
                 updateSidebarBadge();
@@ -193,14 +201,27 @@
     function initVariantesCondicionales() {
         if (!document.getElementById('filtro-grupo-categorias')) return;
 
+        // Categorías y tipo son filtros base, no variantes: quedan siempre visibles.
+        var gruposBase = ['filtro-grupo-categorias', 'filtro-grupo-tipos'];
+
         var varianteGroups = Array.from(document.querySelectorAll('.filtro-grupo')).filter(function (group) {
             var toggle = group.querySelector('.filtro-grupo-toggle');
-            return toggle && toggle.getAttribute('data-target') !== 'filtro-grupo-categorias';
+            return toggle && gruposBase.indexOf(toggle.getAttribute('data-target')) === -1;
         });
 
         if (!varianteGroups.length) return;
 
+        /** Sólo "a medida" tildado: esos productos no tienen variantes que filtrar. */
+        function soloEspeciales() {
+            var tipos = Array.from(
+                document.querySelectorAll('#filtro-grupo-tipos input[type="checkbox"]:checked')
+            ).map(function (cb) { return cb.value; });
+
+            return tipos.length === 1 && tipos[0] === 'especial';
+        }
+
         function hasActiveBaseFilter() {
+            if (soloEspeciales()) return false;
             var hasCat = !!document.querySelector('#filtro-grupo-categorias input[type="checkbox"]:checked');
             var searchInput = document.getElementById('filtros-buscar-input');
             return hasCat || (searchInput && searchInput.value.trim().length > 0);
@@ -219,10 +240,21 @@
             updateSidebarBadge();
         };
 
-        // Attach to category checkboxes BEFORE initAutoSubmit so visibility updates first
-        document.querySelectorAll('#filtro-grupo-categorias input[type="checkbox"]').forEach(function (cb) {
-            cb.addEventListener('change', updateVarianteVisibility);
-        });
+        // Delegado en el form (no en cada checkbox): las opciones de
+        // Categoría se reemplazan por AJAX al cambiar el Tipo, así que un
+        // listener puesto directo sobre esos checkboxes se perdería con el
+        // reemplazo. Se registra ANTES que initAutoSubmit para que la
+        // visibilidad se actualice primero y el submit ya vea el estado final.
+        var f = getForm();
+        if (f) {
+            f.addEventListener('change', function (e) {
+                var t = e.target;
+                if (t.matches && t.matches('input[type="checkbox"]') &&
+                    (t.closest('#filtro-grupo-categorias') || t.closest('#filtro-grupo-tipos'))) {
+                    updateVarianteVisibility();
+                }
+            });
+        }
 
         updateVarianteVisibility();
     }
@@ -261,16 +293,23 @@
     }
 
     /**
-     * Envía el formulario automáticamente al cambiar cualquier checkbox.
+     * Envía el formulario automáticamente al cambiar cualquier checkbox,
+     * Tipo incluido: el servidor manda junto con el grid el HTML actualizado
+     * de las opciones de Categoría (ver fetchProductos), así que no hace
+     * falta recargar la página para mantener esa lista al día.
+     *
+     * Delegado en el form (no en cada checkbox) porque las opciones de
+     * Categoría se reemplazan por AJAX: un listener puesto directo sobre
+     * esos checkboxes se perdería con el reemplazo.
      */
     function initAutoSubmit() {
         var f = getForm();
         if (!f) return;
 
-        f.querySelectorAll('input[type="checkbox"]').forEach(function (checkbox) {
-            checkbox.addEventListener('change', function () {
+        f.addEventListener('change', function (e) {
+            if (e.target.matches && e.target.matches('input[type="checkbox"]')) {
                 fetchProductos(buildUrlFromForm());
-            });
+            }
         });
     }
 
@@ -308,7 +347,16 @@
 
         if ('IntersectionObserver' in window) {
             var observer = new IntersectionObserver(function (entries) {
-                bar.classList.toggle('show', !entries[0].isIntersecting);
+                var entrada = entries[0];
+                // La barra reemplaza al botón cuando el botón ya quedó ARRIBA
+                // del viewport. No alcanza con !isIntersecting: un botón que
+                // todavía está más abajo del fold tampoco intersecta, y en
+                // pantallas bajas —donde el hero solo llena la primera
+                // pantalla— eso mostraba la barra apenas se abría la página,
+                // antes de haber pasado por el botón.
+                var yaPaso = !entrada.isIntersecting
+                    && entrada.boundingClientRect.top < 0;
+                bar.classList.toggle('show', yaPaso);
             }, { threshold: 0 });
             observer.observe(origBtn);
         } else {

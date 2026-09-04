@@ -22,7 +22,32 @@ class Producto extends Model
         'descripcion_tecnica',
         'codigo',
         'activo',
+        'es_especial',
     ];
+
+    protected $casts = [
+        'activo'      => 'boolean',
+        'es_especial' => 'boolean',
+    ];
+
+    /**
+     * Estándar y especial conviven en la misma tabla: el catálogo cotizable
+     * son los estándar, y hay que decirlo explícitamente en cada consulta que
+     * termine en el carrito, en las variantes o en el panel de productos.
+     *
+     * Las consultas que muestran ambos tipos (el index de /productos) no usan
+     * ninguno de los dos scopes; las que sólo quieren especiales van por
+     * ProductoEspecial, que ya los filtra con un scope global.
+     */
+    public function scopeEstandar($query)
+    {
+        return $query->where('es_especial', false);
+    }
+
+    public function scopeEspecial($query)
+    {
+        return $query->where('es_especial', true);
+    }
 
     public function categoria()
     {

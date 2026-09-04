@@ -446,13 +446,22 @@
     top: var(--g-nav-h);
     left: 0;
     right: 0;
-    z-index: 1035;
+    /* Por debajo del navbar (1030), no por encima: así al ocultarse se mete
+       detrás de él —que es opaco— en vez de pasarle por delante. */
+    z-index: 1029;
     background: rgba(255, 255, 255, 0.97);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    transform: translateY(-100%);
-    transition: transform 0.24s ease;
+    /* Su propio alto MÁS el del navbar: está anclada en top: var(--g-nav-h),
+       así que un -100% pelado la subía sólo su alto y la dejaba plantada
+       sobre el navbar, visible y tapándolo. */
+    transform: translateY(calc(-100% - var(--g-nav-h)));
+    /* Oculta también para el mouse y para un lector de pantalla mientras
+       está fuera de cuadro; si no, sigue siendo un botón clickeable.
+       El retardo de la visibilidad espera a que termine el deslizamiento. */
+    visibility: hidden;
+    transition: transform 0.24s ease, visibility 0s linear 0.24s;
     display: none;
 }
 
@@ -464,6 +473,9 @@
 
 .filtros-sticky-bar.show {
     transform: translateY(0);
+    visibility: visible;
+    /* Al mostrarse la visibilidad no espera a la animación */
+    transition: transform 0.24s ease, visibility 0s;
 }
 
 .filtros-sticky-bar-inner {
@@ -977,4 +989,205 @@
     .producto-cta {
         gap: 0.25rem;
     }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PRODUCTOS A MEDIDA
+   Badge sobre la card del catálogo mezclado, y la franja propia que va
+   debajo del grid en la página de categoría.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* El badge se apoya en la esquina de la imagen, por encima del scrim de hover */
+.producto-badge-especial {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 2;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--external-white);
+    background: var(--external-primary);
+    border-radius: 2px;
+    padding: 0.22rem 0.55rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    /* Es un pill de una sola línea: en la card más angosta (col-6 mobile)
+       envolver el texto lo deformaría. */
+    white-space: nowrap;
+}
+
+/* ── Franja de la página de categoría ─────────────────────────────────── */
+
+.especiales-franja {
+    /* Fondo distinto al del catálogo: es otra clase de producto, no más filas */
+    background: var(--g-vidrio);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 3rem 0 3.5rem;
+}
+
+.especiales-franja-header {
+    max-width: 46rem;
+    margin-bottom: 2rem;
+}
+
+.especiales-franja-titulo {
+    margin: 0.35rem 0 0.75rem;
+}
+
+.especiales-franja-bajada {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+/* Card más grande que la estándar: menos por fila, imagen más ancha */
+.especial-card {
+    position: relative;
+    background: var(--external-white);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInUp 0.45s ease both;
+    animation-delay: var(--card-delay, 0s);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.especial-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+    border-color: rgba(40, 116, 82, 0.18);
+}
+
+.especial-card-imagen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    background: linear-gradient(135deg, #edf5f1 0%, #d4e8df 100%);
+    flex-shrink: 0;
+}
+
+.especial-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.42s ease;
+    display: block;
+}
+
+.especial-card:hover .especial-img {
+    transform: scale(1.07);
+}
+
+.especial-card-body {
+    padding: 1rem 1.1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.especial-nombre {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--g-carbon);
+    margin: 0 0 0.45rem;
+}
+
+.especial-descripcion {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: var(--external-secondary);
+    margin: 0 0 0.9rem;
+    flex-grow: 1;
+}
+
+.especial-cta {
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    color: var(--external-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    transition: gap 0.25s ease;
+}
+
+.especial-card:hover .especial-cta {
+    gap: 0.75rem;
+}
+
+.especiales-franja-pie {
+    margin-top: 2rem;
+}
+
+@media (max-width: 575.98px) {
+    .especiales-franja {
+        padding: 2.25rem 0 2.5rem;
+    }
+
+    .especiales-franja-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .especial-card-body {
+        padding: 0.85rem 0.9rem 1rem;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LÍNEA SINGULAR — alerta "qué es esto" en todos.blade.php / categoria.blade.php
+   Es la única diferencia de contenido entre esa vista compartida y su
+   versión estándar: una caja destacada entre el breadcrumb y la fila de
+   filtros/grid, en el mismo lenguaje visual que .grid-personalizar-banner
+   (fondo/borde verdes translúcidos) pero un escalón más marcada, porque acá
+   es la explicación principal de la línea, no una nota al pie del grid.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.singular-linea-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin: 0 0 1.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(40, 116, 82, 0.06);
+    border: 1px solid rgba(40, 116, 82, 0.2);
+    border-left: 3px solid var(--external-primary);
+    border-radius: 3px;
+}
+
+.singular-linea-alert-icono {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgba(40, 116, 82, 0.12);
+    color: var(--external-primary);
+    font-size: var(--fs-sub);
+    margin-top: 1px;
+}
+
+.singular-linea-alert p {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+.singular-linea-alert strong {
+    color: var(--external-primary);
 }

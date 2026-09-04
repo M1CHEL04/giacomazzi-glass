@@ -1,8 +1,18 @@
+/**
+ * searchProducto.js  —  filtrado AJAX de los listados del panel
+ * ─────────────────────────────
+ * Sirve tanto al listado de productos como al de productos especiales: las
+ * dos rutas van en data-* del input de búsqueda, así que no hace falta una
+ * copia del archivo por listado.
+ */
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('searchProducto');
     const categoriaSelect = document.getElementById('filterCategoria');
     const activoSelect = document.getElementById('filterActivo');
     let searchTimeout = null;
+
+    const INDEX_URL = (searchInput && searchInput.dataset.indexUrl) || '/uso-interno/productos';
+    const SHOW_BASE = (searchInput && searchInput.dataset.showBase) || '/uso-interno/show-producto';
 
     function getFilters() {
         return {
@@ -13,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function fetchProductos(filters, page) {
-        const url = new URL(window.location.origin + '/uso-interno/productos');
+        const url = new URL(INDEX_URL, window.location.origin);
         if (filters.search) url.searchParams.set('search', filters.search);
         if (filters.categoria_id) url.searchParams.set('categoria_id', filters.categoria_id);
         if (filters.activo !== '') url.searchParams.set('activo', filters.activo);
@@ -64,6 +74,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? `<span class="badge bg-secondary-subtle text-secondary rounded-1" style="font-size: 11px; font-weight: 600;">${escapeHtml(producto.codigo)}</span>`
                 : '<span class="text-secondary">—</span>';
 
+            // Los especiales no tienen unidad de cotizacion: el listado de
+            // especiales no manda el campo y la columna simplemente no va.
+            const unidad = producto.unidad === undefined
+                ? ''
+                : `<div style="width: 150px;">
+                        <span class="badge rounded-pill text-secondary bg-secondary-subtle" style="font-size: 10px; padding: 3px 10px;">
+                            ${escapeHtml(producto.unidad)}
+                        </span>
+                    </div>`;
+
             const descripcion = producto.descripcion
                 ? `<div class="small text-secondary text-truncate" style="font-size: 12px; max-width: 400px;">${escapeHtml(producto.descripcion)}</div>`
                 : '';
@@ -80,11 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             ${escapeHtml(producto.categoria)}
                         </span>
                     </div>
-                    <div style="width: 150px;">
-                        <span class="badge rounded-pill text-secondary bg-secondary-subtle" style="font-size: 10px; padding: 3px 10px;">
-                            ${escapeHtml(producto.unidad)}
-                        </span>
-                    </div>
+${unidad}
                     <div style="width: 100px;">
                         <button type="button"
                             class="badge border-0 rounded-pill ${producto.activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle'}"
@@ -99,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </div>
                     <div class="text-end" style="width: 60px;">
                         <a
-                            href="/uso-interno/show-producto/${producto.id}"
+                            href="${SHOW_BASE}/${producto.id}"
                             class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"
                             aria-label="Ver producto"
                             title="Ver">

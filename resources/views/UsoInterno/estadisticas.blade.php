@@ -15,8 +15,13 @@
                 <span class="stat-card-icon"><x-heroicon-o-cube /></span>
                 <div class="stat-card-body">
                     <span class="stat-card-value">{{ $totalProductos }}</span>
-                    <span class="stat-card-label">Productos</span>
+                    <span class="stat-card-label">Productos de catálogo</span>
                     <span class="stat-card-meta">{{ $productosActivos }} activos · {{ $productosInactivos }} inactivos</span>
+                    {{-- Los especiales van acá y no en un quinto tile: con cinco,
+                         uno queda solo en una segunda fila. --}}
+                    <span class="stat-card-meta">
+                        + {{ $totalEspeciales }} a medida ({{ $especialesActivos }} {{ $especialesActivos === 1 ? 'activo' : 'activos' }})
+                    </span>
                 </div>
             </div>
         </div>

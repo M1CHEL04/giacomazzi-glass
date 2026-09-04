@@ -6,48 +6,40 @@ use App\Models\Categoria;
 use App\Models\Cotizacion;
 use App\Models\ImagenProducto;
 use App\Models\Producto;
+use App\Models\ProductoEspecial;
 use App\Models\UnidadMedida;
-use App\Services\OptimizadorImagen;
+use App\Services\GestorImagenesProducto;
+use App\Services\MenuCategorias;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class UsoInternoController extends Controller
 {
-    /**
-     * Reglas de cada archivo de imagen de producto.
-     *
-     * `mimes` acota lo que acepta la regla `image` a secas (svg, gif y bmp
-     * incluidos): GD no puede leer un SVG y la conversión a WebP explotaría.
-     *
-     * `dimensions` es la guarda de memoria, y va en megapíxeles porque es lo que
-     * cuesta: GD descomprime a 4 bytes por píxel, así que el peso del archivo no
-     * predice nada (una foto de 50 MP pesa 3,5 MB y pica en 216 MB). El tope de
-     * 8000x8000 deja entrar a los celulares de 48/50 MP y pica en 280 MB contra
-     * el techo de 512M que OptimizadorImagen se pone durante la conversión.
-     * Si se sube este número hay que volver a medir y ajustar allá.
-     */
-    private const REGLAS_IMAGEN = 'image|mimes:jpg,jpeg,png,webp|max:5120|dimensions:max_width=8000,max_height=8000';
+    /** @see GestorImagenesProducto::REGLAS_IMAGEN */
+    private const REGLAS_IMAGEN = GestorImagenesProducto::REGLAS_IMAGEN;
 
     public function __construct(
         private SkuService $skuService,
-        private OptimizadorImagen $optimizador,
+        private GestorImagenesProducto $gestorImagenes,
     ) {}
 
     public function estadisticas()
     {
-        $totalProductos     = Producto::count();
-        $productosActivos   = Producto::where('activo', true)->count();
+        $totalProductos     = Producto::estandar()->count();
+        $productosActivos   = Producto::estandar()->where('activo', true)->count();
         $productosInactivos = $totalProductos - $productosActivos;
+
+        $totalEspeciales   = ProductoEspecial::count();
+        $especialesActivos = ProductoEspecial::where('activo', true)->count();
 
         $totalCategorias   = Categoria::count();
         $categoriasActivas = Categoria::where('activo', true)->count();
 
+        // Sin imagen: cuenta los dos tipos, porque en los dos es un problema.
         $productosSinImagen = Producto::doesntHave('imagenes')->count();
 
         $productosPorCategoria = Categoria::withCount('productos')
@@ -86,6 +78,8 @@ class UsoInternoController extends Controller
             'totalProductos',
             'productosActivos',
             'productosInactivos',
+            'totalEspeciales',
+            'especialesActivos',
             'totalCategorias',
             'categoriasActivas',
             'productosSinImagen',
@@ -172,7 +166,7 @@ class UsoInternoController extends Controller
                 'imagen_hero' => $rutaHero,
             ]);
 
-            Cache::forget('categorias_menu_externo');
+            MenuCategorias::olvidar();
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría creada exitosamente.');
         } catch (\Exception $e) {
             Log::error('Error al crear categoría: ' . $e->getMessage());
@@ -251,7 +245,7 @@ class UsoInternoController extends Controller
 
             DB::commit();
 
-            Cache::forget('categorias_menu_externo');
+            MenuCategorias::olvidar();
 
             $mensaje = 'Categoría actualizada exitosamente.';
             if ($productosDadosDeBaja > 0) {
@@ -275,7 +269,8 @@ class UsoInternoController extends Controller
             $categoriaId = $request->input('categoria_id');
             $activo      = $request->input('activo');
 
-            $productos = Producto::with(['categoria', 'unidad'])
+            $productos = Producto::estandar()
+                ->with(['categoria', 'unidad'])
                 ->when($search, fn($q) => $q->where(function ($q) use ($search) {
                     $q->where('nombre', 'like', '%' . $search . '%')
                         ->orWhere('codigo', 'like', '%' . $search . '%');
@@ -325,7 +320,7 @@ class UsoInternoController extends Controller
     public function showProducto(String $id)
     {
         try {
-            $producto = Producto::with([
+            $producto = Producto::estandar()->with([
                 'categoria',
                 'unidad',
                 'valoresVariantes.variante',
@@ -414,17 +409,21 @@ class UsoInternoController extends Controller
                 $portadaIdx   = str_starts_with($portadaField, 'nueva:')
                     ? (int) substr($portadaField, 6) : 0;
                 foreach ($imagenesRequest as $idx => $imagen) {
-                    $this->guardarImagenes($producto, $imagen, $idx === $portadaIdx);
+                    $this->gestorImagenes->guardar($producto, $imagen, $idx === $portadaIdx);
                 }
             }
 
             // Técnicas: nunca son portada, de ahí el false en el tercer argumento.
             $tecnicasRequest = array_values(array_filter($request->file('imagenes_tecnicas', [])));
             foreach ($tecnicasRequest as $imagen) {
-                $this->guardarImagenes($producto, $imagen, false, true);
+                $this->gestorImagenes->guardar($producto, $imagen, false, true);
             }
 
             $this->skuService->sincronizarVariantes($producto, $request);
+
+            // Puede ser el primer producto activo de su categoría, y eso hace
+            // aparecer la categoría en el menú.
+            MenuCategorias::olvidar();
 
             DB::commit();
             // A la ficha del producto y no al listado: recién creado, lo
@@ -443,7 +442,7 @@ class UsoInternoController extends Controller
     public function editProducto(String $id)
     {
         try {
-            $producto   = Producto::with([
+            $producto   = Producto::estandar()->with([
                 'categoria',
                 'unidad',
                 'valoresVariantes.variante',
@@ -473,7 +472,7 @@ class UsoInternoController extends Controller
 
     public function updateProducto(Request $request, String $id)
     {
-        $producto = Producto::findOrFail($id);
+        $producto = Producto::estandar()->findOrFail($id);
 
         $request->validate([
             'categoria_id'        => 'required|exists:categorias,id',
@@ -562,7 +561,7 @@ class UsoInternoController extends Controller
                 }
                 foreach ($imagenesNuevas as $idx => $imagen) {
                     if ($remaining <= 0) break;
-                    $this->guardarImagenes($producto, $imagen, $portadaIdx !== null && $idx === $portadaIdx);
+                    $this->gestorImagenes->guardar($producto, $imagen, $portadaIdx !== null && $idx === $portadaIdx);
                     $remaining--;
                 }
             }
@@ -583,7 +582,7 @@ class UsoInternoController extends Controller
                 $remainingTecnicas = Producto::MAX_IMAGENES_TECNICAS - $producto->fresh()->imagenesTecnicas()->count();
                 foreach ($tecnicasNuevas as $imagen) {
                     if ($remainingTecnicas <= 0) break;
-                    $this->guardarImagenes($producto, $imagen, false, true);
+                    $this->gestorImagenes->guardar($producto, $imagen, false, true);
                     $remainingTecnicas--;
                 }
             }
@@ -594,6 +593,10 @@ class UsoInternoController extends Controller
             }
 
             $this->skuService->sincronizarVariantes($producto, $request);
+
+            // Cambiar de categoría o de estado mueve al producto entre ramas
+            // del menú.
+            MenuCategorias::olvidar();
 
             DB::commit();
             return redirect()->route('uso-interno.productos.show', $producto->id)
@@ -634,7 +637,7 @@ class UsoInternoController extends Controller
         $accion = $activo ? 'alta' : 'baja';
 
         try {
-            $producto = Producto::with('categoria')->findOrFail($request->producto_id);
+            $producto = Producto::estandar()->with('categoria')->findOrFail($request->producto_id);
 
             // Dos pestañas abiertas, o el listado sin refrescar: el estado que
             // vio el usuario al tocar el badge puede no ser el actual.
@@ -644,6 +647,9 @@ class UsoInternoController extends Controller
             }
 
             $producto->update(['activo' => $activo]);
+
+            // La categoría puede quedarse sin productos activos, o recuperarlos.
+            MenuCategorias::olvidar();
 
             $mensaje = "El producto \"{$producto->nombre}\" se dio de {$accion} correctamente.";
 
@@ -701,77 +707,5 @@ class UsoInternoController extends Controller
         if (file_exists($path)) {
             @unlink($path);
         }
-    }
-
-    private function guardarImagenes(
-        Producto $producto,
-        UploadedFile $imagen,
-        bool $esPrincipal = false,
-        bool $esTecnica = false
-    ): ImagenProducto {
-        if (!$imagen->isValid()) {
-            Log::error('Archivo de imagen invalido en el request', [
-                'producto_id'   => $producto->id,
-                'error_message' => $imagen->getErrorMessage(),
-            ]);
-            throw new \Exception('Imagen no válida: ' . $imagen->getClientOriginalName());
-        }
-
-        $imagenProducto = ImagenProducto::create([
-            'producto_id'  => $producto->id,
-            'es_principal' => $esPrincipal,
-            'es_tecnica'   => $esTecnica,
-        ]);
-
-        // Se descarta la extensión original: lo que se sube siempre es WebP.
-        $base = $imagenProducto->id . '_' . preg_replace(
-            '/[^a-zA-Z0-9._-]/',
-            '_',
-            pathinfo($imagen->getClientOriginalName(), PATHINFO_FILENAME)
-        );
-
-        $imagenProducto->update(['nombre_imagen' => $base . '.webp']);
-
-        $disk       = config('filesystems.image_disk', 'sftp');
-        $carpeta    = 'imagenes_producto/' . $producto->id . '/';
-        $rutaDisco  = $carpeta . $base . '.webp';
-        $rutaThumb  = $carpeta . $base . '-thumb.webp';
-
-        try {
-            $variantes = $this->optimizador->variantes($imagen);
-
-            Storage::disk($disk)->put($rutaDisco, $variantes['full']);
-
-            $url = $this->urlDelDisco($disk, $rutaDisco);
-        } catch (\Exception $e) {
-            $imagenProducto->delete();
-            Log::error('Error al subir imagen: ' . $e->getMessage());
-            throw new \Exception('Error al subir la imagen al servidor de archivos: ' . $e->getMessage());
-        }
-
-        // El thumb es una optimización, no contenido: si falla, se registra y se
-        // sigue. La vista cae a la imagen grande (ImagenProducto::rutaMiniatura).
-        $urlThumb = null;
-        try {
-            Storage::disk($disk)->put($rutaThumb, $variantes['thumb']);
-            $urlThumb = $this->urlDelDisco($disk, $rutaThumb);
-        } catch (\Exception $e) {
-            Log::warning('No se pudo subir la miniatura de la imagen ' . $imagenProducto->id . ': ' . $e->getMessage());
-        }
-
-        $imagenProducto->update([
-            'ruta'       => $url,
-            'ruta_thumb' => $urlThumb,
-        ]);
-
-        return $imagenProducto;
-    }
-
-    /** URL pública de un archivo del file server, o del disco local si no hay una configurada. */
-    private function urlDelDisco(string $disk, string $ruta): string
-    {
-        $baseUrl = rtrim(config('filesystems.disks.' . $disk . '.url', ''), '/');
-
-        return $baseUrl ? $baseUrl . '/' . $ruta : asset('storage/' . $ruta);
     }
 }

@@ -1,0 +1,306 @@
+@extends('layouts.app-interno')
+@php
+$isEdit = isset($producto);
+$formAction = $isEdit
+? route('uso-interno.especiales.update', $producto)
+: route('uso-interno.especiales.store');
+$maxDescripcion = \App\Models\Producto::MAX_DESCRIPCION;
+$maxDescripcionTecnica = \App\Models\Producto::MAX_DESCRIPCION_TECNICA;
+$maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
+@endphp
+@section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto especial - Panel interno - Aberturas Giacomazzi')
+@section('page-title', $isEdit ? 'Editar producto especial' : 'Crear producto especial')
+@section('subhead', $isEdit ? 'Modificá los datos del producto a medida' : 'Agregá un producto a medida al sistema')
+
+@section('css')
+<link rel="stylesheet" href="{{ versioned_asset('css/producto.css') }}">
+@endsection
+
+@section('content')
+<div class="d-flex flex-column gap-3">
+
+    {{-- Volver --}}
+    <div>
+        <a href="{{ route('uso-interno.especiales.index') }}"
+            class="btn btn-outline-secondary btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-decoration-none"
+            style="font-size:13px;">
+            <x-fluentui-arrow-left-20-o class="me-1" style="width:14px;height:14px;" />
+            Volver
+        </a>
+    </div>
+
+    <form method="POST" action="{{ $formAction }}" enctype="multipart/form-data" class="d-flex flex-column gap-3">
+        @csrf
+
+        {{-- ── DATOS DEL PRODUCTO ── --}}
+        <div class="border rounded-3 bg-white p-3">
+            <p class="text-uppercase fw-semibold text-secondary mb-3" style="font-size:11px;letter-spacing:.06em;">
+                Datos del producto
+            </p>
+
+            <div class="row g-3">
+
+                {{-- Nombre --}}
+                <div class="col-12 col-md-8">
+                    <label for="nombre" class="form-label small mb-1">
+                        Nombre <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="nombre" name="nombre"
+                        class="form-control form-control-sm py-2 rounded-2 @error('nombre') is-invalid @enderror"
+                        placeholder="Ej: Puerta pivotante de doble hoja"
+                        value="{{ old('nombre', $producto->nombre ?? '') }}"
+                        autocomplete="off" required>
+                    @error('nombre')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Código --}}
+                <div class="col-12 col-md-4">
+                    <label for="codigo" class="form-label small mb-1">
+                        Código <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" id="codigo" name="codigo"
+                        class="form-control form-control-sm py-2 rounded-2 @error('codigo') is-invalid @enderror"
+                        placeholder="Ej: ESP-001"
+                        value="{{ old('codigo', $producto->codigo ?? '') }}"
+                        autocomplete="off" required>
+                    @error('codigo')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Categoría --}}
+                <div class="col-12">
+                    <label for="categoria_id" class="form-label small mb-1">
+                        Categoría <span class="text-danger">*</span>
+                    </label>
+                    <select id="categoria_id" name="categoria_id"
+                        class="form-select form-select-sm py-2 rounded-2 @error('categoria_id') is-invalid @enderror"
+                        required>
+                        <option value="">Seleccioná una categoría...</option>
+                        @foreach ($categorias as $cat)
+                        <option value="{{ $cat->id }}"
+                            {{ old('categoria_id', $producto->categoria_id ?? '') == $cat->id ? 'selected' : '' }}>
+                            {{ $cat->nombre }}
+                        </option>
+                        @endforeach
+                    </select>
+                    @error('categoria_id')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Descripción --}}
+                <div class="col-12">
+                    <label for="descripcion" class="form-label small mb-1">
+                        Descripción <span class="text-danger">*</span>
+                    </label>
+                    <textarea id="descripcion" name="descripcion" rows="3"
+                        class="form-control form-control-sm py-2 rounded-2 @error('descripcion') is-invalid @enderror"
+                        placeholder="Qué es y para qué sirve, en pocas líneas..." required
+                        maxlength="{{ $maxDescripcion }}"
+                        data-char-count data-char-max="{{ $maxDescripcion }}"
+                        aria-describedby="descripcion-contador">{{ old('descripcion', $producto->descripcion ?? '') }}</textarea>
+                    <div id="descripcion-contador" class="form-text text-end small"
+                        data-char-count-for="descripcion" aria-live="polite"></div>
+                    @error('descripcion')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Descripción técnica --}}
+                <div class="col-12">
+                    <label for="descripcion_tecnica" class="form-label small mb-1">
+                        Descripción técnica
+                        <span class="text-secondary fw-normal">(opcional)</span>
+                    </label>
+                    <textarea id="descripcion_tecnica" name="descripcion_tecnica" rows="8"
+                        class="form-control form-control-sm py-2 rounded-2 @error('descripcion_tecnica') is-invalid @enderror"
+                        placeholder="Materiales, sistemas de apertura, vidrios, herrajes, tolerancias..."
+                        maxlength="{{ $maxDescripcionTecnica }}"
+                        data-char-count data-char-max="{{ $maxDescripcionTecnica }}"
+                        aria-describedby="descripcion_tecnica-contador">{{ old('descripcion_tecnica', $producto->descripcion_tecnica ?? '') }}</textarea>
+                    <div id="descripcion_tecnica-contador" class="form-text text-end small"
+                        data-char-count-for="descripcion_tecnica" aria-live="polite"></div>
+                    @error('descripcion_tecnica')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                {{-- Activo (solo edición) --}}
+                @if ($isEdit)
+                <div class="col-12">
+                    <input type="hidden" name="activo" value="0">
+                    <div class="form-check form-switch">
+                        <input type="checkbox"
+                            class="form-check-input @error('activo') is-invalid @enderror"
+                            id="activo" name="activo" value="1"
+                            {{ old('activo', $producto->activo ?? 0) == 1 ? 'checked' : '' }}>
+                        <label class="form-check-label small" for="activo">Producto activo</label>
+                        @error('activo')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                @endif
+
+            </div>
+        </div>
+
+        {{-- ── IMÁGENES ── --}}
+        <div class="border rounded-3 bg-white p-3">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
+                    Imágenes <span class="text-muted fw-normal text-lowercase">(máx. 5)</span>
+                </p>
+                <button type="button" id="add-imagen-btn"
+                    class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
+                    style="font-size:12px;">
+                    <x-fluentui-add-20-o class="me-1" style="width:12px;height:12px;" />
+                    Agregar imagen
+                </button>
+            </div>
+
+            {{-- Imágenes existentes + inputs nuevos en el mismo flex row --}}
+            <div class="d-flex flex-wrap gap-3">
+                @if ($isEdit && $producto->imagenes->count() > 0)
+                @foreach ($producto->imagenes as $imagen)
+                <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
+                    <img src="{{ $imagen->ruta_miniatura }}"
+                        alt="{{ $imagen->nombre_imagen }}"
+                        class="imagen-thumb"
+                        width="100" height="100"
+                        loading="lazy" decoding="async">
+                    <div class="imagen-eliminar-overlay">
+                        <button type="button"
+                            class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width:20px;height:20px;"
+                            data-imagen-id="{{ $imagen->id }}"
+                            onclick="toggleEliminarImagen(this.dataset.imagenId, this)"
+                            title="Eliminar">
+                            <x-heroicon-m-x-mark style="width:12px;height:12px;" />
+                        </button>
+                    </div>
+                    <button type="button"
+                        class="imagen-portada-btn {{ $imagen->es_principal ? 'activa' : '' }}"
+                        data-imagen-id="{{ $imagen->id }}"
+                        onclick="setPortadaExistente(this)"
+                        title="Marcar como portada">
+                        @if($imagen->es_principal)
+                        <x-heroicon-s-star style="width:12px;height:12px;" />
+                        @else
+                        <x-heroicon-o-star style="width:12px;height:12px;" />
+                        @endif
+                    </button>
+                    <input type="hidden" name="imagenes_eliminar[]"
+                        id="eliminar-{{ $imagen->id }}" value="" disabled>
+                </div>
+                @endforeach
+                @endif
+
+                {{-- Inputs nuevas imágenes (JS appends here) --}}
+                <div id="imagenes-container" style="display:contents;"></div>
+            </div>
+
+            @error('imagenes.*')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- ── IMÁGENES TÉCNICAS ── --}}
+        <div class="border rounded-3 bg-white p-3">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
+                    Imágenes técnicas
+                    <span class="text-muted fw-normal text-lowercase">(máx. {{ $maxImagenesTecnicas }}, opcional)</span>
+                </p>
+                <button type="button" id="add-imagen-tecnica-btn"
+                    class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
+                    style="font-size:12px;">
+                    <x-fluentui-add-20-o class="me-1" style="width:12px;height:12px;" />
+                    Agregar imagen
+                </button>
+            </div>
+            <p class="text-secondary mb-3" style="font-size:12px;">
+                Planos, cortes, despieces o tablas de medidas.
+            </p>
+
+            <div class="d-flex flex-wrap gap-3">
+                @if ($isEdit && $producto->imagenesTecnicas->count() > 0)
+                @foreach ($producto->imagenesTecnicas as $tecnica)
+                <div class="imagen-existente-card" id="tecnica-card-{{ $tecnica->id }}">
+                    <img src="{{ $tecnica->ruta_miniatura }}"
+                        alt="{{ $tecnica->nombre_imagen }}"
+                        class="imagen-thumb"
+                        width="100" height="100"
+                        loading="lazy" decoding="async">
+                    <div class="imagen-eliminar-overlay">
+                        <button type="button"
+                            class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
+                            style="width:20px;height:20px;"
+                            data-tecnica-eliminar="{{ $tecnica->id }}"
+                            title="Eliminar">
+                            <x-heroicon-m-x-mark style="width:12px;height:12px;" />
+                        </button>
+                    </div>
+                    <input type="hidden" name="imagenes_tecnicas_eliminar[]"
+                        id="eliminar-tecnica-{{ $tecnica->id }}" value="" disabled>
+                </div>
+                @endforeach
+                @endif
+
+                {{-- Inputs nuevas imágenes técnicas (JS appends here) --}}
+                <div id="tecnicas-container" style="display:contents;"></div>
+            </div>
+
+            @error('imagenes_tecnicas')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+            @error('imagenes_tecnicas.*')
+            <div class="text-danger small mt-1">{{ $message }}</div>
+            @enderror
+        </div>
+
+        {{-- Hidden: portada de imagen --}}
+        <input type="hidden" name="imagen_portada" id="imagen-portada" value="">
+
+        {{-- Submit --}}
+        <div class="d-flex justify-content-end border rounded-3 bg-white p-3">
+            {{-- El envío sube las imágenes por SFTP y puede tardar: el
+                 spinner y el disabled evitan el doble alta. --}}
+            <button type="submit" class="btn btn-success btn-sm px-3 py-1 rounded-2" style="font-size:13px;"
+                data-submit data-loading-text="{{ $isEdit ? 'Guardando…' : 'Creando…' }}">
+                <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"
+                    data-spinner></span>
+                <span data-submit-text>{{ $isEdit ? 'Guardar cambios' : 'Crear producto especial' }}</span>
+            </button>
+        </div>
+
+    </form>
+</div>
+@endsection
+
+@section('script')
+@php
+$portadaExistenteId = $isEdit
+? ($producto->imagenes->firstWhere('es_principal', true)?->id ?? $producto->imagenes->first()?->id)
+: null;
+$prodConfigJson = json_encode([
+'isEdit' => $isEdit,
+'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
+'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
+'initialVariantes' => [],
+'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
+'portadaExistenteId' => $portadaExistenteId,
+], JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+@endphp
+{{-- data-config es inmune al formatter; JSON_HEX_* evita conflictos con htmlspecialchars --}}
+<div id="prod-config" class="d-none" aria-hidden="true" data-config="{{ $prodConfigJson }}"></div>
+{{-- Iconos Heroicons renderizados server-side; JS los lee vía innerHTML --}}
+<div id="tpl-icon-x-mark" class="d-none" aria-hidden="true"><x-heroicon-m-x-mark /></div>
+<div id="tpl-icon-arrow-uturn-left" class="d-none" aria-hidden="true"><x-heroicon-m-arrow-uturn-left /></div>
+<div id="tpl-icon-star-fill" class="d-none" aria-hidden="true"><x-heroicon-s-star /></div>
+<div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
+<script type="module" src="{{ versioned_asset('js/manageEspecial.js') }}"></script>
+@endsection

@@ -1,0 +1,336 @@
+@extends('layouts.app-interno')
+@section('title', $producto->nombre . ' · Panel interno · Aberturas Giacomazzi')
+@section('page-title', $producto->nombre)
+@section('subhead', 'Producto a medida · ' . ($producto->categoria?->nombre ?? 'Sin categoría'))
+
+@section('css')
+<link rel="stylesheet" href="{{ versioned_asset('css/producto.css') }}">
+<style>
+    /* -- Descripcion tecnica plegable ------------------------------
+   El campo admite hasta 5000 caracteres. Sin plegar, una ficha
+   larga empuja el Registro fuera de la pantalla. */
+    .desc-tecnica {
+        font-size: 13px;
+        line-height: 1.65;
+        white-space: pre-line;
+    }
+
+    .desc-tecnica.is-clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 6;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .ver-mas-toggle {
+        display: none;
+        align-items: center;
+        gap: .2rem;
+        margin-top: .4rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        font-size: 12px;
+        font-weight: 600;
+        color: #287452;
+        cursor: pointer;
+    }
+
+    .ver-mas-toggle.is-visible {
+        display: inline-flex;
+    }
+
+    .ver-mas-toggle:hover {
+        text-decoration: underline;
+    }
+
+    .ver-mas-toggle svg {
+        transition: transform .15s ease;
+    }
+
+    .ver-mas-toggle[aria-expanded="true"] svg {
+        transform: rotate(180deg);
+    }
+</style>
+@endsection
+
+@section('content')
+@php
+$imagenes = $producto->imagenes->values();
+$tecnicas = $producto->imagenesTecnicas;
+@endphp
+
+<div class="d-flex flex-column gap-3">
+
+    {{-- ── Barra de acción ──────────────────────────────────────── --}}
+    <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap">
+        <a href="{{ route('uso-interno.especiales.index') }}"
+            class="d-inline-flex align-items-center gap-1 text-secondary text-decoration-none small fw-semibold">
+            <x-heroicon-m-arrow-left style="width:15px;height:15px;" />
+            Volver a productos especiales
+        </a>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge rounded-pill {{ $producto->activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle' }}"
+                style="font-size:11px; padding:3px 12px; font-weight:600;">
+                {{ $producto->activo ? 'Activo' : 'Inactivo' }}
+            </span>
+
+            {{-- Ver la ficha como la ve el cliente. La vista pública exige
+                 producto y categoría activos: si alguno está de baja el link
+                 daría 404, así que ahí se dice por qué no hay nada que ver. --}}
+            @php
+            $categoriaActiva = (bool) $producto->categoria?->activo;
+            $visiblePublico = $producto->activo && $categoriaActiva;
+            $motivoOculto = !$producto->activo
+            ? 'El producto está inactivo: no aparece en el sitio.'
+            : 'La categoría no está activa: el producto no aparece en el sitio.';
+            @endphp
+
+            @if($visiblePublico)
+            <a href="{{ route('productos.especial.show', $producto->id) }}"
+                target="_blank" rel="noopener"
+                class="btn btn-outline-secondary btn-sm px-2 d-inline-flex align-items-center gap-1"
+                style="font-size:12px; padding-top:3px; padding-bottom:3px;"
+                title="Abrir la ficha pública en una pestaña nueva">
+                <x-heroicon-m-arrow-top-right-on-square style="width:13px;height:13px;" />
+                Ver en el sitio
+            </a>
+            @else
+            <span class="d-inline-flex align-items-center gap-1 text-secondary"
+                style="font-size:12px;" title="{{ $motivoOculto }}">
+                <x-heroicon-m-eye-slash style="width:13px;height:13px;" />
+                Sin ficha pública
+            </span>
+            @endif
+
+            <a href="{{ route('uso-interno.especiales.edit', $producto) }}"
+                class="btn btn-outline-success btn-sm px-2 d-inline-flex align-items-center gap-1"
+                style="font-size:12px; padding-top:3px; padding-bottom:3px;">
+                <x-heroicon-m-pencil-square style="width:13px;height:13px;" />
+                Editar
+            </a>
+        </div>
+    </div>
+
+    {{-- ── Cuerpo principal ──────────────────────────────────────── --}}
+    <div class="row g-3 align-items-start">
+
+        {{-- Columna izquierda: galería ──────────────────────────── --}}
+        <div class="col-lg-4">
+            <div class="info-section">
+                <div class="info-section-title">
+                    <x-heroicon-m-photo style="width:14px;height:14px;" />
+                    Imágenes
+                </div>
+
+                @if($imagenes->isNotEmpty())
+                <div class="prod-photos-grid">
+                    @foreach($imagenes->sortByDesc('es_principal') as $img)
+                    <div class="prod-photo-wrap{{ $img->es_principal ? ' is-portada' : '' }}">
+                        <img src="{{ $img->ruta_miniatura }}"
+                            alt="{{ $img->nombre_imagen }}"
+                            class="prod-photo-thumb"
+                            width="200" height="200"
+                            loading="lazy" decoding="async"
+                            data-src="{{ $img->ruta }}"
+                            data-alt="{{ $img->nombre_imagen }}"
+                            onclick="openLightbox(this.dataset.src, this.dataset.alt)">
+                        @if($img->es_principal)
+                        <span class="portada-badge">
+                            <x-heroicon-s-star style="width:11px;height:11px;" />
+                        </span>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-secondary mb-0" style="font-size:13px;">Sin imágenes cargadas.</p>
+                @endif
+            </div>
+
+            {{-- Imágenes técnicas: van aparte de la galería, acompañan a la
+                 descripción técnica en el sitio público. --}}
+            <div class="info-section mt-3">
+                <div class="info-section-title">
+                    <x-heroicon-m-document-text style="width:14px;height:14px;" />
+                    Imágenes técnicas
+                </div>
+
+                @if($tecnicas->isNotEmpty())
+                <div class="prod-photos-grid">
+                    @foreach($tecnicas as $tecnica)
+                    <div class="prod-photo-wrap">
+                        <img src="{{ $tecnica->ruta_miniatura }}"
+                            alt="{{ $tecnica->nombre_imagen }}"
+                            class="prod-photo-thumb"
+                            width="200" height="200"
+                            loading="lazy" decoding="async"
+                            data-src="{{ $tecnica->ruta }}"
+                            data-alt="{{ $tecnica->nombre_imagen }}"
+                            onclick="openLightbox(this.dataset.src, this.dataset.alt)">
+                    </div>
+                    @endforeach
+                </div>
+                @else
+                <p class="text-secondary mb-0" style="font-size:13px;">Sin imágenes técnicas cargadas.</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Columna derecha: información ───────────────────────── --}}
+        <div class="col-lg-8 d-flex flex-column gap-3">
+
+            {{-- Información general --}}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <x-heroicon-m-information-circle style="width:14px;height:14px;" />
+                    Información general
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="info-field-label">Código</div>
+                        <span class="badge bg-secondary-subtle text-secondary rounded-1"
+                            style="font-size:12px; font-weight:600; padding:4px 10px;">
+                            {{ $producto->codigo ?? '—' }}
+                        </span>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-field-label">Categoría</div>
+                        <span class="badge rounded-pill text-primary bg-primary-subtle"
+                            style="font-size:11px; padding:3px 12px; font-weight:600;">
+                            {{ $producto->categoria?->nombre ?? '—' }}
+                        </span>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-field-label">Descripción</div>
+                        <p class="mb-0 text-secondary" style="font-size:14px; line-height:1.65;">
+                            {{ $producto->descripcion ?? '—' }}
+                        </p>
+                    </div>
+                    @if($producto->descripcion_tecnica)
+                    <div class="col-12">
+                        <div class="info-field-label">Descripción técnica</div>
+                        {{-- pre-line: descripcion_tecnica es TEXT y admite varias líneas.
+                             Arranca plegado a 6 líneas; el botón lo revela y solo aparece
+                             si el texto realmente desborda (ver el script al pie). --}}
+                        <p id="desc-tecnica-texto" class="mb-0 text-secondary desc-tecnica is-clamped"
+                            data-desc-tecnica>{{ $producto->descripcion_tecnica }}</p>
+                        <button type="button" class="ver-mas-toggle"
+                            data-desc-tecnica-toggle aria-expanded="false" aria-controls="desc-tecnica-texto">
+                            <span data-desc-tecnica-label>Ver más</span>
+                            <x-heroicon-m-chevron-down style="width:12px;height:12px;" />
+                        </button>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Cómo se comporta en el sitio: acá no hay variantes ni SKUs que
+                 mostrar, y conviene decir por qué en vez de dejar dos secciones
+                 vacías como en la ficha de un producto estándar. --}}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <x-heroicon-m-sparkles style="width:14px;height:14px;" />
+                    En el sitio
+                </div>
+                <p class="text-secondary mb-0" style="font-size:13px; line-height:1.65;">
+                    Este producto se muestra en su ficha propia y en la franja
+                    <em>a medida</em> de su categoría. No se agrega al carrito: el único
+                    llamado a la acción es consultar por WhatsApp, y por eso no tiene
+                    unidad de cotización, variantes ni SKUs.
+                </p>
+            </div>
+
+            {{-- Metadatos --}}
+            <div class="info-section">
+                <div class="info-section-title">
+                    <x-heroicon-m-clock style="width:14px;height:14px;" />
+                    Registro
+                </div>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="info-field-label">Creado el</div>
+                        <div style="font-size:13px;" class="text-secondary">
+                            {{ $producto->created_at?->format('d/m/Y · H:i') ?? '—' }}
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-field-label">Última modificación</div>
+                        <div style="font-size:13px;" class="text-secondary">
+                            {{ $producto->updated_at?->format('d/m/Y · H:i') ?? '—' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>{{-- /col-8 --}}
+    </div>{{-- /row --}}
+
+</div>
+
+{{-- ── Lightbox ──────────────────────────────────────────────── --}}
+<div class="modal fade" id="imgLightbox" tabindex="-1" aria-label="Imagen ampliada" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0">
+            <div class="modal-body p-2 text-center position-relative">
+                <button type="button"
+                    class="btn-close position-absolute"
+                    style="top:.65rem; right:.65rem; z-index:5;"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"></button>
+                <img id="lightbox-img" src="" alt=""
+                    style="max-height:80vh; max-width:100%; object-fit:contain; border-radius:.5rem;">
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('script')
+<script>
+    function openLightbox(src, alt) {
+        document.getElementById('lightbox-img').src = src;
+        document.getElementById('lightbox-img').alt = alt || '';
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('imgLightbox')).show();
+    }
+
+    // Ver mas / Ver menos de la descripcion tecnica.
+    // El corte lo decide el alto real, no la cantidad de caracteres: el mismo
+    // texto entra en 6 lineas en un monitor ancho y desborda en una notebook,
+    // y ademas el usuario puede haber cargado saltos de linea propios.
+    (function() {
+        var texto = document.querySelector('[data-desc-tecnica]');
+        var boton = document.querySelector('[data-desc-tecnica-toggle]');
+        if (!texto || !boton) return;
+
+        var etiqueta = boton.querySelector('[data-desc-tecnica-label]');
+
+        function sincronizarBoton() {
+            // Desplegado no hay nada que medir: el clamp esta sacado y
+            // scrollHeight siempre igualaria a clientHeight.
+            if (boton.getAttribute('aria-expanded') === 'true') return;
+            var desborda = texto.scrollHeight > texto.clientHeight + 1;
+            boton.classList.toggle('is-visible', desborda);
+        }
+
+        boton.addEventListener('click', function() {
+            var plegado = texto.classList.toggle('is-clamped');
+            boton.setAttribute('aria-expanded', plegado ? 'false' : 'true');
+            if (etiqueta) etiqueta.textContent = plegado ? 'Ver más' : 'Ver menos';
+            if (plegado) sincronizarBoton();
+        });
+
+        sincronizarBoton();
+
+        // Al cambiar el ancho cambia la cantidad de lineas, asi que el boton
+        // puede pasar a sobrar o a hacer falta.
+        var pendiente;
+        window.addEventListener('resize', function() {
+            clearTimeout(pendiente);
+            pendiente = setTimeout(sincronizarBoton, 150);
+        });
+    })();
+</script>
+@endsection

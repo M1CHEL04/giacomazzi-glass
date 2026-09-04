@@ -1,0 +1,327 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   PRODUCTO ESPECIAL — ficha de un producto a medida
+   Se apoya en producto-show.css: la galería, los lightbox, la ficha técnica
+   y el botón de acción (.btn-ps-primary, el mismo verde que "Agregar al
+   carrito" en la ficha estándar) son los mismos, para poder reusar
+   producto-show.js y ese lenguaje de botones sin tocarlos. Acá va sólo lo
+   que distingue a esta ficha: el panel de consulta y el proceso.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Encabezado de línea ──────────────────────────────────────────────── */
+
+/* Va entre el breadcrumb y la galería/info: se ve primero en cualquier
+   orden de columnas, así que "arriba" vale tanto en desktop como en mobile. */
+.pe-linea-eyebrow {
+    margin: 0.75rem 0 1.25rem;
+}
+
+/* ── Panel de consulta ────────────────────────────────────────────────── */
+
+.pe-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.pe-titulo {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 800;
+    line-height: 1.14;
+    color: var(--g-carbon);
+    margin: 0 0 0.5rem;
+}
+
+.pe-categoria {
+    align-self: flex-start;
+    margin-bottom: 1rem;
+}
+
+.pe-descripcion {
+    font-family: var(--font-body);
+    font-size: var(--fs-lead);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    margin: 0 0 1.75rem;
+}
+
+/* ── Qué se puede personalizar ────────────────────────────────────────── */
+
+.pe-personalizable {
+    background: var(--g-vidrio);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-left: 3px solid var(--external-primary);
+    border-radius: 3px;
+    padding: 1.15rem 1.25rem 1.25rem;
+    margin-bottom: 1.75rem;
+}
+
+.pe-personalizable-titulo {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    color: var(--g-carbon);
+    margin: 0 0 0.9rem;
+}
+
+.pe-personalizable-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pe-personalizable-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+    color: var(--external-secondary);
+}
+
+.pe-personalizable-item strong {
+    color: var(--g-carbon);
+    font-weight: 700;
+}
+
+.pe-personalizable-icono {
+    flex-shrink: 0;
+    display: inline-flex;
+    color: var(--external-primary);
+    margin-top: 0.1rem;
+}
+
+.pe-personalizable-icono svg {
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.6;
+}
+
+/* ── CTA ──────────────────────────────────────────────────────────────── */
+
+.pe-acciones {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-bottom: 1.75rem;
+}
+
+/* El botón en sí no tiene CSS propio: usa .btn-ps-primary de
+   producto-show.css, el mismo botón que "Agregar al carrito" en la ficha
+   estándar. Mismo verde de marca, mismo tamaño, mismo hover. */
+
+.pe-acciones-nota {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+.pe-link-categoria {
+    margin-top: 0.25rem;
+}
+
+.pe-link-categoria svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* ── Tira de confianza ────────────────────────────────────────────────── */
+
+.pe-confianza {
+    list-style: none;
+    margin: 0;
+    padding: 1rem 0 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+}
+
+.pe-confianza-item {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--external-secondary);
+    padding-left: 1rem;
+}
+
+.pe-confianza-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--external-primary);
+}
+
+/* ── Proceso ──────────────────────────────────────────────────────────── */
+
+.pe-proceso {
+    background: var(--g-vidrio);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 3.5rem 0;
+}
+
+/* .ps-seccion-titulo trae el tamaño (--fs-title-sm) y el peso; acá sólo
+   se ajusta el espaciado, que en esta sección es mayor que en las demás. */
+.pe-proceso-titulo {
+    margin: 0.5rem 0 2rem;
+}
+
+/* ── Lista de pasos (mobile) ─────────────────────────────────────────────
+   Acordeón: los 4 títulos numerados se leen de entrada sin scrollear
+   demasiado, y cada uno se despliega al tocarlo. Mismo mecanismo genérico
+   que el menú del drawer (layout.js inicializa cualquier [data-acordeon]
+   de la página), así que no hay JS propio de esta sección. Los items son
+   independientes entre sí —abrir uno no cierra los otros—, igual que las
+   ramas del menú de Productos. */
+
+.pe-proceso-lista {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.pe-proceso-item {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.pe-proceso-item-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    width: 100%;
+    padding: 0.9rem 0.25rem;
+    background: transparent;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.pe-proceso-item-numero {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    border-radius: 50%;
+    background: var(--external-primary);
+    color: var(--external-white);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+}
+
+.pe-proceso-item-titulo {
+    flex: 1 1 auto;
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    color: var(--g-carbon);
+}
+
+.pe-proceso-item-chevron {
+    flex: 0 0 auto;
+    color: var(--external-secondary-soft);
+    font-size: 0.85em;
+    transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.pe-proceso-item.open .pe-proceso-item-chevron {
+    transform: rotate(180deg);
+    color: var(--external-primary);
+}
+
+/* El alto en sí lo pone layout.js por JS (arranca en 0, queda en 'auto'
+   mientras está abierto); acá sólo la transición que anima ese cambio y el
+   overflow que recorta el contenido mientras el alto es menor al real. */
+.pe-proceso-item-panel {
+    overflow: hidden;
+    transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pe-proceso-item-texto {
+    margin: 0;
+    /* Alineado bajo el título, no bajo el número */
+    padding: 0 0.25rem 1rem calc(1.85rem + 0.85rem + 0.25rem);
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    color: var(--external-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pe-proceso-item-chevron,
+    .pe-proceso-item-panel {
+        transition: none;
+    }
+}
+
+/* ── Fila de pasos (desktop, ≥992px) ──────────────────────────────────────
+   A ese ancho los 4 entran cómodos: sin carrusel ni scroll, sólo una fila. */
+
+.pe-proceso-pasos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 2rem;
+}
+
+.pe-proceso-paso {
+    flex: 1 1 0;
+    position: relative;
+    padding-top: 1.25rem;
+    border-top: 2px solid var(--external-primary);
+}
+
+.pe-proceso-numero {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--external-primary);
+    color: var(--external-white);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.pe-proceso-paso-titulo {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    color: var(--g-carbon);
+    margin: 0 0 0.45rem;
+}
+
+.pe-proceso-paso-texto {
+    font-family: var(--font-body);
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+/* Sin barra fija de mobile: el único CTA de WhatsApp es el de arriba,
+   .btn-ps-primary dentro de .pe-acciones. */
+
+@media (max-width: 767.98px) {
+    .pe-proceso {
+        padding: 2.5rem 0;
+    }
+}

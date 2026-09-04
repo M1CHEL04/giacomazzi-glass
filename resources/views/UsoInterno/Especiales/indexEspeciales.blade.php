@@ -1,10 +1,7 @@
 @extends('layouts.app-interno')
-@section('title', 'Indice de productos - Panel interno - Aberturas Giacomazzi')
-@section('page-title', 'Productos')
-@section('subhead', 'Lista de productos registrados en el sistema')
-@section('styles')
-
-@endsection
+@section('title', 'Indice de productos especiales - Panel interno - Aberturas Giacomazzi')
+@section('page-title', 'Productos especiales')
+@section('subhead', 'Productos a medida: se consultan por WhatsApp, no se cotizan por carrito')
 
 @section('content')
 <div class="d-flex flex-column gap-3">
@@ -18,8 +15,8 @@
                 placeholder="Buscar por nombre o código..."
                 value="{{ request('search') }}"
                 id="searchProducto"
-                data-index-url="{{ route('uso-interno.productos.index') }}"
-                data-show-base="{{ url('uso-interno/show-producto') }}">
+                data-index-url="{{ route('uso-interno.especiales.index') }}"
+                data-show-base="{{ url('uso-interno/show-producto-especial') }}">
             <x-fluentui-search-20-o class="position-absolute text-secondary" style="width:18px;height:18px;left:10px;top:50%;transform:translateY(-50%);" />
         </div>
         <div style="min-width: 200px;">
@@ -39,9 +36,9 @@
                 <option value="0" {{ request('activo') === '0' ? 'selected' : '' }}>Inactivo</option>
             </select>
         </div>
-        <a href="{{ route('uso-interno.productos.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
+        <a href="{{ route('uso-interno.especiales.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
             <x-fluentui-add-20-o class="me-1" style="width:14px;height:14px;" />
-            Crear producto
+            Crear producto especial
         </a>
     </div>
 
@@ -98,16 +95,16 @@
                 </div>
                 <div class="text-end" style="width: 60px;">
                     <a
-                        href="{{ route('uso-interno.productos.show', $producto) }}"
+                        href="{{ route('uso-interno.especiales.show', $producto) }}"
                         class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"
-                        aria-label="Ver producto"
+                        aria-label="Ver producto especial"
                         title="Ver">
                         <x-fluentui-eye-20-o style="width:16px;height:16px;" />
                     </a>
                 </div>
             </div>
             @empty
-            <div class="px-3 py-4 text-secondary text-center small">No se encontraron productos.</div>
+            <div class="px-3 py-4 text-secondary text-center small">No se encontraron productos especiales.</div>
             @endforelse
         </div>
 
@@ -126,7 +123,10 @@
     </div>
 </div>
 
-@include('UsoInterno.Productos.modals.estadoProducto')
+@include('UsoInterno.Productos.modals.estadoProducto', [
+    'rutaActivar'    => route('uso-interno.especiales.activar'),
+    'rutaDesactivar' => route('uso-interno.especiales.desactivar'),
+])
 @endsection
 
 @section('script')

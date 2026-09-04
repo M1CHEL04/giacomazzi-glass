@@ -6,13 +6,21 @@
     por fila desaparecerían con el re-render. `productoEstado.js` completa
     el nombre visible y el hidden `producto_id` con los datos del badge
     que se tocó.
+
+    Lo usan el listado de productos y el de productos especiales: las rutas
+    de alta y baja llegan por parámetro y caen a las de productos si no se
+    pasan, que es lo que hace el include del listado estándar.
 --}}
+@php
+$rutaActivar    = $rutaActivar    ?? route('uso-interno.productos.activar');
+$rutaDesactivar = $rutaDesactivar ?? route('uso-interno.productos.desactivar');
+@endphp
 
 {{-- ── Dar de baja ─────────────────────────────────────────── --}}
 <div class="modal fade" id="modalBajaProducto" tabindex="-1" aria-labelledby="modalBajaProductoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content border-0 rounded-3">
-            <form method="POST" action="{{ route('uso-interno.productos.desactivar') }}">
+            <form method="POST" action="{{ $rutaDesactivar }}">
                 @csrf
                 <input type="hidden" name="producto_id" value="" data-producto-id-input>
 
@@ -57,7 +65,7 @@
 <div class="modal fade" id="modalAltaProducto" tabindex="-1" aria-labelledby="modalAltaProductoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
         <div class="modal-content border-0 rounded-3">
-            <form method="POST" action="{{ route('uso-interno.productos.activar') }}">
+            <form method="POST" action="{{ $rutaActivar }}">
                 @csrf
                 <input type="hidden" name="producto_id" value="" data-producto-id-input>
 

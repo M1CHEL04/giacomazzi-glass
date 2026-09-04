@@ -1,6 +1,21 @@
 @php
-// Construir chips de filtros activos con URL para eliminar cada uno
 $chipsActivos = [];
+
+$tiposActivos = $tipos ?? [];
+$etiquetasTipo = ['estandar' => 'De catálogo', 'especial' => 'Línea adapta'];
+
+// Chips de tipo (sólo en "todos los productos", cuando $tipos está definido)
+foreach ($tiposActivos as $tipo) {
+$sinEste = array_values(array_filter($tiposActivos, fn($t) => $t !== $tipo));
+$params = [];
+if (!empty($filtros)) $params['variantes'] = $filtros;
+if (!empty($categoriasFiltro ?? [])) $params['categorias'] = $categoriasFiltro;
+if (!empty($sinEste)) $params['tipos'] = $sinEste;
+$chipsActivos[] = [
+'label' => $etiquetasTipo[$tipo] ?? $tipo,
+'url' => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
+];
+}
 
 // Chips de categorías (sólo en "todos los productos", cuando $categoriasFiltro está definido)
 foreach (($categoriasFiltro ?? []) as $catId) {
@@ -10,6 +25,7 @@ $sinEsta = array_values(array_filter($categoriasFiltro, fn($c) => (int) $c !== (
 $params = [];
 if (!empty($filtros)) $params['variantes'] = $filtros;
 if (!empty($sinEsta)) $params['categorias'] = $sinEsta;
+if (!empty($tiposActivos)) $params['tipos'] = $tiposActivos;
 $chipsActivos[] = [
 'label' => $cat->nombre,
 'url' => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
@@ -31,6 +47,7 @@ if (empty($sinEste[$varianteId])) unset($sinEste[$varianteId]);
 $params = [];
 if (!empty($sinEste)) $params['variantes'] = $sinEste;
 if (!empty($categoriasFiltro ?? [])) $params['categorias'] = $categoriasFiltro;
+if (!empty($tiposActivos)) $params['tipos'] = $tiposActivos;
 $chipsActivos[] = [
 'label' => $variante->nombre . ': ' . $valor->valor,
 'url' => $gridBaseUrl . (empty($params) ? '' : '?' . http_build_query($params)),
@@ -63,7 +80,10 @@ $chipsActivos[] = [
     @endif
 </div>
 
-{{-- Énfasis personalización --}}
+{{-- Énfasis personalización: sólo tiene sentido en la línea estándar —
+     invita a pasarse a la línea adapta, así que en la línea adapta misma
+     sería redundante (ahí ya está esa idea en el alert de arriba). --}}
+@unless($esLineaSingular ?? false)
 <div class="grid-personalizar-banner">
     <span class="grid-personalizar-icono"><i class="bi bi-stars"></i></span>
     <p>
@@ -74,12 +94,17 @@ $chipsActivos[] = [
         y lo producimos especialmente para vos.
     </p>
 </div>
+@endunless
 
 <div class="row g-4">
     @foreach($productos as $producto)
+    @php $esEspecial = (bool) ($producto->es_especial ?? false); @endphp
     <div class="col-6 col-xl-4">
         <article class="producto-card" style="--card-delay: {{ $loop->index * 0.055 }}s">
             <div class="producto-card-imagen">
+                @if($esEspecial)
+                <span class="producto-badge-especial">Adapta</span>
+                @endif
                 @php $imagenPrincipal = $producto->imagenes->first(); @endphp
                 @if($imagenPrincipal && $imagenPrincipal->ruta)
                 {{-- Las 2 primeras tarjetas son el LCP en mobile: cargan eager. --}}
@@ -105,10 +130,11 @@ $chipsActivos[] = [
                 <h3 class="producto-nombre">{{ $producto->nombre }}</h3>
                 <p class="producto-descripcion">{{ Str::limit($producto->descripcion, 100) }}</p>
                 <span class="producto-cta">
-                    Ver detalles <i class="bi bi-arrow-right"></i>
+                    {{ $esEspecial ? 'Consultar' : 'Ver detalles' }} <i class="bi bi-arrow-right"></i>
                 </span>
             </div>
-            <a href="{{ route('productos.show', $producto->id) }}" class="stretched-link" aria-label="{{ $producto->nombre }}"></a>
+            <a href="{{ $esEspecial ? route('productos.especial.show', $producto->id) : route('productos.show', $producto->id) }}"
+                class="stretched-link" aria-label="{{ $producto->nombre }}"></a>
         </article>
     </div>
     @endforeach
@@ -128,13 +154,13 @@ $chipsActivos[] = [
     </div>
     <h3 class="productos-empty-title">No se encontraron productos</h3>
     <p class="productos-empty-text">
-        @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []))
+        @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []) || !empty($tiposActivos))
         Probá ajustando los filtros para ver más resultados.
         @else
         Todavía no hay productos en esta sección.
         @endif
     </p>
-    @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []))
+    @if(!empty(array_filter($filtros ?? [])) || !empty($categoriasFiltro ?? []) || !empty($tiposActivos))
     <a href="{{ $gridBaseUrl }}" class="btn-limpiar-filtros">Limpiar filtros</a>
     @endif
 </div>

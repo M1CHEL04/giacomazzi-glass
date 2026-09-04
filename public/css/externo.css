@@ -386,6 +386,22 @@ html {
     color: var(--external-white);
 }
 
+/* El verde de WhatsApp, no el de la marca: acá el color no decora, dice a
+   dónde lleva el botón. Se usa donde consultar es la única acción posible
+   (productos a medida) y en el cierre de esas páginas. */
+.g-btn--wa {
+    background: var(--g-whatsapp);
+    border-color: var(--g-whatsapp);
+    color: var(--g-carbon);
+}
+
+.g-btn--wa:hover,
+.g-btn--wa:focus {
+    background: var(--g-whatsapp-dark);
+    border-color: var(--g-whatsapp-dark);
+    color: var(--external-white);
+}
+
 .g-btn--ghost,
 .home-btn--ghost {
     background: transparent;
@@ -653,41 +669,220 @@ html {
     font-weight: 600;
 }
 
-.external-dropdown-item.fw-semibold {
-    color: var(--external-primary);
-    font-weight: 600;
-    font-size: 0.85rem;
-    background-color: rgba(40, 116, 82, 0.04);
-    border: none;
-    padding: 0.55rem 1rem;
+/* ── Menú de Productos en dos niveles ─────────────────────────────────────
+   El menú es una sola columna con las ramas. El panel de cada rama sale al
+   costado, y sólo mientras esa rama está apuntada: por eso va posicionado
+   fuera del flujo, para que aparecer y desaparecer no cambie el tamaño del
+   menú debajo del cursor.
+
+   El despliegue es :hover y :focus-within, sin JS: así funciona igual con
+   teclado (tabular a la rama abre su panel y sigue abierto mientras el foco
+   esté adentro) y en un notebook táctil, donde tocar el botón le da foco. */
+.external-dropdown-menu.nav-prod {
+    display: none;
+    padding: 0.4rem 0;
+    min-width: 232px;
+    max-width: none;
+    /* Sin overflow oculto: el panel se sale del cuadro a propósito */
+    overflow: visible;
+}
+
+.external-dropdown-menu.nav-prod.show {
+    display: block;
+}
+
+.nav-prod-todos {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    margin-bottom: 0.3rem;
+    border-bottom: 1px solid rgba(40, 116, 82, 0.12);
+    color: var(--external-primary);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s ease;
 }
 
-.external-dropdown-item.fw-semibold::after {
-    content: '→';
+.nav-prod-todos i {
     font-size: 0.85em;
     opacity: 0.65;
     transition: transform 0.15s ease;
-    flex-shrink: 0;
 }
 
-.external-dropdown-item.fw-semibold:hover,
-.external-dropdown-item.fw-semibold:focus {
-    background-color: var(--g-hover-verde);
+.nav-prod-todos:hover,
+.nav-prod-todos:focus {
+    background: var(--g-hover-verde);
     color: var(--external-primary);
-    padding-left: 1rem;
 }
 
-.external-dropdown-item.fw-semibold:hover::after,
-.external-dropdown-item.fw-semibold:focus::after {
-    transform: translateX(4px);
+.nav-prod-todos:hover i,
+.nav-prod-todos:focus i {
+    transform: translateX(3px);
 }
 
-.external-dropdown-item.fw-semibold.active {
-    background-color: rgba(40, 116, 82, 0.1);
+.nav-prod-todos.active {
+    background: rgba(40, 116, 82, 0.1);
+}
+
+.nav-prod-rama-wrap {
+    position: relative;
+}
+
+.nav-prod-rama {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 1rem;
+    border: 0;
+    background: transparent;
+    color: var(--external-secondary);
+    font-family: var(--font-display);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: default;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.nav-prod-rama i {
+    font-size: 0.75em;
+    opacity: 0.5;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+/* La rama apuntada se lee como seleccionada, no sólo como hover: es la que
+   está gobernando el panel de al lado. */
+.nav-prod-rama-wrap:hover .nav-prod-rama,
+.nav-prod-rama-wrap:focus-within .nav-prod-rama {
+    background: var(--g-hover-verde);
+    color: var(--external-primary);
+    box-shadow: inset 3px 0 0 var(--external-primary);
+}
+
+.nav-prod-rama-wrap:hover .nav-prod-rama i,
+.nav-prod-rama-wrap:focus-within .nav-prod-rama i {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+/* Marca de página actual, independiente de lo que se esté apuntando */
+.nav-prod-rama.active {
+    color: var(--external-primary);
+}
+
+/* Panel al costado. El -0.4rem cancela el padding vertical del menú para que
+   el panel arranque a la altura exacta de su rama. */
+.nav-prod-panel {
+    display: none;
+    position: absolute;
+    top: -0.4rem;
+    left: 100%;
+    width: 250px;
+    padding: 0.6rem 0;
+    background: var(--external-white);
+    border-top: 2px solid var(--external-primary);
+    border-radius: 0 0.5rem 0.5rem 0.5rem;
+    box-shadow: 0 8px 28px rgba(27, 45, 33, 0.14), 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.nav-prod-rama-wrap:hover > .nav-prod-panel,
+.nav-prod-rama-wrap:focus-within > .nav-prod-panel {
+    display: block;
+}
+
+.nav-prod-panel-titulo {
+    margin: 0 0 0.35rem;
+    padding: 0 1rem;
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--external-secondary-soft);
+}
+
+.nav-prod-vertodos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 1rem;
+    color: var(--external-primary);
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.nav-prod-vertodos i {
+    font-size: 0.8em;
+    opacity: 0.65;
+    transition: transform 0.15s ease;
+}
+
+.nav-prod-vertodos:hover,
+.nav-prod-vertodos:focus {
+    background: var(--g-hover-verde);
+    color: var(--external-primary);
+}
+
+.nav-prod-vertodos:hover i,
+.nav-prod-vertodos:focus i {
+    transform: translateX(3px);
+}
+
+.nav-prod-vertodos.active {
+    background: rgba(40, 116, 82, 0.1);
+}
+
+.nav-prod-cats {
+    list-style: none;
+    margin: 0.3rem 0 0;
+    padding: 0;
+    /* Una categoría de más no debe estirar el panel fuera de la pantalla */
+    max-height: 15rem;
+    overflow-y: auto;
+}
+
+.nav-prod-cat {
+    display: block;
+    padding: 0.42rem 1rem;
+    color: var(--external-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.15s ease, color 0.15s ease, padding-left 0.15s ease;
+}
+
+.nav-prod-cat:hover,
+.nav-prod-cat:focus {
+    background: var(--g-hover-verde);
+    color: var(--external-primary);
+    padding-left: 1.25rem;
+}
+
+.nav-prod-cat.active {
+    background: rgba(40, 116, 82, 0.08);
+    color: var(--external-primary);
+    font-weight: 600;
+}
+
+.nav-prod-vacio {
+    margin: 0;
+    padding: 0.45rem 1rem;
+    color: var(--external-secondary-soft);
+    font-size: 0.8rem;
+    font-style: italic;
 }
 
 .external-cart-wrapper {
@@ -917,74 +1112,106 @@ html {
     flex-shrink: 0;
 }
 
-.mobile-nav-section.open .toggle-chevron {
+/* Sólo el chevron propio de la sección: sin el `>` una sección abierta
+   también rotaría los de sus ramas anidadas, que pueden estar cerradas. */
+.mobile-nav-section.open > .mobile-nav-section-toggle > .toggle-chevron {
     transform: rotate(180deg);
 }
 
+/* El alto lo maneja layout.js sobre scrollHeight y lo deja en 'auto' al
+   terminar: con acordeones anidados un max-height fijo recorta la rama
+   interna al abrirse. */
 .mobile-nav-section-content {
     overflow: hidden;
-    max-height: 0;
-    transition: max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1), padding 0.25s ease;
-    padding: 0 0.25rem;
+    height: 0;
+    transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.mobile-nav-section.open .mobile-nav-section-content {
-    max-height: 350px;
-    padding: 0.4rem 0.25rem 0.75rem;
-}
+/* ── El árbol: Productos › Especial|Estándar › categorías ─────────────────
+   La jerarquía la dicen la sangría y una guía vertical por nivel, no cajas
+   ni bordes. Como .mobile-nav-sublista envuelve el contenido de cada nivel,
+   alcanza con ponerle la guía a ella: al anidarse, la sangría se acumula
+   sola y cada rama queda colgando de la línea de su padre.
 
-.mobile-nav-categories {
+   El peso tipográfico también baja un escalón por nivel —Productos 600,
+   la rama 600 más chica, la categoría 400— para que se lea de un vistazo
+   qué contiene a qué. */
+.mobile-nav-sublista {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.45rem;
-    padding-bottom: 0.6rem;
+    flex-direction: column;
+    margin-left: 0.5rem;
+    padding-left: 0.85rem;
+    border-left: 1px solid rgba(40, 116, 82, 0.16);
 }
 
-.mobile-nav-category-pill {
-    display: inline-block;
-    padding: 0.3rem 0.9rem;
-    background: transparent;
-    border: 1px solid rgba(40, 116, 82, 0.35);
-    border-radius: 100px;
-    color: var(--external-primary);
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    white-space: nowrap;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
+/* La rama no lleva marco propio: la línea del padre ya la agrupa */
+.mobile-nav-section--anidada {
+    border-bottom: 0;
 }
 
-/* Pastilla de contorno: se tiñe, no se rellena. Rellenarse de verde
-   era el hover de un botón sólido puesto sobre uno que no lo es. */
-.mobile-nav-category-pill:hover {
-    background: var(--g-hover-verde);
-    border-color: var(--external-primary);
+.mobile-nav-section--anidada > .mobile-nav-section-toggle {
+    padding: 0.6rem 0.25rem;
+    font-size: 0.9rem;
     color: var(--external-primary);
 }
 
-.mobile-nav-todos {
+/* "Ver todos": el destino más pedido de cada rama. Va en verde y con la
+   flecha, sin fondo ni caja — tres bloques teñidos apilados pesaban más
+   que todo lo que colgaba de ellos. */
+.mobile-nav-destacado {
     display: inline-flex;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.35rem;
+    align-self: flex-start;
+    min-height: 42px;
+    padding: 0.5rem 0.25rem;
     color: var(--external-primary);
-    font-size: 0.875rem;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
     font-weight: 700;
     text-decoration: none;
-    padding: 0.1rem 0.25rem 0 0.25rem;
-    transition: color 0.15s, gap 0.2s;
 }
 
-.mobile-nav-todos i {
-    font-size: 1.1em;
-    transition: transform 0.2s;
+.mobile-nav-destacado i {
+    font-size: 0.8em;
+    opacity: 0.6;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
-.mobile-nav-todos:hover {
+.mobile-nav-destacado:active {
     color: var(--external-primary-dark);
 }
 
-.mobile-nav-todos:hover i {
+.mobile-nav-destacado:active i {
     transform: translateX(3px);
+}
+
+/* Hojas del árbol. Sin borde por fila ni chevron: son el último nivel y no
+   llevan a ningún lado más profundo, así que la guía de la izquierda y el
+   espaciado alcanzan para agruparlas. El área táctil se sostiene con
+   min-height aunque la fila se vea liviana. */
+.mobile-nav-cat {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.45rem 0.25rem;
+    color: var(--external-secondary);
+    font-size: 0.92rem;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+.mobile-nav-cat:active {
+    color: var(--external-primary);
+}
+
+.mobile-nav-vacio {
+    margin: 0;
+    padding: 0.5rem 0.25rem;
+    color: var(--external-secondary-soft);
+    font-size: 0.85rem;
+    font-style: italic;
 }
 
 .mobile-drawer-footer {

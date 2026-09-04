@@ -1,6 +1,20 @@
 @extends('layouts.app-externo')
 
-@section('title', 'Todos los Productos - Aberturas Giacomazzi')
+{{-- Esta misma vista sirve al catálogo completo (indexTodos) y a la línea
+     singular (indexEspeciales, que es indexTodos() con el Tipo pre-armado
+     en "especial"): la única diferencia entre las dos es el renglón de
+     "$esLineaSingular", que explica qué es la línea cuando corresponde.
+     Todo lo demás —hero, breadcrumb, filtros (Tipo incluido), grid, sticky
+     bar— es literalmente el mismo código para las dos, así que no hay
+     forma de que se desalineen con el tiempo. --}}
+@php
+$esLineaSingular = $esLineaSingular ?? false;
+// Sólo lo pasa indexTodos() cuando se llama directo (no vía la entrada de
+// línea singular, que siempre lo manda): fallback por las dudas.
+$gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
+@endphp
+
+@section('title', $esLineaSingular ? 'Línea adapta - Aberturas Giacomazzi' : 'Todos los Productos - Aberturas Giacomazzi')
 
 @section('css')
 <link rel="stylesheet" href="{{ versioned_asset('css/categoria-index.css') }}">
@@ -23,7 +37,7 @@
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">
         <p class="g-hero-eyebrow">Aberturas Giacomazzi</p>
-        <h1 class="g-hero-title">Catálogo</h1>
+        <h1 class="g-hero-title">{{ $esLineaSingular ? 'Línea adapta' : 'Línea estándar' }}</h1>
     </div>
 </section>
 
@@ -37,10 +51,24 @@
                     <a href="{{ route('welcome') }}">Inicio</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">
-                    Todos los productos
+                    {{ $esLineaSingular ? 'Línea adapta' : 'Línea estándar' }}
                 </li>
             </ol>
         </nav>
+
+        {{-- Qué es la línea singular, en un renglón: la única diferencia de
+             contenido entre las dos líneas en toda esta vista. --}}
+        @if($esLineaSingular)
+        <div class="singular-linea-alert">
+            <span class="singular-linea-alert-icono"><i class="bi bi-stars"></i></span>
+            <p>
+                <strong>Línea adapta.</strong>
+                Productos que no se fabrican en serie ni tienen medidas fijas.
+                Los producimos por encargo y podemos ajustar dimensiones o
+                detalles según lo que requiera tu espacio.
+            </p>
+        </div>
+        @endif
 
         <div class="row g-4">
 
@@ -49,28 +77,34 @@
                 <button class="btn-filtros-mobile" id="filtros-mobile-btn" type="button">
                     <i class="bi bi-funnel"></i>
                     Filtrar
-                    @php $totalFiltros = collect($filtros)->flatten()->filter()->count() + count($categoriasFiltro); @endphp
+                    @php $totalFiltros = collect($filtros)->flatten()->filter()->count() + count($categoriasFiltro) + count($tipos); @endphp
                     @if($totalFiltros > 0)
                     <span class="filtros-badge-mobile">{{ $totalFiltros }}</span>
                     @endif
                 </button>
             </div>
 
-            {{-- Sidebar de filtros --}}
+            {{-- Sidebar de filtros: exactamente los mismos que en la línea
+                 estándar, Tipo incluido (acá puede venir pre-tildado en
+                 "Línea singular", pero el usuario lo puede cambiar como en
+                 cualquier otro filtro). --}}
             <div class="col-lg-3">
                 @include('UsoExterno.partials.filtros-categoria', [
-                'filtrosLimpiarUrl' => route('productos.todos'),
+                'filtrosLimpiarUrl' => $gridBaseUrl,
                 'todasCategorias' => $todasCategorias,
                 'categoriasFiltro' => $categoriasFiltro,
+                'tipos' => $tipos,
                 ])
             </div>
 
             {{-- Grid de productos --}}
             <div class="col-lg-9" id="productos-container">
                 @include('UsoExterno.partials.productos-grid', [
-                'gridBaseUrl' => route('productos.todos'),
+                'gridBaseUrl' => $gridBaseUrl,
                 'todasCategorias' => $todasCategorias,
                 'categoriasFiltro' => $categoriasFiltro,
+                'tipos' => $tipos,
+                'esLineaSingular' => $esLineaSingular,
                 ])
             </div>
 

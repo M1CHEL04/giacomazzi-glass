@@ -122,7 +122,10 @@ class CarritoController extends Controller
             $valorIds       = array_map('intval', $request->input('valor_ids', []));
             sort($valorIds);
 
-            $producto = Producto::select(['id', 'nombre', 'codigo', 'unidad_id'])
+            // estandar(): los productos a medida no se cotizan por carrito, se
+            // consultan por WhatsApp. Sin unidad no habría con qué cotizarlos.
+            $producto = Producto::estandar()
+                ->select(['id', 'nombre', 'codigo', 'unidad_id'])
                 ->with('unidad')
                 ->where('activo', true)
                 ->findOrFail($productoId);
@@ -184,6 +187,15 @@ class CarritoController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // No existe, está inactivo, o es un producto a medida: esos se
+            // consultan por WhatsApp y no tienen unidad con la que cotizar.
+            // Sin este caso caería en el catch de abajo y devolvería un 500,
+            // que no es lo que pasó.
+            return response()->json([
+                'ok'      => false,
+                'message' => 'El producto no está disponible para cotizar.',
+            ], 404);
         } catch (\Exception $e) {
             Log::error('CarritoController::agregar - Error al agregar producto al carrito', [
                 'producto_id' => $request->input('producto_id'),

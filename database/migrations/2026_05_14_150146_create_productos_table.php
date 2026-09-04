@@ -16,16 +16,21 @@ return new class extends Migration
         Schema::create('productos', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(Categoria::class)->index();
-            $table->foreignIdFor(UnidadMedida::class, 'unidad_id')->index();
+            // Nullable por los productos especiales: no se cotizan por carrito,
+            // así que no tienen unidad de cotización.
+            $table->foreignIdFor(UnidadMedida::class, 'unidad_id')->nullable()->index();
             $table->string('nombre');
             $table->string('descripcion');
             $table->text('descripcion_tecnica')->nullable();
             $table->string('codigo')->unique();
             $table->boolean('activo')->default(true)->index();
+            // Producto a medida: mismo catálogo, otro CRUD y otra ficha.
+            $table->boolean('es_especial')->default(false);
             $table->timestamps();
 
             // Índice compuesto para el filtro más frecuente: categoría + activo
             $table->index(['categoria_id', 'activo'], 'idx_productos_categoria_activo');
+            $table->index(['es_especial', 'activo'], 'idx_productos_especial_activo');
         });
     }
 

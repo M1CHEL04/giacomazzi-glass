@@ -29,6 +29,30 @@
         }
     });
 
+    // ── Ramas del menú de Productos (desktop) ─────────────────────────────────
+    // Mostrar y ocultar el panel lo hace el CSS con :hover y :focus-within, así
+    // que el menú anda sin JS. Lo único que falta es contarle a un lector de
+    // pantalla si el panel está desplegado, que es lo que el CSS no puede
+    // expresar.
+    document.querySelectorAll('[data-rama-wrap]').forEach(function (wrap) {
+        var boton = wrap.querySelector('.nav-prod-rama');
+        if (!boton) return;
+
+        function sincronizar(abierto) {
+            boton.setAttribute('aria-expanded', String(abierto));
+        }
+
+        wrap.addEventListener('mouseenter', function () { sincronizar(true); });
+        wrap.addEventListener('mouseleave', function () {
+            // Con el foco adentro el panel sigue abierto aunque salga el mouse.
+            if (!wrap.contains(document.activeElement)) sincronizar(false);
+        });
+        wrap.addEventListener('focusin',  function () { sincronizar(true); });
+        wrap.addEventListener('focusout', function (e) {
+            if (!wrap.contains(e.relatedTarget)) sincronizar(false);
+        });
+    });
+
     // ── Sombra del navbar pegado ──────────────────────────────────────────────
     // El header acompaña el scroll; la sombra aparece recién cuando hay
     // contenido pasando por debajo, para que se lea como capa y no como
@@ -82,14 +106,70 @@
         if (e.key === 'Escape') closeDrawer();
     });
 
-    // ── Acordeón de Productos en el drawer ────────────────────────────────────
-    var productsToggle  = document.getElementById('mobile-products-toggle');
-    var productsSection = document.getElementById('mobile-products-section');
+    // ── Acordeones del drawer ─────────────────────────────────────────────────
+    // Genérico y anidable: Productos contiene Especial y Estándar. La altura
+    // se anima sobre scrollHeight y al terminar queda en 'auto', que es lo que
+    // permite que abrir una rama empuje al padre en vez de quedar recortada.
 
-    if (productsToggle && productsSection) {
-        productsToggle.addEventListener('click', function () {
-            var isOpen = productsSection.classList.toggle('open');
-            productsToggle.setAttribute('aria-expanded', String(isOpen));
+    /**
+     * Cierra de golpe las ramas que cuelgan de una sección. Se llama recién
+     * cuando la sección padre terminó de plegarse, así que no hay nada a la
+     * vista que animar: sin transición no se ve el hueco que deja una rama al
+     * cerrarse dentro de otra que también se está cerrando.
+     */
+    function cerrarRamas(seccion) {
+        seccion.querySelectorAll('[data-acordeon].open').forEach(function (rama) {
+            var t = rama.querySelector(':scope > [data-acordeon-toggle]');
+            var p = rama.querySelector(':scope > [data-acordeon-panel]');
+            rama.classList.remove('open');
+            if (p) p.style.height = '0px';
+            if (t) t.setAttribute('aria-expanded', 'false');
         });
     }
+
+    document.querySelectorAll('[data-acordeon]').forEach(function (seccion) {
+        var toggle = seccion.querySelector(':scope > [data-acordeon-toggle]');
+        var panel  = seccion.querySelector(':scope > [data-acordeon-panel]');
+        if (!toggle || !panel) return;
+
+        panel.style.height = '0px';
+
+        function abrir() {
+            seccion.classList.add('open');
+            panel.style.height = panel.scrollHeight + 'px';
+            panel.addEventListener('transitionend', function alTerminar(e) {
+                if (e.propertyName !== 'height') return;
+                panel.style.height = 'auto';
+                panel.removeEventListener('transitionend', alTerminar);
+            });
+        }
+
+        function cerrar() {
+            // Del 'auto' no se puede animar: primero se fija el alto real.
+            panel.style.height = panel.scrollHeight + 'px';
+            requestAnimationFrame(function () {
+                seccion.classList.remove('open');
+                panel.style.height = '0px';
+                panel.addEventListener('transitionend', function alCerrar(e) {
+                    if (e.propertyName !== 'height') return;
+                    panel.removeEventListener('transitionend', alCerrar);
+                    // Si volvió a abrirse antes de que terminara de plegarse,
+                    // esto ya no corresponde.
+                    if (seccion.classList.contains('open')) return;
+                    // Plegar Productos pliega sus ramas: la próxima vez que se
+                    // abra, arranca desde el mismo estado que la primera.
+                    cerrarRamas(seccion);
+                });
+            });
+        }
+
+        toggle.addEventListener('click', function () {
+            var abierto = seccion.classList.contains('open');
+            if (abierto) cerrar(); else abrir();
+            toggle.setAttribute('aria-expanded', String(!abierto));
+
+            // El padre está en 'auto' mientras está abierto, así que absorbe
+            // el cambio solo; no hace falta recalcularlo.
+        });
+    });
 })();

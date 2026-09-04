@@ -47,30 +47,87 @@
                         <a class="nav-link external-menu-btn {{ request()->routeIs('welcome') ? 'active' : '' }}"
                             href="{{ route('welcome') }}">Inicio</a>
                     </li>
+                    {{-- Menú de Productos en dos niveles: arriba el catálogo
+                         completo, y debajo una rama por tipo. Al apuntar una
+                         rama, el panel derecho lista su "ver todos" más las
+                         categorías que hoy tienen producto activo de ese tipo
+                         (ver App\Services\MenuCategorias). --}}
                     <li class="nav-item dropdown">
                         <a class="nav-link external-menu-btn dropdown-toggle {{ request()->routeIs('productos.*') ? 'active' : '' }}"
                             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Productos
                         </a>
-                        <ul class="dropdown-menu external-dropdown-menu">
-                            @if(!empty($categoriasMenu))
-                            @foreach($categoriasMenu as $categoria)
-                            <li>
-                                <a class="dropdown-item external-dropdown-item {{ request()->routeIs('productos.categoria') && request()->route('id') == $categoria['id'] ? 'active' : '' }}"
-                                    href="{{ route('productos.categoria', $categoria['id']) }}">
-                                    {{ $categoria['nombre'] }}
-                                </a>
-                            </li>
+                        <div class="dropdown-menu external-dropdown-menu nav-prod" id="nav-prod-menu">
+
+                            <a class="nav-prod-todos {{ request()->routeIs('productos.todos') ? 'active' : '' }}"
+                                href="{{ route('productos.todos') }}">
+                                Ver todos los productos
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+
+                            @foreach ([
+                                'estandar' => [
+                                    'label'      => 'Línea estándar',
+                                    'titulo'     => 'Línea estándar',
+                                    'verTodos'   => route('productos.todos', ['tipos' => ['estandar']]),
+                                    'verLabel'   => 'Ver todos los estándar',
+                                    'categorias' => $menuEstandar,
+                                    'ruta'       => 'productos.categoria',
+                                    'activaRama' => request()->routeIs('productos.categoria', 'productos.show'),
+                                    'activaVer'  => false,
+                                ],
+                                'especial' => [
+                                    'label'      => 'Línea adapta',
+                                    'titulo'     => 'Línea adapta',
+                                    'verTodos'   => route('productos.especiales'),
+                                    'verLabel'   => 'Ver toda la línea adapta',
+                                    'categorias' => $menuEspeciales,
+                                    'ruta'       => 'productos.especial.categoria',
+                                    'activaRama' => request()->routeIs('productos.especiales', 'productos.especial.*'),
+                                    'activaVer'  => request()->routeIs('productos.especiales'),
+                                ],
+                            ] as $clave => $rama)
+                            {{-- Cada rama contiene su propio panel, posicionado
+                                 al costado. Así el despliegue es hover y
+                                 focus-within de CSS: sin rama apuntada no hay
+                                 panel, y sin JS el menú igual funciona. --}}
+                            <div class="nav-prod-rama-wrap" data-rama-wrap>
+                                <button type="button"
+                                    class="nav-prod-rama {{ $rama['activaRama'] ? 'active' : '' }}"
+                                    aria-haspopup="true" aria-expanded="false"
+                                    aria-controls="nav-prod-panel-{{ $clave }}">
+                                    <span>{{ $rama['label'] }}</span>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+
+                                <div class="nav-prod-panel" id="nav-prod-panel-{{ $clave }}">
+                                    <p class="nav-prod-panel-titulo">{{ $rama['titulo'] }}</p>
+
+                                    <a class="nav-prod-vertodos {{ $rama['activaVer'] ? 'active' : '' }}"
+                                        href="{{ $rama['verTodos'] }}">
+                                        {{ $rama['verLabel'] }}
+                                        <i class="bi bi-arrow-right"></i>
+                                    </a>
+
+                                    @if(!empty($rama['categorias']))
+                                    <ul class="nav-prod-cats">
+                                        @foreach($rama['categorias'] as $categoria)
+                                        <li>
+                                            <a class="nav-prod-cat {{ request()->routeIs($rama['ruta']) && request()->route('id') == $categoria['id'] ? 'active' : '' }}"
+                                                href="{{ route($rama['ruta'], $categoria['id']) }}">
+                                                {{ $categoria['nombre'] }}
+                                            </a>
+                                        </li>
+                                        @endforeach
+                                    </ul>
+                                    @else
+                                    <p class="nav-prod-vacio">Todavía no hay productos publicados.</p>
+                                    @endif
+                                </div>
+                            </div>
                             @endforeach
-                            <li><hr class="dropdown-divider"></li>
-                            @endif
-                            <li>
-                                <a class="dropdown-item external-dropdown-item fw-semibold {{ request()->routeIs('productos.todos') ? 'active' : '' }}"
-                                    href="{{ route('productos.todos') }}">
-                                    Ver todos los productos
-                                </a>
-                            </li>
-                        </ul>
+
+                        </div>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link external-menu-btn {{ request()->routeIs('nosotros') ? 'active' : '' }}"
@@ -129,27 +186,69 @@
             <nav class="mobile-drawer-nav" aria-label="Navegación principal">
                 <a href="{{ route('welcome') }}" class="mobile-nav-link">Inicio</a>
 
-                <div class="mobile-nav-section" id="mobile-products-section">
-                    <button class="mobile-nav-section-toggle" id="mobile-products-toggle"
+                {{-- Mismo árbol que en desktop, pero como acordeón anidado.
+                     Las categorías van en filas a lo ancho y no en pastillas:
+                     el nombre no se corta, la fila entera es el área táctil y
+                     la lista se recorre con el pulgar sin apuntar. --}}
+                <div class="mobile-nav-section" data-acordeon>
+                    <button class="mobile-nav-section-toggle" data-acordeon-toggle
                         aria-expanded="false" aria-controls="mobile-products-content">
                         Productos
                         <i class="bi bi-chevron-down toggle-chevron"></i>
                     </button>
-                    <div class="mobile-nav-section-content" id="mobile-products-content">
-                        @if(!empty($categoriasMenu))
-                        <div class="mobile-nav-categories">
-                            @foreach($categoriasMenu as $categoria)
-                            <a href="{{ route('productos.categoria', $categoria['id']) }}"
-                                class="mobile-nav-category-pill">
-                                {{ $categoria['nombre'] }}
+                    <div class="mobile-nav-section-content" id="mobile-products-content" data-acordeon-panel>
+                        <div class="mobile-nav-sublista">
+
+                            <a href="{{ route('productos.todos') }}" class="mobile-nav-destacado">
+                                Ver todos los productos
+                                <i class="bi bi-arrow-right"></i>
                             </a>
+
+                            @foreach ([
+                                'estandar' => [
+                                    'label'      => 'Línea estándar',
+                                    'verTodos'   => route('productos.todos', ['tipos' => ['estandar']]),
+                                    'verLabel'   => 'Ver todos los estándar',
+                                    'categorias' => $menuEstandar,
+                                    'ruta'       => 'productos.categoria',
+                                ],
+                                'especial' => [
+                                    'label'      => 'Línea adapta',
+                                    'verTodos'   => route('productos.especiales'),
+                                    'verLabel'   => 'Ver toda la línea adapta',
+                                    'categorias' => $menuEspeciales,
+                                    'ruta'       => 'productos.especial.categoria',
+                                ],
+                            ] as $clave => $rama)
+                            <div class="mobile-nav-section mobile-nav-section--anidada" data-acordeon>
+                                <button class="mobile-nav-section-toggle" data-acordeon-toggle
+                                    aria-expanded="false" aria-controls="mobile-rama-{{ $clave }}">
+                                    {{ $rama['label'] }}
+                                    <i class="bi bi-chevron-down toggle-chevron"></i>
+                                </button>
+                                <div class="mobile-nav-section-content" id="mobile-rama-{{ $clave }}" data-acordeon-panel>
+                                    <div class="mobile-nav-sublista">
+                                        <a href="{{ $rama['verTodos'] }}" class="mobile-nav-destacado">
+                                            {{ $rama['verLabel'] }}
+                                            <i class="bi bi-arrow-right"></i>
+                                        </a>
+                                        {{-- Sin chevron: son el último nivel del
+                                             árbol y la guía de la izquierda ya
+                                             las agrupa. --}}
+                                        @forelse($rama['categorias'] as $categoria)
+                                        <a href="{{ route($rama['ruta'], $categoria['id']) }}"
+                                            class="mobile-nav-cat">
+                                            {{ $categoria['nombre'] }}
+                                        </a>
+                                        @empty
+                                        <p class="mobile-nav-vacio">Todavía no hay productos publicados.</p>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </div>
                             @endforeach
+
                         </div>
-                        @endif
-                        <a href="{{ route('productos.todos') }}" class="mobile-nav-todos">
-                            Ver todos los productos
-                            <i class="bi bi-arrow-right-short"></i>
-                        </a>
                     </div>
                 </div>
 
@@ -216,7 +315,9 @@
 
     @include('layouts.partials.carrito')
 
-    @if(request()->routeIs('welcome', 'nosotros', 'productos.todos', 'productos.categoria'))
+    {{-- La ficha del producto a medida queda afuera a propósito: ya tiene su
+         propia barra fija de consulta y los dos botones se pisarían. --}}
+    @if(request()->routeIs('welcome', 'nosotros', 'productos.todos', 'productos.categoria', 'productos.especiales'))
         @include('layouts.partials.whatsapp-float')
     @endif
 
