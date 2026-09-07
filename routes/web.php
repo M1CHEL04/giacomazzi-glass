@@ -61,6 +61,7 @@ Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group
 
     // Productos
     Route::get('/productos',           [UsoInternoController::class, 'indexProductos'])->name('productos.index');
+    Route::get('/productos/catalogo-pdf', [UsoInternoController::class, 'catalogoPdfProductos'])->name('productos.catalogo-pdf');
     Route::get('/show-producto/{id}',  [UsoInternoController::class, 'showProducto'])->name('productos.show');
     Route::get('/create-producto',     [UsoInternoController::class, 'createProducto'])->name('productos.create');
     Route::get('/edit-producto/{id}',  [UsoInternoController::class, 'editProducto'])->name('productos.edit');

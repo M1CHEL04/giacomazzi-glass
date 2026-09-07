@@ -8,6 +8,7 @@ use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Models\ProductoEspecial;
 use App\Models\UnidadMedida;
+use App\Services\CatalogoPdfService;
 use App\Services\GestorImagenesProducto;
 use App\Services\MenuCategorias;
 use App\Services\SkuService;
@@ -22,6 +23,7 @@ class UsoInternoController extends Controller
     public function __construct(
         private SkuService $skuService,
         private GestorImagenesProducto $gestorImagenes,
+        private CatalogoPdfService $catalogoPdfService,
     ) {}
 
     public function estadisticas()
@@ -311,6 +313,18 @@ class UsoInternoController extends Controller
             }
 
             return redirect()->back()->with('error', 'Error al cargar los productos.');
+        }
+    }
+
+    public function catalogoPdfProductos()
+    {
+        try {
+            $pdf = $this->catalogoPdfService->generar();
+
+            return $pdf->stream('catalogo-productos-giacomazzi-' . now()->format('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            Log::error('Error al generar catálogo PDF: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al generar el catálogo PDF.');
         }
     }
 

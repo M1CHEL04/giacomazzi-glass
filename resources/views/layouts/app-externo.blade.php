@@ -47,11 +47,6 @@
                         <a class="nav-link external-menu-btn {{ request()->routeIs('welcome') ? 'active' : '' }}"
                             href="{{ route('welcome') }}">Inicio</a>
                     </li>
-                    {{-- Menú de Productos en dos niveles: arriba el catálogo
-                         completo, y debajo una rama por tipo. Al apuntar una
-                         rama, el panel derecho lista su "ver todos" más las
-                         categorías que hoy tienen producto activo de ese tipo
-                         (ver App\Services\MenuCategorias). --}}
                     <li class="nav-item dropdown">
                         <a class="nav-link external-menu-btn dropdown-toggle {{ request()->routeIs('productos.*') ? 'active' : '' }}"
                             href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -66,31 +61,27 @@
                             </a>
 
                             @foreach ([
-                                'estandar' => [
-                                    'label'      => 'Línea estándar',
-                                    'titulo'     => 'Línea estándar',
-                                    'verTodos'   => route('productos.todos', ['tipos' => ['estandar']]),
-                                    'verLabel'   => 'Ver todos los estándar',
-                                    'categorias' => $menuEstandar,
-                                    'ruta'       => 'productos.categoria',
-                                    'activaRama' => request()->routeIs('productos.categoria', 'productos.show'),
-                                    'activaVer'  => false,
-                                ],
-                                'especial' => [
-                                    'label'      => 'Línea adapta',
-                                    'titulo'     => 'Línea adapta',
-                                    'verTodos'   => route('productos.especiales'),
-                                    'verLabel'   => 'Ver toda la línea adapta',
-                                    'categorias' => $menuEspeciales,
-                                    'ruta'       => 'productos.especial.categoria',
-                                    'activaRama' => request()->routeIs('productos.especiales', 'productos.especial.*'),
-                                    'activaVer'  => request()->routeIs('productos.especiales'),
-                                ],
+                            'estandar' => [
+                            'label' => 'Línea estándar',
+                            'titulo' => 'Línea estándar',
+                            'verTodos' => route('productos.todos', ['tipos' => ['estandar']]),
+                            'verLabel' => 'Ver todos los estándar',
+                            'categorias' => $menuEstandar,
+                            'ruta' => 'productos.categoria',
+                            'activaRama' => request()->routeIs('productos.categoria', 'productos.show'),
+                            'activaVer' => false,
+                            ],
+                            'especial' => [
+                            'label' => 'Línea adapta',
+                            'titulo' => 'Línea adapta',
+                            'verTodos' => route('productos.especiales'),
+                            'verLabel' => 'Ver toda la línea adapta',
+                            'categorias' => $menuEspeciales,
+                            'ruta' => 'productos.especial.categoria',
+                            'activaRama' => request()->routeIs('productos.especiales', 'productos.especial.*'),
+                            'activaVer' => request()->routeIs('productos.especiales'),
+                            ],
                             ] as $clave => $rama)
-                            {{-- Cada rama contiene su propio panel, posicionado
-                                 al costado. Así el despliegue es hover y
-                                 focus-within de CSS: sin rama apuntada no hay
-                                 panel, y sin JS el menú igual funciona. --}}
                             <div class="nav-prod-rama-wrap" data-rama-wrap>
                                 <button type="button"
                                     class="nav-prod-rama {{ $rama['activaRama'] ? 'active' : '' }}"
@@ -205,20 +196,20 @@
                             </a>
 
                             @foreach ([
-                                'estandar' => [
-                                    'label'      => 'Línea estándar',
-                                    'verTodos'   => route('productos.todos', ['tipos' => ['estandar']]),
-                                    'verLabel'   => 'Ver todos los estándar',
-                                    'categorias' => $menuEstandar,
-                                    'ruta'       => 'productos.categoria',
-                                ],
-                                'especial' => [
-                                    'label'      => 'Línea adapta',
-                                    'verTodos'   => route('productos.especiales'),
-                                    'verLabel'   => 'Ver toda la línea adapta',
-                                    'categorias' => $menuEspeciales,
-                                    'ruta'       => 'productos.especial.categoria',
-                                ],
+                            'estandar' => [
+                            'label' => 'Línea estándar',
+                            'verTodos' => route('productos.todos', ['tipos' => ['estandar']]),
+                            'verLabel' => 'Ver toda la línea estándar',
+                            'categorias' => $menuEstandar,
+                            'ruta' => 'productos.categoria',
+                            ],
+                            'especial' => [
+                            'label' => 'Línea adapta',
+                            'verTodos' => route('productos.especiales'),
+                            'verLabel' => 'Ver toda la línea adapta',
+                            'categorias' => $menuEspeciales,
+                            'ruta' => 'productos.especial.categoria',
+                            ],
                             ] as $clave => $rama)
                             <div class="mobile-nav-section mobile-nav-section--anidada" data-acordeon>
                                 <button class="mobile-nav-section-toggle" data-acordeon-toggle
@@ -272,7 +263,7 @@
 
     <footer class="external-footer mt-auto">
         @php
-            $footerWa = whatsapp_numero();
+        $footerWa = whatsapp_numero();
         @endphp
         <div class="container external-footer-inner">
             <a href="{{ route('welcome') }}" class="external-footer-logo" aria-label="Aberturas Giacomazzi">
@@ -318,7 +309,7 @@
     {{-- La ficha del producto a medida queda afuera a propósito: ya tiene su
          propia barra fija de consulta y los dos botones se pisarían. --}}
     @if(request()->routeIs('welcome', 'nosotros', 'productos.todos', 'productos.categoria', 'productos.especiales'))
-        @include('layouts.partials.whatsapp-float')
+    @include('layouts.partials.whatsapp-float')
     @endif
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -330,7 +321,9 @@
 
     <script>
         // `cantidad` es la cantidad de líneas del carrito (ver CarritoController::totalLineas).
-        window.__carritoInit = {!! json_encode(['cantidad' => count(session('carrito', [])), 'carrito' => array_values(session('carrito', []))]) !!};
+        window.__carritoInit = {
+            !!json_encode(['cantidad' => count(session('carrito', [])), 'carrito' => array_values(session('carrito', []))]) !!
+        };
     </script>
     <script src="{{ versioned_asset('js/carrito.js') }}"></script>
 
