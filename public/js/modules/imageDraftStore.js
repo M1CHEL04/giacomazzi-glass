@@ -24,6 +24,9 @@ function abrirDb() {
         req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME);
         req.onsuccess = () => resolve(req.result);
         req.onerror = () => reject(req.error);
+        // Sin esto, una conexión vieja abierta en otra pestaña deja este
+        // open() pendiente para siempre: ni resuelve ni rechaza.
+        req.onblocked = () => reject(new Error('IndexedDB bloqueada por otra pestaña'));
     });
 }
 

@@ -82,12 +82,12 @@
                     <a href="{{route('uso-interno.productos.index')}}"
                         class="internal-sidebar-link {{ request()->routeIs('uso-interno.productos.*') ? 'active' : '' }}">
                         <x-heroicon-o-cube />
-                        <span>Productos</span>
+                        <span>Línea estandar</span>
                     </a>
                     <a href="{{ route('uso-interno.especiales.index') }}"
                         class="internal-sidebar-link {{ request()->routeIs('uso-interno.especiales.*') ? 'active' : '' }}">
                         <x-heroicon-o-sparkles />
-                        <span>Productos especiales</span>
+                        <span>Línea adapta</span>
                     </a>
                     <a href="{{ route('uso-interno.categorias.index') }}"
                         class="internal-sidebar-link {{ request()->routeIs('categorias.*') ? 'active' : '' }}">

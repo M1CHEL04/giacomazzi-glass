@@ -40,15 +40,34 @@ export function initImageDraftPersistence({ form, cfg, gallery, tecnicas }) {
     // El submit real se pospone hasta que termina de guardar: si se dejara
     // seguir de largo, la navegación puede cortar la escritura a IndexedDB
     // a mitad de camino y el borrador quedaría vacío o corrupto.
+    //
+    // Sin imágenes no hay nada que preservar, así que ni se toca IndexedDB:
+    // eso evita por completo que un submit de solo texto dependa de que
+    // IndexedDB responda (si queda bloqueada por otra pestaña, el submit
+    // no debe pagar ese costo).
     let reenviando = false;
     form.addEventListener('submit', function (e) {
         if (reenviando) return;
+
+        const archivosGaleria  = gallery ? gallery.collectFiles() : [];
+        const archivosTecnicas = tecnicas ? tecnicas.collectFiles() : [];
+        if (!archivosGaleria.length && !archivosTecnicas.length) return;
+
         e.preventDefault();
 
-        Promise.all([
-            guardarDraft(keyGaleria, gallery ? gallery.collectFiles() : []),
-            guardarDraft(keyTecnicas, tecnicas ? tecnicas.collectFiles() : []),
-        ]).catch(() => {}).finally(() => {
+        // Resguardo: si IndexedDB no contesta ni por onsuccess/onerror ni
+        // por el onblocked de abrirDb(), no vale la pena colgar el submit
+        // esperando (el usuario pierde a lo sumo el redraft de imágenes,
+        // no el envío del formulario).
+        const conTimeout = (promesa, ms) => Promise.race([
+            promesa,
+            new Promise(resolve => setTimeout(resolve, ms)),
+        ]);
+
+        conTimeout(Promise.all([
+            guardarDraft(keyGaleria, archivosGaleria),
+            guardarDraft(keyTecnicas, archivosTecnicas),
+        ]), 800).catch(() => {}).finally(() => {
             reenviando = true;
             form.requestSubmit();
         });

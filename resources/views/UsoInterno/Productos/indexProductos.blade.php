@@ -1,7 +1,7 @@
 @extends('layouts.app-interno')
-@section('title', 'Indice de productos - Panel interno - Aberturas Giacomazzi')
-@section('page-title', 'Productos')
-@section('subhead', 'Lista de productos registrados en el sistema')
+@section('title', 'Indice de productos estandar - Panel interno - Aberturas Giacomazzi')
+@section('page-title', 'Línea estandar')
+@section('subhead', 'Lista de productos estandar registrados en el sistema')
 @section('styles')
 
 @endsection

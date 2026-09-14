@@ -1,6 +1,6 @@
 @extends('layouts.app-interno')
-@section('title', 'Indice de productos especiales - Panel interno - Aberturas Giacomazzi')
-@section('page-title', 'Productos especiales')
+@section('title', 'Indice de productos adapta - Panel interno - Aberturas Giacomazzi')
+@section('page-title', 'Línea adapta')
 @section('subhead', 'Productos a medida: se consultan por WhatsApp, no se cotizan por carrito')
 
 @section('content')
@@ -124,8 +124,8 @@
 </div>
 
 @include('UsoInterno.Productos.modals.estadoProducto', [
-    'rutaActivar'    => route('uso-interno.especiales.activar'),
-    'rutaDesactivar' => route('uso-interno.especiales.desactivar'),
+'rutaActivar' => route('uso-interno.especiales.activar'),
+'rutaDesactivar' => route('uso-interno.especiales.desactivar'),
 ])
 @endsection
 
