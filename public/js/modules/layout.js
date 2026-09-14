@@ -132,7 +132,17 @@
         var panel  = seccion.querySelector(':scope > [data-acordeon-panel]');
         if (!toggle || !panel) return;
 
-        panel.style.height = '0px';
+        // Una sección puede venir abierta del marcado (clase .open): así el
+        // conector de Inicio muestra la primera línea desplegada y enseña el
+        // gesto sin pedir un toque. Arranca en 'auto' —el mismo valor en el
+        // que queda después de abrirla a mano—, así que no se recorta si el
+        // contenido cambia de alto antes del primer clic.
+        if (seccion.classList.contains('open')) {
+            panel.style.height = 'auto';
+            toggle.setAttribute('aria-expanded', 'true');
+        } else {
+            panel.style.height = '0px';
+        }
 
         function abrir() {
             seccion.classList.add('open');

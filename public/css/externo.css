@@ -13,6 +13,25 @@
     --g-carbon: #23262a;
     --g-vidrio: #f6f8f9;
 
+    /* Escalones claros del verde de marca: es el mismo #287452 diluido
+       sobre blanco (≈6% y ≈12%), no colores nuevos. Existen para que una
+       sección se lea teñida y no pálida sin salir de la paleta ni pedir
+       otro gris. Misma lógica que la escala de hover: cada color se mueve
+       dentro de la suya.
+         --g-verde-wash   banda clara, apenas insinuada
+         --g-verde-tinte  banda clara marcada, un escalón más */
+    --g-verde-wash: #eef4f1;
+    --g-verde-tinte: #e1ece6;
+
+    /* Trama del plano de taller. La firma de la marca es la cota, y esto
+       es su fondo: la grilla milimetrada. Se aplica con .g-plano (o
+       repitiendo estas dos variables en un ::before) y siempre con una
+       máscara que la desvanece — una grilla pareja de borde a borde se
+       lee como papel cuadriculado, no como plano. */
+    --g-plano-linea: rgba(40, 116, 82, 0.07);
+    --g-plano-linea-light: rgba(255, 255, 255, 0.07);
+    --g-plano-paso: 32px;
+
     /* Archivo y Asap: dos familias de Omnibus-Type (Buenos Aires).
        Archivo titula y etiqueta; Asap sostiene el texto corrido. */
     --font-display: 'Archivo', 'Segoe UI', Tahoma, sans-serif;
@@ -475,6 +494,45 @@ html {
     flex-shrink: 0;
 }
 
+/* El mismo link sobre fondo oscuro o verde. Baja un escalón dentro de la
+   escala neutra —blanco → --external-light—, igual que .g-btn--solid: el
+   verde de marca no se lee sobre el verde de marca. */
+.g-link--light,
+.home-link--light {
+    color: var(--external-white);
+}
+
+.g-link--light:hover,
+.g-link--light:focus,
+.home-link--light:hover,
+.home-link--light:focus {
+    color: var(--external-light);
+}
+
+/* ── Trama de plano ───────────────────────────────────────────────────
+   Grilla milimetrada de fondo. Va sobre un ::before propio y no sobre el
+   background del elemento para poder enmascararla sin tocar su color.
+   Quien la usa pone `position: relative` y la máscara: la dirección del
+   desvanecido depende de dónde esté el peso de la sección. */
+.g-plano::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+        linear-gradient(var(--g-plano-linea) 1px, transparent 1px),
+        linear-gradient(90deg, var(--g-plano-linea) 1px, transparent 1px);
+    background-size: var(--g-plano-paso) var(--g-plano-paso);
+}
+
+/* Sobre fondo oscuro la trama se dibuja en blanco, no en verde */
+.g-plano--light::before {
+    background-image:
+        linear-gradient(var(--g-plano-linea-light) 1px, transparent 1px),
+        linear-gradient(90deg, var(--g-plano-linea-light) 1px, transparent 1px);
+}
+
 /* Foco visible y consistente en todo lo accionable */
 .g-btn:focus-visible,
 .g-link:focus-visible,
@@ -496,6 +554,40 @@ html {
     .g-link,
     .home-btn,
     .home-link {
+        transition: none;
+    }
+}
+
+/* ── Aparición al entrar en pantalla ──────────────────────────────────
+   Ver public/js/modules/reveal.js. Todo cuelga de .reveal-on sobre <html>:
+   sin esa clase estas reglas no existen, así que el contenido nunca queda
+   invisible por un JS que no cargó. Un solo gesto —subir 16px y aparecer—
+   y siempre corto: esto acompaña la lectura, no la interrumpe. */
+.reveal-on [data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+}
+
+.reveal-on [data-reveal].is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.55s ease,
+                transform 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Escalonado de hermanos. Cuatro pasos y no más: pasados los ~0.3s de
+   demora el último de la fila llega tarde a su propia sección. */
+.reveal-on [data-reveal-delay="1"].is-in { transition-delay: 0.08s; }
+.reveal-on [data-reveal-delay="2"].is-in { transition-delay: 0.16s; }
+.reveal-on [data-reveal-delay="3"].is-in { transition-delay: 0.24s; }
+.reveal-on [data-reveal-delay="4"].is-in { transition-delay: 0.32s; }
+
+/* Red de seguridad: el inline del <head> ya no agrega .reveal-on con
+   reduced-motion, pero si la clase llegara igual, esto la desarma. */
+@media (prefers-reduced-motion: reduce) {
+    .reveal-on [data-reveal] {
+        opacity: 1;
+        transform: none;
         transition: none;
     }
 }

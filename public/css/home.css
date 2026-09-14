@@ -3,36 +3,64 @@
    Depende de los tokens definidos en externo.css (:root)
 
    Mobile-first: la base es el teléfono y los @media suman desde ahí.
-   (Antes era al revés, con max-width, y el caso más usado quedaba
-   armado a fuerza de excepciones.)
 
    El orden de la página es el mensaje:
-     hero → catálogo estándar → fabricación a medida → nosotros
+     hero → nosotros → conector → catálogo estándar → línea adapta →
+     proyectos a medida
 
-   Primero se recorre lo que ya está resuelto y se cotiza solo; recién
-   después aparece el proyecto desde cero, que es cuando el visitante
-   ya sabe si algo del catálogo le sirve. Ningún camino le pide elegir
-   antes de tener con qué elegir, y "a medida" no queda en media
-   tarjeta: se lleva una franja entera.
+   Primero quiénes somos y, en un renglón cada una, las tres líneas
+   (conector). Después el recorrido: lo ya resuelto que se cotiza solo,
+   lo que se ajusta por encargo y, por último, el proyecto desde cero.
+   Ningún camino le pide elegir antes de tener con qué elegir, y "a
+   medida" no queda en media tarjeta: cierra con la franja entera.
 
-   Firma visual: la línea de cota del plano de taller (.home-cota).
-   Aparece en tres lugares —hero, catálogo y a medida— y en ninguno
-   más: acá se mide en milímetros, así que la cota dice algo, no
-   decora.
+   ── El ritmo de bandas ────────────────────────────────────────────
+   La página alterna claro y oscuro, y ninguna banda es blanca por
+   descarte. De arriba a abajo:
+
+     hero       foto oscura
+     nosotros   VERDE lleno         ← el golpe de color de la marca
+     conector   verde al 6%         ← baja el volumen, no lo apaga
+     catálogo   blanco              ← única banda blanca, ver abajo
+     adapta     verde profundo      ← rima con nosotros, más oscuro
+     medida     carbón + verde      ← cierra pesado
+
+   Adapta y medida son las dos bandas oscuras seguidas, así que medida
+   entra con el mismo filete verde de 5px que abre el catálogo: sin él
+   las dos se leían como una sola franja larga.
+
+   El catálogo es la excepción a propósito: las fotos de las categorías
+   son el contenido de esa sección y cualquier tinte de fondo les
+   compite. Es blanco por una razón, no por ser el default.
+
+   ── Las texturas ──────────────────────────────────────────────────
+   La firma de la marca es la cota del plano de taller (.g-cota) y su
+   fondo es la grilla milimetrada (.g-plano, en externo.css). Aparece
+   en nosotros, en el conector y en el panel de adapta, siempre
+   enmascarada: una grilla pareja de borde a borde se lee como papel
+   cuadriculado. Acá se mide en milímetros, así que la trama dice algo.
    ===================================================================== */
 
 /* ── Primitivas ────────────────────────────────────────────────────── */
-/* .home-cota, .home-eyebrow, .home-title, .home-btn y .home-link se
-   mudaron a externo.css: ahora también las usa Nosotros y tener dos
-   copias garantizaba que se separaran. Allá viven con doble nombre
-   (.g-* nuevo, .home-* alias), así que este archivo no cambió nada. */
+/* .home-cota, .home-eyebrow, .home-title, .home-btn, .home-link y la
+   aparición al scrollear ([data-reveal]) viven en externo.css: también
+   las usa Nosotros y tener dos copias garantizaba que se separaran.
+   Allá tienen doble nombre (.g-* nuevo, .home-* alias). */
 
 /* Foco de los controles propios de esta página */
 .home-rail-arrow:focus-visible,
 .home-cat:focus-visible,
+.home-linea:focus-visible,
+.home-indice-row:focus-visible,
 .rail-dot:focus-visible {
     outline: 2px solid var(--external-primary);
     outline-offset: 3px;
+}
+
+/* Sobre la franja verde el verde no se ve: el foco pasa a blanco */
+.home-indice-row:focus-visible {
+    outline-color: var(--external-white);
+    outline-offset: -2px;
 }
 
 /* ── HERO ──────────────────────────────────────────────────────────── */
@@ -42,11 +70,7 @@
     align-items: flex-end;
     /* En teléfono el hero no se lleva la pantalla entera: a 82svh el
        catálogo quedaba tan abajo que la primera pantalla era sólo foto.
-       Con 68svh la banda verde del catálogo ya asoma sin scrollear.
-       El recorte vertical que sirve el <picture> en mobile es 3:4, así
-       que acá el alto ya no le come ancho a la foto — cuando la caja
-       era alta y la foto apaisada, cover recortaba a los costados y por
-       eso hubo que bajarla en su momento.
+       Con 68svh la banda verde de Nosotros ya asoma sin scrollear.
        El piso de 400px protege pantallas muy cortas: es lo que mide el
        contenido del hero, así que por debajo de eso manda el texto. */
     min-height: max(400px, 68svh);
@@ -80,7 +104,11 @@
     position: relative;
     z-index: 2;
     padding-top: 3.5rem;
-    padding-bottom: 2.75rem;
+    /* El fondo del hero ya no es aire: abajo vive la señal de scroll, así
+       que el texto se corre para arriba lo que ella ocupa (~90px). En
+       teléfono el hero no cambia de alto por esto: manda el min-height y
+       el contenido sobra, así que lo único que se mueve es el bloque. */
+    padding-bottom: 4.25rem;
 }
 
 .home-hero-title {
@@ -108,20 +136,533 @@
     margin: 0 0 1.75rem;
 }
 
-/* Acciones: el catálogo va primero y sólido. No porque valga más,
-   sino porque es por donde se empieza a mirar.
-   En fila y del ancho de su texto: apilados a todo lo ancho pesaban
-   más que el título y el hero se leía como una pantalla de botones.
-   Si no entran (pantallas muy angostas), wrap los apila igual. */
-.home-hero-actions {
-    display: flex;
-    flex-flow: row wrap;
+/* ── Señal de scroll del hero ──────────────────────────────────────────
+   Al pie del hero: rótulo y, debajo, una línea vertical corta por la que
+   baja un destello en loop. El movimiento va en la dirección en la que
+   queremos que vaya el dedo — no un ratón dibujado ni una flecha que
+   rebota, que es lo que hace todo el mundo y no dice hacia dónde.
+
+   La línea se desvanece hacia abajo (mask): termina en el borde del hero
+   y apunta a lo que sigue en vez de cerrarse sobre sí misma.
+
+   Desaparece apenas se scrollea: ya cumplió, y quedarse encima del hero
+   mientras se lee el resto es ruido. El disparador es .is-scrolled, la
+   clase que layout.js ya le pone al header (scrollY > 4) para la sombra
+   del navbar; header y main son hermanos, así que alcanza con el
+   selector — no hay JS nuevo para esto. */
+.home-hero-cue-wrap {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 1.15rem;
+    z-index: 3;
+    /* Sólo el link recibe el toque: el wrap ocupa todo el ancho del hero
+       y el .container de adentro es el que alinea. */
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease, visibility 0s;
+}
+
+.home-hero-cue {
+    pointer-events: auto;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.55rem;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.72);
+    transition: color 0.2s ease;
+}
+
+.home-hero-cue:hover,
+.home-hero-cue:focus-visible {
+    color: var(--external-white);
+}
+
+.home-hero-cue:focus-visible {
+    outline: 2px solid var(--external-white);
+    outline-offset: 6px;
+    border-radius: 2px;
+}
+
+.home-hero-cue-label {
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.home-hero-cue-track {
+    position: relative;
+    display: block;
+    width: 2px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 55%, transparent 100%);
+}
+
+/* El destello: una porción de la línea, con degradé para que tenga
+   cabeza y cola, bajando de punta a punta. */
+.home-hero-cue-beam {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 45%;
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0),
+            var(--external-white));
+    animation: home-cue-beam 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes home-cue-beam {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    20% {
+        opacity: 1;
+    }
+
+    70% {
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(222%);
+        opacity: 0;
+    }
+}
+
+/* Apagado al scrollear. La visibilidad cambia recién al terminar el
+   fundido (transition-delay), así que durante la salida se ve, y una vez
+   afuera no queda un link invisible en el orden de tabulación. El
+   destello se pausa: nada animándose en una capa que no se ve. */
+.external-header.is-scrolled ~ .external-main .home-hero-cue-wrap {
+    opacity: 0;
+    transform: translateY(10px);
+    visibility: hidden;
+    transition-delay: 0s, 0s, 0.4s;
+}
+
+.external-header.is-scrolled ~ .external-main .home-hero-cue-beam {
+    animation-play-state: paused;
+}
+
+/* Los anclajes de esta página —la señal del hero y la tercera tarjeta del
+   conector, que va a #proyectos— se recorren, no saltan. Va en home.css y
+   no en externo.css a propósito: es la única página con anclajes largos y
+   así no le cambia el comportamiento a las demás. */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Con reduced-motion la señal se queda, pero quieta: el rótulo y la línea
+   siguen diciendo que abajo hay más, sin nada que se mueva. */
+@media (prefers-reduced-motion: reduce) {
+    .home-hero-cue-wrap {
+        transition: none;
+    }
+
+    .home-hero-cue-track {
+        background: rgba(255, 255, 255, 0.42);
+    }
+
+    .home-hero-cue-beam {
+        display: none;
+    }
+}
+
+/* ── NOSOTROS (mini) ───────────────────────────────────────────────── */
+/* La banda verde de la marca, apenas termina el hero. Antes era blanca y
+   cerraba la página; ahora abre, y abrir en blanco después de una foto
+   oscura era empezar en voz baja.
+
+   En escritorio va a dos columnas: el párrafo solo, centrado y angosto,
+   dejaba media franja vacía a cada lado. La columna derecha no agrega
+   información — desarma la misma frase en materiales, atributos y
+   alcance— así que si se cae a una columna en mobile no se pierde nada. */
+.home-nosotros {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg,
+            var(--external-primary-dark) 0%,
+            var(--external-primary) 100%);
+    color: var(--external-white);
+    padding: 3.5rem 0;
+}
+
+/* La trama se desvanece desde la esquina donde no hay texto */
+.home-nosotros.g-plano::before {
+    -webkit-mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(120% 100% at 100% 0%, #000 0%, transparent 72%);
+}
+
+.home-nosotros-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.home-nosotros-lead {
+    font-size: var(--fs-lead);
+    line-height: 1.55;
+    color: var(--external-white);
+    font-weight: 500;
+    max-width: 46ch;
+    margin: 0 0 0.75rem;
+}
+
+/* El isotipo de la franja. Sólo de escritorio (≥992px) para arriba:
+   apilado debajo del texto en teléfono estiraba la sección hacia abajo
+   sin sumar nada. Acá está oculto y el <img> es lazy, así que en mobile
+   ni se descarga — esconder con display:none una imagen que igual se
+   baja es pagar el ancho de banda por nada. */
+.home-nosotros-figure {
+    display: none;
+    margin: 0;
+}
+
+/* Placa clara: el logo es gris oscuro y verde, así que sobre la franja
+   verde no se leería. La trama del plano de fondo es lo que la salva de
+   ser un recuadro blanco con un logo adentro — la placa se lee como una
+   chapa de obra, que es de donde viene el gesto. */
+.home-nosotros-plate {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* 3:2, la proporción del propio archivo: con 4:3 la placa quedaba
+       alta y el logo flotando en el medio de un campo vacío. */
+    aspect-ratio: 3 / 2;
+    padding: 2.5rem;
+    border-radius: 4px;
+    background: var(--g-vidrio);
+}
+
+.home-nosotros-plate.g-plano::before {
+    -webkit-mask-image: radial-gradient(120% 120% at 0% 100%, #000 0%, transparent 72%);
+    mask-image: radial-gradient(120% 120% at 0% 100%, #000 0%, transparent 72%);
+}
+
+.home-nosotros-logo {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    max-width: 21rem;
+    height: auto;
+    /* contain y no cover: es un logo, recortarlo sería romperlo */
+    object-fit: contain;
+}
+
+/* ── CONECTOR: las tres líneas ─────────────────────────────────────── */
+/* Verde al 6%: después de la franja llena hay que bajar el volumen sin
+   irse al blanco, que llega recién en el catálogo. */
+.home-lineas {
+    position: relative;
+    overflow: hidden;
+    background: var(--g-verde-wash);
+    padding: 3.5rem 0;
+}
+
+.home-lineas.g-plano::before {
+    -webkit-mask-image: radial-gradient(100% 80% at 50% 0%, #000 0%, transparent 80%);
+    mask-image: radial-gradient(100% 80% at 50% 0%, #000 0%, transparent 80%);
+}
+
+.home-lineas-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.home-lineas-title {
+    margin-top: 0.15rem;
+}
+
+.home-lineas-intro {
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    max-width: 46ch;
+    margin: 1rem 0 0;
+}
+
+/* ── Acordeón (teléfono) ───────────────────────────────────────────────
+   Hasta 768px el conector es un acordeón y no tres tarjetas apiladas:
+   apiladas se llevaban casi pantalla y media de scroll para decir tres
+   cosas, y había que bajar hasta el final para saber cuántos caminos
+   había. Plegado, el recorrido entero entra de un vistazo.
+
+   Es una sola pieza continua con filetes entre filas, no tres cajas
+   sueltas: son tres partes de una misma respuesta. Y no se parece ni al
+   riel de tarjetas del catálogo (justo abajo) ni al índice de adapta —
+   cada franja de la página sigue teniendo su propia forma.
+
+   El mecanismo lo pone layout.js ([data-acordeon]); acá va cómo se ve y
+   la transición de alto que ese script anima. */
+.home-lineas-acordeon {
+    /* La sangría del panel arranca donde arranca el nombre, así que el
+       número y su separación se miden una sola vez y las usan las dos. */
+    --lin-pad: 1.1rem;
+    --lin-num: 1.6rem;
+    --lin-gap: 0.85rem;
+
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    background: var(--external-white);
+    border: 1px solid rgba(40, 116, 82, 0.12);
+    border-radius: 4px;
+    /* Recorta los paneles plegados y las esquinas de la primera fila */
+    overflow: hidden;
+    /* El mismo filete verde de la tarjeta, ahora para las tres juntas */
+    box-shadow: inset 0 3px 0 var(--external-primary);
+}
+
+.home-lin+.home-lin {
+    border-top: 1px solid rgba(40, 116, 82, 0.12);
+}
+
+/* La fila abierta se tiñe apenas: con tres renglones iguales hace falta
+   algo que diga cuál es el que estás leyendo. */
+.home-lin.open {
+    background: rgba(40, 116, 82, 0.04);
+}
+
+.home-lin-head {
+    display: flex;
+    align-items: center;
+    gap: var(--lin-gap);
+    width: 100%;
+    padding: 0.95rem var(--lin-pad);
+    background: none;
+    border: 0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.home-lin-head:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: -3px;
+}
+
+.home-lin-num {
+    flex-shrink: 0;
+    width: var(--lin-num);
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--external-primary);
+}
+
+.home-lin-titles {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.home-lin-name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--external-secondary);
+}
+
+/* Lo que la fila dice estando cerrada. Al abrirla se va: abajo está el
+   texto completo y el resumen pasa a ser una repetición.
+
+   No alcanza con apagarlo —invisible seguía ocupando su renglón y dejaba
+   un hueco entre el nombre y el texto—, así que también se pliega. El
+   max-height es el tope de dos renglones: de 'auto' no se puede animar y
+   el resumen nunca pasa de ahí. */
+.home-lin-resumen {
+    display: block;
+    margin-top: 0.15rem;
+    max-height: 2.5rem;
+    overflow: hidden;
+    font-size: var(--fs-small);
+    line-height: 1.35;
+    color: rgba(63, 63, 63, 0.72);
+    transition: opacity 0.2s ease, max-height 0.3s ease, margin-top 0.3s ease;
+}
+
+.home-lin.open .home-lin-resumen {
+    opacity: 0;
+    max-height: 0;
+    margin-top: 0;
+}
+
+/* La flecha va sola, sin pastilla: el área que se toca es el renglón
+   entero, así que el círculo no agrandaba el blanco —sólo dibujaba un
+   botón donde no hay uno. Lo que dice que la fila está abierta es el
+   giro. */
+.home-lin-chevron {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--external-primary);
+    transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.home-lin-chevron svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    stroke-width: 2;
+}
+
+.home-lin.open .home-lin-chevron {
+    transform: rotate(180deg);
+}
+
+/* El alto lo maneja layout.js sobre scrollHeight y lo deja en 'auto' al
+   terminar; acá va sólo la transición que anima ese cambio y el overflow
+   que recorta el contenido mientras el alto es menor al real. */
+.home-lin-panel {
+    height: 0;
+    overflow: hidden;
+    transition: height 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.home-lin-panel-in {
+    /* Alineado con el nombre, no con el número: el texto es la
+       continuación de ese renglón. */
+    padding: 0 var(--lin-pad) 1.15rem
+        calc(var(--lin-pad) + var(--lin-num) + var(--lin-gap));
+}
+
+.home-lin-text {
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    margin: 0;
+}
+
+.home-lin-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.9rem;
+    color: var(--external-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+}
+
+.home-lin-go svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+}
+
+.home-lin-go:focus-visible {
+    outline: 2px solid var(--external-primary);
+    outline-offset: 3px;
+}
+
+/* ── Tarjetas (768px para arriba) ──────────────────────────────────────
+   Un renglón por línea, y cada tarjeta es el link a su destino: las dos
+   primeras al índice de su línea, la tercera al ancla de la franja de
+   proyectos. Es el guion hablado del recorrido que viene abajo, con el
+   atajo puesto donde se lo nombra.
+
+   En teléfono no se muestran —manda el acordeón de arriba— y el display
+   real se lo da el @media de 768px. */
+.home-lineas-list {
+    display: none;
+    list-style: none;
+    margin: 2.25rem 0 0;
+    padding: 0;
+    gap: 1rem;
+}
+
+.home-linea {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.5rem 1.35rem 1.4rem;
+    border-radius: 4px;
+    background: var(--external-white);
+    border: 1px solid rgba(40, 116, 82, 0.12);
+    /* El filete verde arriba es el mismo recurso que separa las bandas,
+       en chico: dice "este bloque es uno de tres". */
+    box-shadow: inset 0 3px 0 var(--external-primary);
+    text-decoration: none;
+    transition: transform 0.25s ease, box-shadow 0.25s ease,
+                border-color 0.25s ease;
+}
+
+.home-linea-num {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    color: var(--external-primary);
+    margin-bottom: 0.55rem;
+}
+
+.home-linea-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--external-secondary);
+    margin: 0 0 0.35rem;
+}
+
+.home-linea-text {
+    /* Empuja el pie hacia abajo: con tres textos de largo distinto, los
+       renglones de acción quedan igual alineados en las tres tarjetas. */
+    flex: 1 1 auto;
+    font-size: var(--fs-small);
+    line-height: 1.6;
+    color: var(--external-secondary);
+    max-width: 54ch;
+    margin: 0;
+}
+
+/* El pie es la señal de que la tarjeta se toca. Va separado por una
+   línea y ocupa el ancho completo: un link suelto al final del párrafo
+   se leía como parte del texto. */
+.home-linea-go {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(40, 116, 82, 0.16);
+    color: var(--external-primary);
+    font-family: var(--font-display);
+    font-size: var(--fs-small);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.home-linea-go svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
 }
 
 /* ── CATÁLOGO ESTÁNDAR ─────────────────────────────────────────────── */
+/* La única banda blanca, y por una razón: las fotos de las categorías
+   son el contenido acá y un fondo teñido les compite. */
 .home-catalogo {
-    background: var(--g-vidrio);
+    background: var(--external-white);
     padding: 3.5rem 0;
     border-top: 5px solid var(--external-primary);
 }
@@ -173,7 +714,7 @@
     display: block;
     position: relative;
     height: 100%;
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
     text-decoration: none;
     border-bottom: 3px solid var(--external-primary);
@@ -320,13 +861,310 @@
     width: 100%;
 }
 
-/* ── A MEDIDA ──────────────────────────────────────────────────────── */
-/* Franja oscura y entera. Llega después del catálogo, pero no llega
-   más chica: es el otro negocio de la fábrica, no un plan B. */
+/* ── LÍNEA ADAPTA ──────────────────────────────────────────────────── */
+/* El verde es la franja entera, no un recuadro adentro de una franja: un
+   panel flotando dejaba un marco de color alrededor que no decía nada y
+   le sacaba ancho al contenido.
+
+   Las categorías van como índice y no como riel de fotos ni como
+   pastillas. La versión con tarjetas repetía el catálogo justo debajo
+   del catálogo; la de pastillas era una lista de botones sin jerarquía.
+   Un índice —número, nombre en tipografía de título, flecha— es lo que
+   realmente es esto: entradas a un listado. Y es lo más distinto que
+   puede ser del riel de arriba sin dejar de ser navegable. */
+.home-adapta {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(150deg,
+            var(--external-primary-dark) 0%,
+            var(--g-carbon) 100%);
+    color: var(--external-white);
+    padding: 3.5rem 0;
+}
+
+.home-adapta.g-plano::before {
+    -webkit-mask-image: radial-gradient(90% 90% at 100% 0%, #000 0%, transparent 70%);
+    mask-image: radial-gradient(90% 90% at 100% 0%, #000 0%, transparent 70%);
+}
+
+/* El resplandor de la esquina es la estrella de la línea adapta hecha
+   luz: mismo lugar donde el catálogo pone el ícono, sin repetirlo. */
+.home-adapta::after {
+    content: '';
+    position: absolute;
+    top: -18%;
+    right: -8%;
+    width: 26rem;
+    height: 26rem;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(circle,
+            rgba(138, 185, 165, 0.24) 0%,
+            transparent 62%);
+}
+
+.home-adapta-inner {
+    position: relative;
+    z-index: 1;
+}
+
+.home-adapta-head .home-eyebrow .bi {
+    font-size: 0.95rem;
+    line-height: 1;
+}
+
+.home-adapta-text {
+    font-size: var(--fs-body);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 52ch;
+    margin: 1rem 0 0;
+}
+
+/* El índice: una caja de alto fijo con las categorías adentro.
+
+   Antes se cortaba en seis y avisaba "4 categorías más" al pie. Ahora
+   están todas y la franja mide siempre lo mismo: lo que cambia es
+   cuánto hay que scrollear adentro, no cuánto empuja la página hacia
+   abajo. El alto es max-height y no height: con pocas categorías la
+   caja se achica en vez de dejar un hueco verde.
+
+   Cada categoría ocupa lo que necesita su nombre —de media caja a caja
+   entera— así que entran dos por renglón cuando los nombres son cortos
+   y una sola cuando son largos. Nunca tres: a esa altura el nombre
+   compite con el número y la flecha y el renglón deja de leerse de un
+   golpe. */
+.home-indice-wrap {
+    position: relative;
+    margin-top: 2.5rem;
+}
+
+.home-indice {
+    list-style: none;
+    margin: 0;
+    padding: 0.25rem 0.75rem 0.25rem 0;
+    max-height: 16.5rem;
+    overflow-y: auto;
+    /* Al llegar al final el gesto no sigue de largo arrastrando la
+       página: la caja se come el sobrante. */
+    overscroll-behavior-y: contain;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    /* La barra fina y clara es la señal en escritorio; en teléfono no se
+       dibuja hasta que se arrastra, y de eso se encargan el velo y el
+       renglón de abajo. */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.home-indice::-webkit-scrollbar {
+    width: 6px;
+}
+
+.home-indice::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 3px;
+}
+
+.home-indice:focus-visible {
+    outline: 2px solid var(--external-white);
+    outline-offset: 4px;
+}
+
+/* El mínimo es media caja —menos el hueco— así que dos entran justas y
+   tres no entran nunca; el máximo es la caja entera. Entre esos dos
+   valores manda el largo del nombre.
+
+   Crecen para terminar de llenar su renglón (flex-grow) en vez de
+   quedarse en el ancho exacto del texto. Es lo que evita el borde
+   derecho desparejo: si en un ancho dado entra una sola, esa una ocupa
+   el renglón entero y se lee como la lista de siempre; si entran dos, se
+   reparten. Nunca queda un hueco muerto al costado. */
+.home-indice>li {
+    flex: 1 1 auto;
+    min-width: calc(50% - 0.25rem);
+    max-width: 100%;
+}
+
+/* Con anchos distintos el filete de abajo solo quedaba desparejo —tres
+   subrayados de largos que no coinciden se leen como un error—, así que
+   cada categoría cierra su propio contorno. Adentro no cambió nada:
+   número, nombre y flecha, igual que antes. */
+/* En teléfono el renglón es compacto —48px, el mínimo táctil— pero no
+   apretado: en un ancho de 390px casi ningún nombre entra en media
+   caja, así que cada categoría se queda con el renglón entero. Achicar
+   la tipografía y la flecha para forzar dos por fila daría dos
+   categorías ilegibles en vez de una que se lee. */
+.home-indice-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.35rem 0.85rem;
+    min-height: 48px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--external-white);
+    text-decoration: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.home-indice-num {
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--external-primary-soft);
+}
+
+.home-indice-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--external-white);
+}
+
+.home-indice-go {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--external-white);
+    transition: background-color 0.2s ease, border-color 0.2s ease,
+                color 0.2s ease, transform 0.2s ease;
+}
+
+.home-indice-go svg {
+    width: 0.95rem;
+    height: 0.95rem;
+}
+
+/* ── Que se note que la caja scrollea ──────────────────────────────────
+   Las dos señales cuelgan de .is-scrollable, que scroller.js pone sólo
+   cuando sobra contenido: si las categorías entran todas, acá no pasa
+   nada. Y las dos se apagan con .is-end, cuando ya no queda nada abajo.
+
+   El desvanecido va como máscara sobre la caja y no como un velo de
+   color encima: la franja es un degradado de verde a carbón, así que
+   cualquier color fijo que le pusiera arriba iba a pegar en un solo
+   punto de la página. Enmascarado, lo que se transparenta es el fondo
+   que haya, sea cual sea. */
+.home-indice.is-scrollable {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3.5rem), transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3.5rem), transparent 100%);
+}
+
+.home-indice.is-scrollable.is-end {
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+/* El renglón dice lo que el corte insinúa. No reserva lugar cuando no
+   hay nada que scrollear (display:none), y cuando lo hay se apaga al
+   llegar al final sin devolver el espacio: si desapareciera del todo, la
+   franja daría un salto justo al terminar de scrollear. */
+.home-indice-hint {
+    display: none;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.7rem 0 0;
+    font-size: var(--fs-small);
+    color: rgba(255, 255, 255, 0.62);
+    transition: opacity 0.25s ease;
+}
+
+.home-indice.is-scrollable~.home-indice-hint {
+    display: flex;
+    opacity: 1;
+}
+
+.home-indice.is-scrollable.is-end~.home-indice-hint {
+    opacity: 0;
+}
+
+.home-indice-hint svg {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    animation: home-hint-bob 1.8s ease-in-out infinite;
+}
+
+@keyframes home-hint-bob {
+    0%, 100% {
+        transform: translateY(-2px);
+    }
+
+    50% {
+        transform: translateY(2px);
+    }
+}
+
+.home-adapta-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-top: 2rem;
+}
+
+.home-adapta-foot .home-btn {
+    width: 100%;
+}
+
+/* El renglón de "N categorías más" se fue con el tope de seis: ahora
+   están todas adentro de la caja. */
+
+/* ── PROYECTOS A MEDIDA ────────────────────────────────────────────── */
+/* Cierra con la foto a sangre y el texto encima, no con un color plano y
+   la foto al costado. Es lo que la separa de la línea adapta, que queda
+   justo arriba y también es oscura: adapta es color, esto es obra.
+
+   El velo es neutro —gris casi negro— a propósito. Teñirlo de verde la
+   habría vuelto la tercera banda verde seguida, y acá el color lo pone
+   la foto. El único verde es el filete de 5px de arriba, que es el que
+   divide las dos bandas oscuras. */
 .home-medida {
+    position: relative;
+    overflow: hidden;
     background: var(--g-carbon);
     color: var(--external-white);
     padding: 3.5rem 0;
+    border-top: 5px solid var(--external-primary);
+}
+
+.home-medida-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    z-index: 0;
+}
+
+/* En teléfono el degradado es vertical y denso: el texto ocupa el ancho
+   completo y necesita fondo parejo abajo de cada renglón. */
+.home-medida-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(to top,
+            rgba(18, 20, 22, 0.94) 0%,
+            rgba(18, 20, 22, 0.88) 55%,
+            rgba(18, 20, 22, 0.72) 100%);
+}
+
+.home-medida-inner {
+    position: relative;
+    z-index: 2;
 }
 
 .home-medida-title {
@@ -338,62 +1176,64 @@
     line-height: 1.65;
     color: rgba(255, 255, 255, 0.82);
     max-width: 52ch;
-    margin: 0 0 1.75rem;
+    margin: 0;
+}
+
+/* Los tipos de obra, como índice numerado: mismo patrón de lectura que
+   el índice de la línea adapta (número + nombre), pero sin la caja de
+   scroll —acá siempre entran los cuatro renglones— y con un filete
+   como único separador, así se apoya en lo que ya hay debajo sin
+   competir con la foto de fondo.
+
+   En teléfono queda debajo del texto por el orden natural del flujo;
+   el layout de dos columnas es el que se agrega en escritorio. */
+.home-medida-list-wrap {
+    margin-top: 2.25rem;
+}
+
+.home-medida-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.home-medida-list-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.85rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.home-medida-list-num {
+    font-family: var(--font-display);
+    font-size: var(--fs-label);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: var(--external-primary-soft);
+}
+
+.home-medida-list-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sub);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--external-white);
+}
+
+.home-medida-nota {
+    font-size: var(--fs-small);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 1rem 0 0;
 }
 
 .home-medida-actions {
     display: flex;
     flex-direction: column;
     gap: 0.7rem;
-}
-
-/* La figura va acotada como un plano de taller: el dibujo dice
-   "vos ponés las medidas" mejor que una línea de copy. */
-.home-medida-figure {
-    display: flex;
-    align-items: stretch;
-    gap: 0.85rem;
-    margin: 2.25rem 0 0;
-}
-
-.home-medida-figure-cota-v {
-    display: none;
-    color: var(--external-primary-soft);
-}
-
-.home-medida-figure-body {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.home-medida-img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 3px;
-    display: block;
-}
-
-.home-medida-figure-cota-h {
-    color: var(--external-primary-soft);
-    margin-top: 0.85rem;
-}
-
-/* ── NOSOTROS (mini) ───────────────────────────────────────────────── */
-/* Cierre callado y sin imagen: después de la franja oscura conviene
-   bajar el volumen, no volver a subirlo. */
-.home-nosotros {
-    background: var(--external-white);
-    padding: 3.5rem 0;
-}
-
-.home-nosotros-lead {
-    font-size: var(--fs-lead);
-    line-height: 1.5;
-    color: var(--external-secondary);
-    font-weight: 500;
-    max-width: 46ch;
-    margin: 0 0 0.75rem;
+    margin-top: 1.75rem;
 }
 
 /* ── ≥576px ────────────────────────────────────────────────────────── */
@@ -403,12 +1243,30 @@
         flex-wrap: wrap;
     }
 
-    .home-catalogo-foot .home-btn {
+    .home-catalogo-foot .home-btn,
+    .home-adapta-foot .home-btn {
         width: auto;
+    }
+
+    .home-adapta-foot {
+        flex-direction: row;
+        align-items: center;
+        gap: 1.25rem;
     }
 
     .home-rail-item {
         flex-basis: 46%;
+    }
+
+    /* Desde acá el ancho ya alcanza para que dos nombres cortos compartan
+       renglón. El hueco crece y el mínimo se recalcula solo: sigue
+       siendo media caja. */
+    .home-indice {
+        gap: 0.75rem;
+    }
+
+    .home-indice>li {
+        min-width: calc(50% - 0.375rem);
     }
 }
 
@@ -429,6 +1287,17 @@
         padding-bottom: 5rem;
     }
 
+    /* Acá el contenido va centrado y el hero mide 82svh: hay lugar de
+       sobra abajo, así que la señal se despega del borde y la línea se
+       alarga a la escala de la pantalla. */
+    .home-hero-cue-wrap {
+        bottom: 2rem;
+    }
+
+    .home-hero-cue-track {
+        height: 58px;
+    }
+
     .home-hero-scrim {
         background: linear-gradient(105deg,
                 rgba(15, 17, 19, 0.62) 0%,
@@ -436,10 +1305,41 @@
                 rgba(15, 17, 19, 0.1) 100%);
     }
 
+    .home-nosotros,
+    .home-lineas,
     .home-catalogo,
-    .home-medida,
-    .home-nosotros {
+    .home-adapta,
+    .home-medida {
         padding: 5rem 0;
+    }
+
+    /* Sube a tamaño de título: en la franja de apertura esto es una
+       declaración, no un párrafo de apoyo. El tope de 34ch es para que
+       en pantalla ancha no se estire a un renglón larguísimo — abajo de
+       eso manda el ancho de la columna. */
+    .home-nosotros-lead {
+        font-size: var(--fs-title-sm);
+        line-height: 1.4;
+        max-width: 34ch;
+    }
+
+    /* Las tres líneas pasan a columnas: se leen de un vistazo como el
+       índice del recorrido, en vez de una lista que hay que bajar. Acá
+       ya no hay nada que plegar, así que el acordeón de teléfono se va y
+       vuelven las tarjetas, con la tarjeta entera como link. */
+    .home-lineas-acordeon {
+        display: none;
+    }
+
+    .home-lineas-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+        margin-top: 2.75rem;
+    }
+
+    .home-lineas-head {
+        max-width: 62ch;
     }
 
     .home-rail-wrap {
@@ -454,51 +1354,73 @@
         display: inline-flex;
     }
 
-    /* Copy e imagen lado a lado; la cota vertical aparece recién acá,
-       cuando hay ancho para que se lea como cota y no como adorno. */
+    /* Con el ancho de escritorio los renglones respiran y el nombre sube
+       a tamaño de título: el índice deja de ser una lista y se lee como
+       la tabla de contenidos que es. Y como cada uno mide más, la caja
+       crece para que sigan entrando cuatro renglones. */
+    .home-indice {
+        max-height: 19.5rem;
+        gap: 1rem;
+    }
+
+    .home-indice>li {
+        min-width: calc(50% - 0.5rem);
+    }
+
+    .home-indice-row {
+        min-height: 64px;
+        padding: 0.9rem 1rem;
+        gap: 0.35rem 1rem;
+    }
+
+    .home-indice-name {
+        font-size: var(--fs-title-sm);
+    }
+
+    .home-indice-go {
+        width: 38px;
+        height: 38px;
+    }
+
+    .home-indice-go svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* La foto de fondo se ve del lado derecho: el degradado se inclina y
+       deja destapada la mitad donde no hay texto. Mismo recurso que el
+       hero, que es el otro bloque con foto a sangre de la página. */
+    .home-medida {
+        padding: 6rem 0;
+    }
+
+    .home-medida-scrim {
+        background: linear-gradient(100deg,
+                rgba(18, 20, 22, 0.95) 0%,
+                rgba(18, 20, 22, 0.86) 42%,
+                rgba(18, 20, 22, 0.42) 100%);
+    }
+
+    /* El texto no cruza la mitad: del otro lado tiene que verse la foto,
+       que es lo que hace que esta franja no sea otro rectángulo de color. */
+    .home-medida-copy {
+        max-width: 34rem;
+    }
+
+    /* El índice pasa a la derecha, en la franja donde ya se ve la foto:
+       por eso no lleva fondo propio, sólo el filete por renglón que ya
+       tiene suficiente contraste sobre el velo oscuro. */
     .home-medida-inner {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        display: flex;
         align-items: center;
-        gap: 3rem;
-    }
-
-    .home-medida-figure {
-        margin-top: 0;
-    }
-
-    .home-medida-figure-cota-v {
-        display: flex;
-    }
-
-    .home-catalogo-head {
-        display: flex;
-        align-items: flex-end;
         justify-content: space-between;
-        gap: 2rem;
-        margin-bottom: 0;
+        gap: 2.5rem;
     }
 
-    .home-catalogo-intro {
+    .home-medida-list-wrap {
+        flex: 0 0 20rem;
+        max-width: 20rem;
         margin-top: 0;
-        flex: 0 1 26rem;
-    }
-
-    /* Centrado y angosto: en pantalla ancha, alineado a la izquierda
-       dejaba dos tercios vacíos y parecía una sección sin terminar. */
-    .home-nosotros-inner {
-        max-width: 60ch;
-        margin-inline: auto;
-        text-align: center;
-    }
-
-    .home-nosotros-inner .home-eyebrow,
-    .home-nosotros-inner .home-link {
-        justify-content: center;
-    }
-
-    .home-nosotros-lead {
-        max-width: none;
     }
 }
 
@@ -508,6 +1430,35 @@
         flex-basis: 23.7%;
     }
 
+    .home-nosotros-inner {
+        gap: 4.5rem;
+    }
+
+    .home-lineas-list {
+        gap: 1.75rem;
+    }
+
+    /* El isotipo aparece recién acá, con la franja a dos columnas. De 768
+       a 991 la sección es sólo la declaración: meter la placa abajo del
+       texto era estirarla sin ganar nada. La columna de la placa es la
+       más angosta —un logo no necesita la mitad de la pantalla. */
+    .home-nosotros-inner {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        align-items: center;
+    }
+
+    .home-nosotros-figure {
+        display: block;
+    }
+
+    /* ── Hovers ────────────────────────────────────────────────────
+       Sólo desde acá: abajo de 992 la pantalla es táctil y un :hover
+       que se queda pegado después del toque es peor que no tenerlo.
+
+       El gesto es siempre el mismo, el de externo.css: las superficies
+       flotan, los botones se hunden, y nada cambia de color — se mueve
+       un escalón dentro de su propia escala. */
     .home-cat:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
@@ -517,8 +1468,34 @@
         transform: scale(1.05);
     }
 
-    .home-medida-inner {
-        gap: 4.5rem;
+    /* La tarjeta del conector flota igual que la del catálogo, y el
+       filete verde de arriba viaja con ella dentro del mismo box-shadow
+       (si se declarara aparte, el hover lo pisaría). */
+    .home-linea:hover {
+        transform: translateY(-4px);
+        border-color: rgba(40, 116, 82, 0.28);
+        box-shadow: inset 0 3px 0 var(--external-primary),
+                    0 12px 26px rgba(0, 0, 0, 0.12);
+    }
+
+    .home-linea:hover .home-linea-go svg {
+        transform: translateX(4px);
+    }
+
+    /* El renglón del índice no flota ni se corre: se enciende. Con
+       anchos distintos, correrlo movía sólo a uno de los dos de la
+       fila; y una fila que levanta sombra se lee como tarjeta. */
+    .home-indice-row:hover {
+        background: var(--g-hover-blanco);
+        border-color: rgba(255, 255, 255, 0.45);
+        color: var(--external-white);
+    }
+
+    .home-indice-row:hover .home-indice-go {
+        background: var(--external-white);
+        border-color: var(--external-white);
+        color: var(--g-carbon);
+        transform: translateX(3px);
     }
 }
 
@@ -532,16 +1509,38 @@
     .home-link,
     .home-cat,
     .home-cat-img,
+    .home-linea,
+    .home-linea-go svg,
+    .home-lin-panel,
+    .home-lin-resumen,
+    .home-indice-row,
+    .home-indice-go,
     .home-rail-arrow,
     .rail-dot {
         transition: none;
     }
 
-    .home-cat:hover {
+    /* La flecha salta a su posición en vez de girar. Sigue apuntando
+       para arriba con la fila abierta —y lo sigue diciendo
+       aria-expanded—, que es lo que hay que leer. */
+    .home-lin-chevron {
+        transition: none;
+    }
+
+    .home-cat:hover,
+    .home-linea:hover {
         transform: none;
     }
 
-    .home-cat:hover .home-cat-img {
+    .home-cat:hover .home-cat-img,
+    .home-linea:hover .home-linea-go svg,
+    .home-indice-row:hover .home-indice-go {
         transform: none;
+    }
+
+    /* La flecha del aviso de scroll se queda quieta: lo que dice que hay
+       más abajo es el corte desvanecido, y ese no se mueve. */
+    .home-indice-hint svg {
+        animation: none;
     }
 }

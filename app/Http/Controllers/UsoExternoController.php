@@ -14,12 +14,22 @@ class UsoExternoController extends Controller
     public function welcome()
     {
         // El ViewComposer inyecta las categorías solo en el layout (navbar);
-        // acá las pasamos explícitamente para la sección "Modelos estándar".
+        // acá las pasamos explícitamente para las secciones de líneas.
         $categorias = Categoria::where('activo', true)
             ->orderBy('nombre')
             ->get(['id', 'nombre', 'imagen_hero']);
 
-        return view('UsoExterno.welcome', compact('categorias'));
+        // Línea adapta: sólo las categorías que hoy tienen algún producto a
+        // medida activo. Una card que lleva a un listado vacío es una promesa
+        // incumplida (mismo criterio que MenuCategorias::especiales()).
+        $categoriasAdapta = Categoria::where('activo', true)
+            ->whereHas('productos', fn ($q) => $q
+                ->where('es_especial', true)
+                ->where('activo', true))
+            ->orderBy('nombre')
+            ->get(['id', 'nombre', 'imagen_hero']);
+
+        return view('UsoExterno.welcome', compact('categorias', 'categoriasAdapta'));
     }
 
     public function nosotros()

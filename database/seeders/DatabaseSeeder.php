@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategoriasSeeder::class,
             ProductosSeeder::class,
+            ProductosEspecialesSeeder::class,
             CotizacionesSeeder::class,
         ]);
     }
