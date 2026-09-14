@@ -22,6 +22,13 @@ export function initSubmitState(form) {
     let sending = false;
 
     form.addEventListener('submit', function (e) {
+        // Un submit ya prevenido por otro listener (ej. imageDraftPersistence
+        // guardando el borrador antes de reenviar con form.requestSubmit())
+        // todavía no es el envío real: no cuenta como "viajando" y no debe
+        // tocar el spinner, o el reenvío que sigue se topa con `sending`
+        // en true y queda bloqueado para siempre.
+        if (e.defaultPrevented) return;
+
         // Segundo clic mientras el primero todavía viaja: no hay nada
         // nuevo que enviar.
         if (sending) {
