@@ -286,11 +286,6 @@
                     <span class="external-footer-loc-addr">San Juan 1978, Quilmes Oeste</span>
                     <a href="tel:+541164457059" class="external-footer-loc-phone">011 6445-7059</a>
                 </address>
-                <address class="external-footer-loc">
-                    <span class="external-footer-loc-label">Local al público</span>
-                    <span class="external-footer-loc-addr">Au Dr. Ricardo Balbín Km 30, G. E. Hudson</span>
-                    <a href="tel:+541192683417" class="external-footer-loc-phone">011 9268-3417</a>
-                </address>
             </div>
 
             <p class="external-footer-copy">

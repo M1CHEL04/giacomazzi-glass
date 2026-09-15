@@ -217,52 +217,31 @@
     border-top: 1px solid rgba(0, 0, 0, 0.07);
 }
 
-/* Cada sede es una tarjeta suelta, no una fila dentro de un recuadro
-   compartido con el mapa. Así en teléfono ocupa el ancho completo. */
-.about-sede-grid {
+/* Panel único: info y mapa son dos caras de la misma tarjeta, no dos
+   bloques sueltos. En teléfono se apilan; el mapa entra con una altura
+   fija, la justa para ubicar la fábrica, no para llenar la pantalla. */
+.about-sede-panel {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0.85rem;
+    background: var(--external-white);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 3px;
+    overflow: hidden;
     margin-bottom: 1.25rem;
 }
 
-.about-sede {
-    background: var(--external-white);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-left: 3px solid transparent;
-    border-radius: 3px;
-    padding: 1.25rem 1.15rem;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
+.about-sede-info {
+    padding: 1.5rem 1.35rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Tres estados, y el fondo teñido es de uno solo: si el hover también
-   pintaba la tarjeta (antes 0.04 contra 0.05, indistinguibles), pasar
-   el mouse por arriba se veía igual que elegir. Acá el hover mueve el
-   borde y nada más. */
-.about-sede:hover {
-    border-color: rgba(40, 116, 82, 0.35);
-}
-
-/* Arranque: la fábrica queda señalada con el filo en verde claro, sin
-   fondo. Alcanza para decir "empezá por acá" sin afirmar que el mapa
-   la está mostrando, que es lo que todavía no pasó. */
-.about-sede.is-default {
-    border-left-color: var(--external-primary-soft);
-}
-
-/* Elegida: la única con superficie verde y filo verde pleno. */
-.about-sede.is-active {
-    background: rgba(40, 116, 82, 0.05);
-    border-color: rgba(40, 116, 82, 0.35);
-    border-left-color: var(--external-primary);
+.about-sede-action {
+    margin-top: 0.35rem;
 }
 
 .about-map {
-    min-height: 300px;
+    height: 220px;
     background: #e9ecef;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 3px;
 }
 
 /* Instagram: la única dirección de la sección que no está en el mapa.
@@ -386,45 +365,6 @@
     text-decoration: underline;
 }
 
-.about-sede-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 1.25rem;
-}
-
-.about-sede-action {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    min-height: 44px;
-    padding: 0;
-    border: none;
-    background: none;
-    font-family: var(--font-display);
-    font-size: var(--fs-small);
-    font-weight: 700;
-    color: var(--external-primary);
-    text-decoration: none;
-    cursor: pointer;
-    transition: gap 0.2s ease, color 0.2s ease;
-}
-
-.about-sede-action:hover {
-    color: var(--external-primary-dark);
-    gap: 0.55rem;
-}
-
-.about-sede-action svg {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-}
-
-.about-sede-action:focus-visible {
-    outline: 2px solid var(--external-primary);
-    outline-offset: 3px;
-}
-
 /* ── ESCRIBINOS ────────────────────────────────────────────────────── */
 /* Franja oscura de cierre, igual que "a medida" en Inicio. */
 .about-contacto {
@@ -477,15 +417,22 @@
         margin-bottom: 2.5rem;
     }
 
-    /* Las dos sedes lado a lado; el mapa se queda con todo el ancho */
-    .about-sede-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+    /* Info y mapa lado a lado dentro del mismo panel, en vez de
+       apilados: hay lugar de sobra a lo ancho y el mapa no necesita
+       ser gigante para ubicar un solo punto. */
+    .about-sede-panel {
+        grid-template-columns: minmax(280px, 360px) 1fr;
         margin-bottom: 1.5rem;
     }
 
+    .about-sede-info {
+        padding: 2rem;
+        border-bottom: none;
+        border-right: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
     .about-map {
-        min-height: 420px;
+        height: 360px;
     }
 
     /* La cota se estira con el mapa: cuanto más ancho el dibujo, más
@@ -526,12 +473,8 @@
 
 /* ── ≥992px ────────────────────────────────────────────────────────── */
 @media (min-width: 992px) {
-    .about-map {
-        min-height: 480px;
-    }
-
-    .about-sede {
-        padding: 1.5rem 1.6rem;
+    .about-sede-panel {
+        grid-template-columns: 400px 1fr;
     }
 
     .about-rail-item {
@@ -545,8 +488,6 @@
         scroll-behavior: auto;
     }
 
-    .about-sede,
-    .about-sede-action,
     .about-rail-arrow {
         transition: none;
     }

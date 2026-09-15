@@ -17,10 +17,8 @@ $waNumero = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
 $waMensaje = '¡Hola! Quiero hacerles una consulta.';
 $waHref = $waNumero ? 'https://wa.me/' . $waNumero . '?text=' . rawurlencode($waMensaje) : null;
 
-// Sedes: alimentan tanto la lista como los marcadores del mapa
-$sedes = [
-[
-'key' => 'fabrica',
+// Sede: alimenta tanto el panel como el marcador del mapa
+$sede = [
 'tipo' => 'Fábrica',
 'tag' => 'Producción',
 'direccion' => 'San Juan 1978 entre Av. La Plata y Madame Curie',
@@ -30,32 +28,7 @@ $sedes = [
 'telefono_tel' => '01164457059',
 'lat' => -34.7277121,
 'lng' => -58.2851433,
-],
-[
-'key' => 'local',
-'tipo' => 'Local al público',
-'tag' => 'Atención y showroom',
-'direccion' => 'Au Dr. Ricardo Balbín Km 30 - Local 03B',
-'localidad' => 'Guillermo Enrique Hudson, Buenos Aires',
-'horarios' => 'Lun a Vie: 10:00 - 19:00',
-'telefono_label' => '011 9268-3417',
-'telefono_tel' => '01192683417',
-'lat' => -34.7763988,
-'lng' => -58.1634747,
-],
 ];
-
-// Versión reducida para el JS del mapa
-$sedesMapa = array_map(fn($s) => [
-'key' => $s['key'],
-'tipo' => $s['tipo'],
-'direccion' => $s['direccion'],
-'localidad' => $s['localidad'],
-'telLabel' => $s['telefono_label'],
-'telTel' => $s['telefono_tel'],
-'lat' => $s['lat'],
-'lng' => $s['lng'],
-], $sedes);
 
 // Obras: cargá 'imagen' con la ruta (ej. 'images/obras/edificio.jpg') y
 // la obra aparece sola. Sin fotos cargadas la sección no se muestra:
@@ -176,17 +149,15 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 <section class="about-sedes" id="donde-estamos">
     <div class="container">
         <div class="about-head">
-            <p class="g-eyebrow">Sedes</p>
+            <p class="g-eyebrow">Ubicación</p>
             <h2 class="g-title">Dónde encontrarnos</h2>
 
         </div>
-        <div class="about-sede-grid">
-            @foreach($sedes as $i => $sede)
-            {{-- La fábrica arranca señalada, pero con .is-default y no con
-                 .is-active: al cargar el mapa muestra las dos sedes y
-                 ninguna está elegida todavía, así que pintarla de activa
-                 era decir algo que no había pasado. --}}
-            <div class="about-sede {{ $i === 0 ? 'is-default' : '' }}" data-sede="{{ $sede['key'] }}">
+        {{-- Un único panel: info a la izquierda, mapa a la derecha. Con
+             una sola sede, separar tarjeta y mapa en dos bloques dejaba
+             un plano gigante sin nada que justificara su tamaño. --}}
+        <div class="about-sede-panel">
+            <div class="about-sede-info">
                 <span class="about-sede-tag">{{ $sede['tag'] }}</span>
                 <h3 class="about-sede-title">{{ $sede['tipo'] }}</h3>
 
@@ -205,26 +176,19 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
                     </p>
                 </div>
 
-                <div class="about-sede-actions">
-                    {{-- La tarjeta entera responde al clic, pero el control
-                         real es este botón: así el teclado también llega. --}}
-                    <button type="button" class="about-sede-action"
-                        data-sede-focus="{{ $sede['key'] }}"
-                        aria-pressed="false">
-                        <x-heroicon-o-map-pin />
-                        Ver en el mapa
-                    </button>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $sede['lat'] }},{{ $sede['lng'] }}"
-                        class="about-sede-action" target="_blank" rel="noopener">
-                        <x-heroicon-o-arrow-right />
-                        Cómo llegar
-                    </a>
-                </div>
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $sede['lat'] }},{{ $sede['lng'] }}"
+                    class="g-btn g-btn--primary about-sede-action" target="_blank" rel="noopener">
+                    <x-heroicon-o-arrow-right />
+                    Cómo llegar
+                </a>
             </div>
-            @endforeach
-        </div>
 
-        <div class="about-map" id="map" data-sedes="{{ json_encode($sedesMapa) }}"></div>
+            <div class="about-map" id="map"
+                data-lat="{{ $sede['lat'] }}" data-lng="{{ $sede['lng'] }}"
+                data-tipo="{{ $sede['tipo'] }}"
+                data-direccion="{{ $sede['direccion'] }}"
+                data-localidad="{{ $sede['localidad'] }}"></div>
+        </div>
 
         {{-- Instagram cierra la sección: es la única dirección que no
              está en el mapa. La cota va abajo del dibujo, como en el
@@ -271,16 +235,15 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
         const mapEl = document.getElementById('map');
         if (!mapEl) return;
 
-        const sedes = JSON.parse(mapEl.dataset.sedes);
+        const lat = parseFloat(mapEl.dataset.lat);
+        const lng = parseFloat(mapEl.dataset.lng);
 
-        // Centro aproximado entre las dos sedes
-        const initialZoom = window.matchMedia('(max-width: 767.98px)').matches ? 11 : 12;
         const map = L.map(mapEl, {
             // La rueda no hace zoom para no entorpecer el scroll de la página.
             // Queda disponible por botones (+/-) y gesto de dos dedos.
             scrollWheelZoom: false,
             touchZoom: true,
-        }).setView([-34.752, -58.224], initialZoom);
+        }).setView([lat, lng], 16);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -295,77 +258,15 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
             popupAnchor: [1, -34]
         });
 
-        const markers = {};
-        sedes.forEach(function(s) {
-            const marker = L.marker([s.lat, s.lng], {
-                icon: greenIcon
-            }).addTo(map);
-            marker.bindPopup(
-                '<div style="font-family: Asap, sans-serif; line-height: 1.45;">' +
-                '<strong style="color: #287452; font-size: 1rem;">' + s.tipo + '</strong><br>' +
-                s.direccion + '<br>' +
-                s.localidad + '<br>' +
-                '<a href="tel:' + s.telTel + '" style="color: #287452; text-decoration: none; font-weight: 600;">' + s.telLabel + '</a>' +
-                '</div>', {
-                    autoPan: false
-                }
-            );
-            marker.on('click', function() {
-                setActive(s.key, false);
-            });
-            markers[s.key] = marker;
-        });
-
-        const cards = document.querySelectorAll('.about-sede[data-sede]');
-        const focusBtns = document.querySelectorAll('[data-sede-focus]');
-
-        function setActive(key, moveMap) {
-            if (moveMap === undefined) moveMap = true;
-
-            cards.forEach(function(card) {
-                // La marca de arranque se va apenas hay una elección real:
-                // si no, quedarían dos tarjetas señaladas a la vez.
-                card.classList.remove('is-default');
-                card.classList.toggle('is-active', card.dataset.sede === key);
-            });
-            focusBtns.forEach(function(btn) {
-                btn.setAttribute('aria-pressed', btn.dataset.sedeFocus === key ? 'true' : 'false');
-            });
-
-            const marker = markers[key];
-            if (!marker) return;
-
-            if (moveMap) {
-                const zoom = 15;
-                // Se sube el centro para que el popup no quede pegado al borde
-                const punto = map.project(marker.getLatLng(), zoom).subtract([0, 60]);
-                map.setView(map.unproject(punto, zoom), zoom, {
-                    animate: true
-                });
-            }
-            marker.openPopup();
-        }
-
-        cards.forEach(function(card) {
-            card.addEventListener('click', function(e) {
-                // Los links y el botón propio actúan por su cuenta
-                if (e.target.closest('a, button')) return;
-                setActive(card.dataset.sede);
-            });
-        });
-
-        focusBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                setActive(btn.dataset.sedeFocus);
-                // El mapa quedó abajo de las tarjetas: sin esto, en teléfono
-                // el botón parecía no hacer nada porque el mapa no se veía.
-                const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-                mapEl.scrollIntoView({
-                    behavior: reduce ? 'auto' : 'smooth',
-                    block: 'center'
-                });
-            });
-        });
+        L.marker([lat, lng], {
+            icon: greenIcon
+        }).addTo(map).bindPopup(
+            '<div style="font-family: Asap, sans-serif; line-height: 1.45;">' +
+            '<strong style="color: #287452; font-size: 1rem;">' + mapEl.dataset.tipo + '</strong><br>' +
+            mapEl.dataset.direccion + '<br>' +
+            mapEl.dataset.localidad +
+            '</div>'
+        );
 
         // Reajuste por si el contenedor cambia de tamaño (mobile/desktop)
         window.addEventListener('load', function() {
