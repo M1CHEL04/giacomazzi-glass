@@ -32,7 +32,29 @@ class CatalogoPdfService
             'capitulos' => $this->capitulos(),
             'logoPath'  => $this->logoPath(),
             'fecha'     => $this->fechaLegible(),
+            'contacto'  => $this->contacto(),
         ]);
+
+        // El header/footer con el logo y "Página X de Y" se dibuja con PHP
+        // embebido (ver catalogo.blade.php): es la única forma de excluir la
+        // portada, ya que un elemento position:fixed de CSS se repite en
+        // todas las páginas sin excepción, portada incluida.
+        $pdf->setOption('isPhpEnabled', true);
+
+        return $pdf->setPaper('a4', 'portrait');
+    }
+
+    /** Mismo contenido que generar(), pero en una plantilla sin logos ni nombre de marca. */
+    public function generarSinMarca(): DomPdfDocument
+    {
+        set_time_limit(120);
+
+        $pdf = Pdf::loadView('UsoInterno.Productos.pdf.catalogo-sin-marca', [
+            'capitulos' => $this->capitulos(),
+            'fecha'     => $this->fechaLegible(),
+        ]);
+
+        $pdf->setOption('isPhpEnabled', true);
 
         return $pdf->setPaper('a4', 'portrait');
     }
@@ -91,6 +113,23 @@ class CatalogoPdfService
         $ruta = public_path('images/logo-catalogo.png');
 
         return file_exists($ruta) ? $ruta : null;
+    }
+
+    /**
+     * Datos de contacto para el encabezado del catálogo con marca. El
+     * teléfono sale del mismo WHATSAPP_NUMBER que usa el botón de cotizar
+     * por WhatsApp del sitio; el mail es un placeholder hasta que haya uno
+     * oficial para el catálogo.
+     */
+    private function contacto(): array
+    {
+        $whatsapp = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
+
+        return [
+            'telefono'  => $whatsapp ? substr($whatsapp, 0, 4) . ' ' . substr($whatsapp, 4) : null,
+            'email'     => 'ventas@aberturasgiacomazzi.com.ar',
+            'direccion' => 'San Juan 1978, Quilmes Oeste',
+        ];
     }
 
     private function fechaLegible(): string

@@ -39,10 +39,10 @@
                 <option value="0" {{ request('activo') === '0' ? 'selected' : '' }}>Inactivo</option>
             </select>
         </div>
-        <a href="{{ route('uso-interno.productos.catalogo-pdf') }}" target="_blank" class="btn btn-outline-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
+        <button type="button" class="btn btn-outline-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;" data-bs-toggle="modal" data-bs-target="#modalCatalogoPdf">
             <x-fluentui-document-pdf-20-o class="me-1" style="width:14px;height:14px;" />
             Generar catálogo PDF
-        </a>
+        </button>
         <a href="{{ route('uso-interno.productos.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
             <x-fluentui-add-20-o class="me-1" style="width:14px;height:14px;" />
             Crear producto
@@ -131,6 +131,7 @@
 </div>
 
 @include('UsoInterno.Productos.modals.estadoProducto')
+@include('UsoInterno.Productos.modals.catalogoPdf')
 @endsection
 
 @section('script')

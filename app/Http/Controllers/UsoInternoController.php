@@ -328,6 +328,18 @@ class UsoInternoController extends Controller
         }
     }
 
+    public function catalogoPdfProductosSinMarca()
+    {
+        try {
+            $pdf = $this->catalogoPdfService->generarSinMarca();
+
+            return $pdf->stream('catalogo-productos-estandar-' . now()->format('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            Log::error('Error al generar catálogo PDF sin marca: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al generar el catálogo PDF.');
+        }
+    }
+
     public function showProducto(String $id)
     {
         try {

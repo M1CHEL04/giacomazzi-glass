@@ -2,19 +2,17 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Catálogo de productos - Aberturas Giacomazzi</title>
+<title>Catálogo de productos estándar</title>
 <style>
     /*
-        Vista exclusiva para DomPDF: no extiende layouts.app-interno porque
-        DomPDF no soporta flexbox/grid ni clamp() (usados en esos layouts y
-        en externo.css). Paleta y tamaños quedan fijos acá, tomados de
-        externo.css pero reescritos en pt para que impriman igual siempre.
-
-        La portada usa su propio margen (@page :first): no necesita el hueco
-        superior/inferior reservado para el header/footer del resto de hojas.
+        Copia de catalogo.blade.php sin ningún elemento de marca (logo, nombre
+        "Aberturas Giacomazzi", verde corporativo): paleta neutra en gris/negro.
+        Ver ese archivo para las notas sobre las limitaciones de DomPDF que
+        explican por qué está todo en pt/px fijos y por qué el paginado se
+        dibuja con PHP embebido en vez de position:fixed.
     */
     @page {
-        margin: 145px 50px 90px 50px;
+        margin: 90px 50px 90px 50px;
     }
 
     @page :first {
@@ -39,7 +37,7 @@
     }
 
     .cat-tag {
-        color: #287452;
+        color: #5a5a5a;
         font-size: 9pt;
         font-weight: bold;
         letter-spacing: 1px;
@@ -50,39 +48,15 @@
     .portada {
         page-break-after: always;
         text-align: center;
-        /*
-            DomPDF no distribuye el height de una tabla de una sola fila
-            (ignora el alto explícito para el cálculo de vertical-align), así
-            que no hay forma de centrar con flex/tabla: el padding-top de acá
-            está calculado a mano para este contenido puntual, no es un valor
-            arbitrario. Si se agrega o saca contenido de la portada hay que
-            volver a medir y ajustar este número.
-        */
-        padding-top: 350px;
-    }
-
-    .portada-logo {
-        width: 440px;
+        /* Ver la nota en catalogo.blade.php: DomPDF no centra verticalmente
+           con tablas, así que este padding está calculado a mano. */
+        padding-top: 441px;
     }
 
     .portada-titulo {
         font-size: 32pt;
         font-weight: bold;
         color: #23262a;
-        margin-top: 50px;
-    }
-
-    .portada-acento {
-        width: 70px;
-        height: 4px;
-        background-color: #287452;
-        margin: 14px auto 0;
-    }
-
-    .portada-subtitulo {
-        font-size: 14pt;
-        color: #287452;
-        margin-top: 14px;
     }
 
     .portada-fecha {
@@ -97,14 +71,14 @@
         font-weight: bold;
         color: #23262a;
         margin-bottom: 24px;
-        border-bottom: 2px solid #287452;
+        border-bottom: 2px solid #5a5a5a;
         padding-bottom: 8px;
     }
 
     .indice-categoria {
         font-size: 12pt;
         font-weight: bold;
-        color: #1f5c3e;
+        color: #23262a;
         margin-top: 16px;
     }
 
@@ -120,7 +94,7 @@
         font-size: 20pt;
         font-weight: bold;
         color: #ffffff;
-        background-color: #287452;
+        background-color: #3f3f3f;
         padding: 14px 16px;
         margin: 0 0 24px 0;
     }
@@ -186,7 +160,7 @@
     .producto-seccion-label {
         font-size: 8pt;
         font-weight: bold;
-        color: #287452;
+        color: #5a5a5a;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         margin-top: 12px;
@@ -223,14 +197,7 @@
 
     {{-- Portada --}}
     <div class="portada">
-        @if($logoPath)
-            <img class="portada-logo" src="{{ $logoPath }}" alt="Aberturas Giacomazzi">
-        @else
-            <div class="portada-titulo" style="margin-top:0;">GIACOMAZZI</div>
-        @endif
-        <div class="portada-titulo">Catálogo de productos</div>
-        <div class="portada-acento"></div>
-        <div class="portada-subtitulo">Aberturas Giacomazzi</div>
+        <div class="portada-titulo">Catálogo de productos estándar</div>
         <div class="portada-fecha">Generado el {{ $fecha }}</div>
     </div>
 
@@ -300,59 +267,20 @@
     @endforeach
 
     {{--
-        Membrete (logo + datos de contacto) y "Página X de Y" en todas las
-        hojas salvo la portada. Va con PHP embebido de DomPDF ($pdf acá es el
-        canvas del motor, no algo de Laravel) porque es el único mecanismo
-        que conoce el total real de páginas: dentro del render normal, un
-        contador leído en el momento sólo sabe "hasta acá", no el total
-        final. page_script() se ejecuta una única vez, al terminar de
-        maquetar todo el documento, y por eso puede recorrer todas las
-        páginas ya con el total correcto y saltear la portada (page 1)
-        explícitamente.
+        "Página X de Y" en todas las hojas salvo la portada. Ver
+        catalogo.blade.php para la explicación de por qué esto va con
+        page_script() de DomPDF (PHP embebido) en vez de un contador simple:
+        es lo único que conoce el total real de páginas y permite saltear la
+        portada, ejecutando una única vez al final del documento.
     --}}
     <script type="text/php">
     if (isset($pdf)) {
-        $logoPath = {!! json_encode($logoPath) !!};
-        $contacto = {!! var_export($contacto, true) !!};
-
-        $pdf->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) use ($logoPath, $contacto) {
+        $pdf->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
             if ($pageNumber === 1) {
                 return;
             }
-
-            $gris  = [0.35, 0.35, 0.35];
-            $verde = [0.157, 0.455, 0.322];
-
-            // Logo del membrete: bastante más grande que un simple sello de
-            // página, para que cada hoja se sienta tan de marca como la tapa.
-            if ($logoPath) {
-                $canvas->image($logoPath, 50, 28, 140, 23.77);
-            }
-
-            // Datos de contacto alineados a la derecha, a la altura del logo.
-            $fontContacto = $fontMetrics->getFont('Helvetica', 'bold');
             $font = $fontMetrics->getFont('Helvetica');
-            $lineas = array_values(array_filter([
-                $contacto['telefono'] ? 'WhatsApp ' . $contacto['telefono'] : null,
-                $contacto['email'] ?? null,
-                $contacto['direccion'] ?? null,
-            ]));
-
-            $y = 29;
-            foreach ($lineas as $i => $linea) {
-                $f = $i === 0 ? $fontContacto : $font;
-                $w = $fontMetrics->getTextWidth($linea, $f, 8);
-                $canvas->text(545.28 - $w, $y, $linea, $f, 8, $gris);
-                $y += 11;
-            }
-
-            // Regla que separa el membrete del contenido de la hoja.
-            $canvas->line(50, 64, 545.28, 64, $verde, 1);
-
-            // Pie de página.
-            $texto = "Página $pageNumber de $pageCount";
-            $wTexto = $fontMetrics->getTextWidth($texto, $font, 8);
-            $canvas->text(545.28 - $wTexto, 794, $texto, $font, 8, [0.70, 0.70, 0.70]);
+            $canvas->text(470, 794, "Página $pageNumber de $pageCount", $font, 8, [0.70, 0.70, 0.70]);
             $canvas->line(50, 786, 545.28, 786, [0.90, 0.90, 0.90], 0.75);
         });
     }
