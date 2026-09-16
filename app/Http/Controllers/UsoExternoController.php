@@ -13,17 +13,17 @@ class UsoExternoController extends Controller
 {
     public function welcome()
     {
-        // El ViewComposer inyecta las categorías solo en el layout (navbar);
-        // acá las pasamos explícitamente para las secciones de líneas.
+
         $categorias = Categoria::where('activo', true)
+            ->whereHas('productos', fn($q) => $q
+                ->where('es_especial', false)
+                ->where('activo', true))
             ->orderBy('nombre')
             ->get(['id', 'nombre', 'imagen_hero']);
 
-        // Línea adapta: sólo las categorías que hoy tienen algún producto a
-        // medida activo. Una card que lleva a un listado vacío es una promesa
-        // incumplida (mismo criterio que MenuCategorias::especiales()).
+
         $categoriasAdapta = Categoria::where('activo', true)
-            ->whereHas('productos', fn ($q) => $q
+            ->whereHas('productos', fn($q) => $q
                 ->where('es_especial', true)
                 ->where('activo', true))
             ->orderBy('nombre')
@@ -87,9 +87,10 @@ class UsoExternoController extends Controller
 
             $buscar = trim($request->input('buscar', ''));
             if ($buscar !== '') {
-                $query->where(fn($q) => $q
-                    ->where('nombre', 'like', "%{$buscar}%")
-                    ->orWhere('descripcion', 'like', "%{$buscar}%")
+                $query->where(
+                    fn($q) => $q
+                        ->where('nombre', 'like', "%{$buscar}%")
+                        ->orWhere('descripcion', 'like', "%{$buscar}%")
                 );
             }
 
@@ -113,8 +114,8 @@ class UsoExternoController extends Controller
             $variantes = Variante::with(['valores' => fn($q) => $q->whereHas(
                 'productos',
                 fn($qp) => $qp->estandar()
-                               ->where('activo', true)
-                               ->whereHas('categoria', fn($qc) => $qc->where('activo', true))
+                    ->where('activo', true)
+                    ->whereHas('categoria', fn($qc) => $qc->where('activo', true))
             )])
                 ->get()
                 ->filter(fn($v) => $v->valores->count() > 0)
@@ -125,21 +126,36 @@ class UsoExternoController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'html' => view('UsoExterno.partials.productos-grid', compact(
-                        'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro', 'tipos', 'gridBaseUrl', 'esLineaSingular'
+                        'productos',
+                        'variantes',
+                        'filtros',
+                        'todasCategorias',
+                        'categoriasFiltro',
+                        'tipos',
+                        'gridBaseUrl',
+                        'esLineaSingular'
                     ))->render(),
                     // El Tipo cambia qué categorías tienen sentido ofrecer, y el
                     // fetch por AJAX sólo reemplaza el grid: mandamos aparte el
                     // HTML de las opciones de Categoría para que el sidebar
                     // también quede al día sin recargar la página.
                     'categoriasHtml' => view('UsoExterno.partials.filtro-categorias-opciones', compact(
-                        'todasCategorias', 'categoriasFiltro'
+                        'todasCategorias',
+                        'categoriasFiltro'
                     ))->render(),
                 ]);
             }
 
             return view('UsoExterno.Indexs.todos', compact(
-                'productos', 'variantes', 'filtros', 'todasCategorias', 'categoriasFiltro',
-                'tipos', 'buscar', 'gridBaseUrl', 'esLineaSingular'
+                'productos',
+                'variantes',
+                'filtros',
+                'todasCategorias',
+                'categoriasFiltro',
+                'tipos',
+                'buscar',
+                'gridBaseUrl',
+                'esLineaSingular'
             ));
         } catch (\Exception $e) {
             Log::error('UsoExternoController::indexTodos - Error al cargar productos: ' . $e->getMessage());
@@ -171,9 +187,10 @@ class UsoExternoController extends Controller
 
             $buscar = trim($request->input('buscar', ''));
             if ($buscar !== '') {
-                $query->where(fn($q) => $q
-                    ->where('nombre', 'like', "%{$buscar}%")
-                    ->orWhere('descripcion', 'like', "%{$buscar}%")
+                $query->where(
+                    fn($q) => $q
+                        ->where('nombre', 'like', "%{$buscar}%")
+                        ->orWhere('descripcion', 'like', "%{$buscar}%")
                 );
             }
 
@@ -194,9 +211,9 @@ class UsoExternoController extends Controller
             $productos = $query->paginate(12)->withQueryString();
 
             $variantes = Variante::with(['valores' => fn($q) => $q->whereHas(
-                    'productos',
-                    fn($qp) => $qp->estandar()->where('categoria_id', $id)->where('activo', true)
-                )])
+                'productos',
+                fn($qp) => $qp->estandar()->where('categoria_id', $id)->where('activo', true)
+            )])
                 ->get()
                 ->filter(fn($v) => $v->valores->count() > 0)
                 ->values();
@@ -322,9 +339,10 @@ class UsoExternoController extends Controller
 
             $buscar = trim($request->input('buscar', ''));
             if ($buscar !== '') {
-                $query->where(fn($q) => $q
-                    ->where('nombre', 'like', "%{$buscar}%")
-                    ->orWhere('descripcion', 'like', "%{$buscar}%")
+                $query->where(
+                    fn($q) => $q
+                        ->where('nombre', 'like', "%{$buscar}%")
+                        ->orWhere('descripcion', 'like', "%{$buscar}%")
                 );
             }
 
@@ -340,13 +358,23 @@ class UsoExternoController extends Controller
             if ($request->ajax()) {
                 return response()->json([
                     'html' => view('UsoExterno.partials.productos-grid', compact(
-                        'productos', 'variantes', 'filtros', 'gridBaseUrl', 'esLineaSingular'
+                        'productos',
+                        'variantes',
+                        'filtros',
+                        'gridBaseUrl',
+                        'esLineaSingular'
                     ))->render(),
                 ]);
             }
 
             return view('UsoExterno.Indexs.categoria', compact(
-                'categoria', 'productos', 'variantes', 'filtros', 'buscar', 'gridBaseUrl', 'esLineaSingular'
+                'categoria',
+                'productos',
+                'variantes',
+                'filtros',
+                'buscar',
+                'gridBaseUrl',
+                'esLineaSingular'
             ));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             throw $e;
@@ -411,7 +439,9 @@ class UsoExternoController extends Controller
             }
 
             return view('UsoExterno.Shows.producto-especial', compact(
-                'producto', 'relacionados', 'relacionadosSonEspeciales'
+                'producto',
+                'relacionados',
+                'relacionadosSonEspeciales'
             ));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             throw $e;
