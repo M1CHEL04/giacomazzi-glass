@@ -85,22 +85,22 @@ $lineas = [
 </section>
 
 
-<section class="home-nosotros g-plano g-plano--light" id="nosotros">
+<section class="home-nosotros g-plano" id="nosotros">
     <div class="container home-nosotros-inner">
         <div class="home-nosotros-copy" data-reveal>
-            <p class="home-eyebrow home-eyebrow--light">Sobre nosotros</p>
+            <p class="home-eyebrow">Sobre nosotros</p>
             <p class="home-nosotros-lead">
                 En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de
                 aberturas de PVC y aluminio, ofreciendo soluciones funcionales,
                 duraderas y de calidad para todo tipo de proyectos.
             </p>
-            <a href="{{ route('nosotros') }}" class="home-link home-link--light">
+            <a href="{{ route('nosotros') }}" class="home-link">
                 Leer más <x-heroicon-o-arrow-right />
             </a>
         </div>
 
         <figure class="home-nosotros-figure" data-reveal data-reveal-delay="1">
-            <div class="home-nosotros-plate g-plano">
+            <div class="home-nosotros-plate">
                 <img src="{{ imagen_src($nosotrosImagen, 800) }}"
                     srcset="{{ imagen_srcset($nosotrosImagen) }}"
                     sizes="(min-width: 1200px) 420px, 34vw"
@@ -112,13 +112,13 @@ $lineas = [
     </div>
 </section>
 
-<section class="home-lineas g-plano">
+<section class="home-lineas g-plano g-plano--light">
     <div class="container home-lineas-inner">
         <div class="home-lineas-head" data-reveal>
-            <p class="home-eyebrow">Cómo trabajamos</p>
-            <h2 class="home-title home-lineas-title">Una solución para cada necesidad</h2>
+            <p class="home-eyebrow home-eyebrow--light">Cómo trabajamos</p>
+            <h2 class="home-title home-title--light home-lineas-title">Una solución para cada necesidad</h2>
             <p class="home-lineas-intro">
-                TTres formas de resolver lo que necesitás, con la misma calidad de fabricación en cada una.
+                Tres formas de resolver lo que necesitás, con la misma calidad de fabricación en cada una.
             </p>
         </div>
 
@@ -170,7 +170,7 @@ $lineas = [
     </div>
 </section>
 
-<section class="home-catalogo" id="catalogo">
+<section class="home-catalogo g-plano" id="catalogo">
     <div class="container">
         <div class="home-catalogo-head" data-reveal>
             <div>
