@@ -141,10 +141,10 @@ class UsoInternoController extends Controller
 
     public function storeCategoria(Request $request)
     {
-        $request->validate([
+        $request->validate(array_merge([
             'nombre'      => 'required|string|max:255|unique:categorias,nombre',
             'imagen_hero' => 'nullable|image|max:4096',
-        ], [
+        ], $this->reglasEncuadreHero()), [
             'nombre.required'     => 'El nombre de la categoria es obligatorio.',
             'nombre.string'       => 'El nombre de la categoria debe ser un texto.',
             'nombre.max'          => 'El nombre de la categoria no puede superar los 255 caracteres.',
@@ -159,11 +159,13 @@ class UsoInternoController extends Controller
                 $rutaHero = $this->guardarImagenHero($request->file('imagen_hero'));
             }
 
-            Categoria::create([
+            Categoria::create(array_merge([
                 'nombre'      => $request->nombre,
                 'activo'      => true,
                 'imagen_hero' => $rutaHero,
-            ]);
+            ], $rutaHero
+                ? $this->encuadreHeroDesde($request)
+                : $this->encuadreHeroPorDefecto()));
 
             MenuCategorias::olvidar();
             return redirect()->route('uso-interno.categorias.index')->with('success', 'Categoría creada exitosamente.');
@@ -199,11 +201,11 @@ class UsoInternoController extends Controller
     {
         $categoria = Categoria::findOrFail($id);
 
-        $request->validate([
+        $request->validate(array_merge([
             'nombre'      => 'required|string|max:255|unique:categorias,nombre,' . $categoria->id,
             'activo'      => 'nullable|in:0,1',
             'imagen_hero' => 'nullable|image|max:4096',
-        ], [
+        ], $this->reglasEncuadreHero()), [
             'nombre.required'   => 'El nombre de la categoria es obligatorio.',
             'nombre.string'     => 'El nombre de la categoria debe ser un texto.',
             'nombre.max'        => 'El nombre de la categoria no puede superar los 255 caracteres.',
@@ -226,11 +228,19 @@ class UsoInternoController extends Controller
                     $this->eliminarImagenHero($categoria->imagen_hero);
                 }
                 $datos['imagen_hero'] = $this->guardarImagenHero($request->file('imagen_hero'));
+                $datos += $this->encuadreHeroDesde($request);
             } elseif ($request->boolean('eliminar_imagen_hero')) {
                 if ($categoria->imagen_hero) {
                     $this->eliminarImagenHero($categoria->imagen_hero);
                 }
                 $datos['imagen_hero'] = null;
+                // Sin foto el encuadre no apunta a nada: vuelve al centro para
+                // que la próxima que suban no herede el ajuste de la anterior.
+                $datos += $this->encuadreHeroPorDefecto();
+            } elseif ($categoria->imagen_hero) {
+                // Misma foto, encuadre retocado: el caso más común una vez que
+                // la imagen ya está cargada.
+                $datos += $this->encuadreHeroDesde($request);
             }
 
             $categoria->update($datos);
@@ -714,5 +724,55 @@ class UsoInternoController extends Controller
         if (file_exists($path)) {
             @unlink($path);
         }
+    }
+
+    /**
+     * Reglas del encuadre del hero: punto focal en porcentaje y zoom.
+     *
+     * Los seis campos los escribe el editor de encuadre (hero-imagen.js) en
+     * inputs ocultos, así que un valor fuera de rango sólo llega de un
+     * formulario manipulado — por eso alcanza con acotarlo y no hay mensajes
+     * propios: el admin nunca los va a ver.
+     */
+    private function reglasEncuadreHero(): array
+    {
+        $reglas = [];
+
+        foreach (array_keys(Categoria::RECUADROS_HERO) as $recuadro) {
+            $reglas["hero_{$recuadro}_x"]    = 'nullable|numeric|between:0,100';
+            $reglas["hero_{$recuadro}_y"]    = 'nullable|numeric|between:0,100';
+            $reglas["hero_{$recuadro}_zoom"] = 'nullable|numeric|between:1,3';
+        }
+
+        return $reglas;
+    }
+
+    /** Los seis campos del encuadre tal como vinieron del formulario. */
+    private function encuadreHeroDesde(Request $request): array
+    {
+        $datos = [];
+
+        foreach (array_keys(Categoria::RECUADROS_HERO) as $recuadro) {
+            foreach (Categoria::ENCUADRE_DEFECTO as $eje => $defecto) {
+                $campo = "hero_{$recuadro}_{$eje}";
+                $datos[$campo] = (float) $request->input($campo, $defecto);
+            }
+        }
+
+        return $datos;
+    }
+
+    /** Encuadre centrado y sin ampliar: cómo se veía el hero antes de ser editable. */
+    private function encuadreHeroPorDefecto(): array
+    {
+        $datos = [];
+
+        foreach (array_keys(Categoria::RECUADROS_HERO) as $recuadro) {
+            foreach (Categoria::ENCUADRE_DEFECTO as $eje => $defecto) {
+                $datos["hero_{$recuadro}_{$eje}"] = $defecto;
+            }
+        }
+
+        return $datos;
     }
 }

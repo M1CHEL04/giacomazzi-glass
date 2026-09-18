@@ -172,6 +172,17 @@ html {
     border-bottom: 5px solid var(--external-primary);
 }
 
+/* El encuadre lo elige el admin y viaja en el `style` del <img> como
+   variables (ver Categoria::estiloEncuadreHero). Sin ellas queda el centro
+   sin ampliar, que es como se veían los heros antes de que fueran editables
+   — por eso los heros fijos de Nosotros y Todos los productos no cambian.
+
+   Los tres valores trabajan juntos: object-position pone el punto elegido de
+   la foto en esa misma posición del recuadro, y transform-origin repite las
+   coordenadas para que el zoom crezca *alrededor* de ese punto en vez de
+   alrededor del centro. Así el punto que el admin marcó queda clavado donde
+   lo dejó, sin importar el alto que tome el hero en la ventana del visitante:
+   por eso alcanza un par de números y no hace falta recortar el archivo. */
 .g-hero-bg,
 .about-hero-bg {
     position: absolute;
@@ -179,7 +190,9 @@ html {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: var(--hero-x, 50%) var(--hero-y, 50%);
+    transform-origin: var(--hero-x, 50%) var(--hero-y, 50%);
+    scale: var(--hero-zoom, 1);
     z-index: 0;
 }
 
@@ -244,6 +257,16 @@ html {
     .about-hero-inner {
         padding-top: 4rem;
         padding-bottom: 4rem;
+    }
+
+    /* Desde acá el recuadro pasa de ≈1.8:1 a ≈4.5:1, una franja mucho más
+       apaisada: lo que encuadra bien en el teléfono suele descabezar la foto.
+       Por eso escritorio tiene su propio encuadre y no hereda el del móvil. */
+    .g-hero-bg,
+    .about-hero-bg {
+        object-position: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
+        transform-origin: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
+        scale: var(--hero-zoom-esc, 1);
     }
 
     /* En pantalla ancha el degradado se inclina: oscurece el lado donde

@@ -1,0 +1,375 @@
+/* =====================================================================
+   Editor de encuadre del hero de categoría (panel interno)
+   ---------------------------------------------------------------------
+   Se ve la foto entera y encima un recuadro claro: eso es lo que el
+   visitante va a ver. Todo lo que queda afuera va bajo un velo, porque
+   el trabajo acá no es mirar la foto sino decidir qué se pierde.
+
+   Sobre fondo carbón y no sobre el gris del panel: una foto sólo se
+   juzga contra un neutro oscuro, y el carbón ya está en la paleta del
+   sitio (--g-carbon, tomado del aluminio anodizado que fabricamos).
+
+   La cota — la línea con topes que mide el recuadro — es la firma del
+   plano de taller que usa el sitio público, y acá informa igual que
+   allá: dice cuántos píxeles reales de la foto entran en el recuadro,
+   y se pone en alerta cuando no alcanzan. Es el único gesto decorado
+   de la pantalla; el resto se mantiene callado a propósito.
+   ===================================================================== */
+
+.hero-encuadre {
+    /* Neutros fríos del mismo origen que --g-carbon en externo.css. No son
+       colores nuevos: es la escala del aluminio, que acá hace de mesa de luz. */
+    --enc-fondo: #23262a;
+    --enc-panel: #2b2f34;
+    --enc-linea: rgba(255, 255, 255, 0.14);
+    --enc-texto: #e8ecea;
+    --enc-texto-tenue: #98a19e;
+
+    /* La cota toma el verde suave de la marca: lee como anotación sobre el
+       plano, no como contenido de la foto. */
+    --enc-cota: var(--internal-primary-soft, #8ab9a5);
+    /* --g-peligro aclarado para que se lea sobre carbón. Misma escala del
+       rojo de siempre, no un color aparte. */
+    --enc-alerta: #e0705f;
+
+    --enc-velo: rgba(14, 16, 18, 0.82);
+    --enc-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+
+    background: var(--enc-fondo);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: var(--enc-texto);
+}
+
+.hero-encuadre-intro {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--enc-texto-tenue);
+    margin: 0 0 0.875rem;
+}
+
+.hero-encuadre-marcos {
+    display: flex;
+    flex-direction: column;
+    gap: 1.125rem;
+}
+
+.hero-marco {
+    margin: 0;
+    min-width: 0;
+}
+
+.hero-marco-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.625rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-marco-nombre {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--enc-texto);
+}
+
+.hero-marco-forma {
+    font-family: var(--enc-mono);
+    font-size: 10.5px;
+    color: var(--enc-texto-tenue);
+}
+
+/* ── Lienzo: la foto completa ───────────────────────────────────────── */
+
+.hero-lienzo {
+    position: relative;
+    display: block;
+    /* Calca a la foto: sin padding ni borde, así un porcentaje del lienzo es
+       el mismo porcentaje de la imagen y el recuadro se posiciona sin cuentas.
+       fit-content y no max-content: en columna angosta se achica con ella. */
+    width: fit-content;
+    max-width: 100%;
+    margin-inline: auto;
+    overflow: hidden;
+    border-radius: 0.375rem;
+    background: var(--enc-panel);
+    cursor: grab;
+    touch-action: none;
+}
+
+.hero-lienzo:focus-visible {
+    outline: 2px solid var(--enc-cota);
+    outline-offset: 3px;
+}
+
+.hero-lienzo[data-arrastrando] {
+    cursor: grabbing;
+}
+
+/* width/height en auto con los dos máximos: así la foto entra entera sin
+   deformarse y el lienzo la calca, que es lo que deja posicionar el
+   recuadro en porcentajes puros. */
+.hero-lienzo-img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 14rem;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* ── Recuadro: lo que se ve en el sitio ─────────────────────────────── */
+
+/* El velo se hace con un box-shadow de radio enorme recortado por el
+   overflow del lienzo: un solo elemento en vez de cuatro paneles que hay
+   que mantener sincronizados en cada arrastre. */
+.hero-ventana {
+    position: absolute;
+    box-shadow: 0 0 0 9999px var(--enc-velo);
+    outline: 1.5px solid rgba(255, 255, 255, 0.92);
+    transition: box-shadow 0.15s ease;
+}
+
+.hero-lienzo[data-arrastrando] .hero-ventana {
+    --enc-velo: rgba(14, 16, 18, 0.9);
+}
+
+/* El hero publicado lleva un degradado de arriba a abajo, pero replicarlo
+   entero acá oscurecía el interior del recuadro tanto como el velo oscurece
+   lo de afuera, y las dos zonas terminaban pareciéndose: se perdía justo la
+   lectura que esta pantalla tiene que dar. Queda sólo el pie, que es donde
+   apoya el título y lo único que hace falta para juzgar si se va a leer. */
+.hero-ventana-scrim {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 55%;
+    background: linear-gradient(to top,
+            rgba(15, 17, 19, 0.72) 0%,
+            rgba(15, 17, 19, 0) 100%);
+}
+
+.hero-ventana-titulo {
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.375rem;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(15, 17, 19, 0.6);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Cota: cuántos píxeles de la foto entran acá ────────────────────── */
+
+.hero-cota {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    color: var(--enc-cota);
+}
+
+.hero-cota-tope {
+    width: 1px;
+    height: 9px;
+    background: currentColor;
+    flex: none;
+}
+
+.hero-cota-linea {
+    flex: 1;
+    height: 1px;
+    background: currentColor;
+    min-width: 0.5rem;
+}
+
+/* Placa detrás del número: la cota cae sobre la parte clara de la foto, que
+   es justo donde el verde fino deja de leerse. */
+.hero-cota-medida {
+    font-family: var(--enc-mono);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: currentColor;
+    padding: 0.05rem 0.3rem;
+    border-radius: 0.2rem;
+    background: rgba(14, 16, 18, 0.82);
+}
+
+/* Pocos píxeles para el tamaño al que se va a mostrar: la medida misma
+   avisa, que es más directo que un cartel aparte. */
+.hero-cota[data-escasa] {
+    color: var(--enc-alerta);
+}
+
+/* En un recuadro chico la cota tapa más de lo que informa. */
+.hero-cota[hidden] {
+    display: none;
+}
+
+/* ── Controles ──────────────────────────────────────────────────────── */
+
+.hero-marco-controles {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.625rem;
+}
+
+.hero-paso {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    border: 1px solid var(--enc-linea);
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--enc-texto);
+    transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.hero-paso:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+
+.hero-paso:focus-visible {
+    outline: 2px solid var(--enc-cota);
+    outline-offset: 2px;
+}
+
+/* --relleno lo escribe el JS en cada cambio: es la parte recorrida. */
+.hero-zoom {
+    flex: 1;
+    min-width: 0;
+    height: 2px;
+    padding: 0;
+    border: 0;
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: linear-gradient(to right,
+            var(--enc-cota) 0 var(--relleno, 0%),
+            var(--enc-linea) var(--relleno, 0%) 100%);
+    cursor: pointer;
+}
+
+.hero-zoom::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    transition: transform 0.12s ease;
+}
+
+.hero-zoom::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    transition: transform 0.12s ease;
+}
+
+.hero-zoom:active::-webkit-slider-thumb {
+    transform: scale(1.3);
+}
+
+.hero-zoom:active::-moz-range-thumb {
+    transform: scale(1.3);
+}
+
+.hero-zoom::-moz-range-track {
+    background: transparent;
+}
+
+.hero-zoom:focus-visible {
+    outline: 2px solid var(--enc-cota);
+    outline-offset: 4px;
+}
+
+.hero-zoom-valor {
+    font-family: var(--enc-mono);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--enc-texto-tenue);
+    min-width: 2.9rem;
+    text-align: right;
+}
+
+.hero-btn-texto {
+    flex: none;
+    padding: 0.2rem 0.5rem;
+    font-size: 11px;
+    border: 0;
+    border-radius: 0.375rem;
+    background: transparent;
+    color: var(--enc-texto-tenue);
+    transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+.hero-btn-texto:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--enc-texto);
+}
+
+.hero-btn-texto:focus-visible {
+    outline: 2px solid var(--enc-cota);
+    outline-offset: 2px;
+}
+
+.hero-encuadre-nota {
+    font-size: 11.5px;
+    line-height: 1.45;
+    color: var(--enc-alerta);
+    margin: 0.875rem 0 0;
+}
+
+.hero-encuadre-nota:empty {
+    display: none;
+}
+
+/* Desde tablet los dos lienzos entran uno al lado del otro y se comparan
+   de un vistazo, que es de lo que se trata tener dos. */
+@media (min-width: 768px) {
+    .hero-encuadre-marcos {
+        flex-direction: row;
+        gap: 1.25rem;
+    }
+
+    .hero-marco {
+        flex: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-ventana,
+    .hero-paso,
+    .hero-btn-texto,
+    .hero-zoom::-webkit-slider-thumb,
+    .hero-zoom::-moz-range-thumb {
+        transition: none;
+    }
+}

@@ -88,6 +88,42 @@ if (! function_exists('imagen_src')) {
     }
 }
 
+if (! function_exists('imagen_medidas')) {
+    /**
+     * Ancho y alto en píxeles de la mejor copia disponible de una imagen, o
+     * null si no se puede leer ninguna.
+     *
+     * Busca de la variante más grande a la más chica y recién después el
+     * original, porque `images:optimizar --eliminar-originales` lo borra: para
+     * varios heros del repo la copia de 2400 ES el original.
+     *
+     * Lo usa el editor de encuadre del panel, que muestra una variante liviana
+     * pero tiene que informar los píxeles que de verdad va a servir el hero.
+     */
+    function imagen_medidas(string $ruta): ?array
+    {
+        $candidatas = [];
+
+        foreach (array_reverse(imagen_anchos()) as $ancho) {
+            if ($variante = imagen_variante($ruta, $ancho)) {
+                $candidatas[] = $variante;
+            }
+        }
+
+        $candidatas[] = ltrim($ruta, '/');
+
+        foreach ($candidatas as $relativa) {
+            $absoluta = public_path($relativa);
+
+            if (is_file($absoluta) && ($medidas = @getimagesize($absoluta))) {
+                return ['ancho' => $medidas[0], 'alto' => $medidas[1]];
+            }
+        }
+
+        return null;
+    }
+}
+
 if (! function_exists('imagen_srcset')) {
     /**
      * Cadena para el atributo `srcset` con todas las variantes existentes.

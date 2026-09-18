@@ -5,6 +5,7 @@
         sizes="100vw"
         alt="" class="g-hero-bg" aria-hidden="true"
         width="2400" height="745"
+        style="{{ $categoria->estiloEncuadreHero() }}"
         fetchpriority="high" decoding="async">
     @endif
     <span class="g-hero-scrim"></span>
