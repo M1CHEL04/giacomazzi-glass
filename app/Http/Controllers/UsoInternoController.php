@@ -10,6 +10,7 @@ use App\Models\ProductoEspecial;
 use App\Models\UnidadMedida;
 use App\Services\CatalogoPdfService;
 use App\Services\GestorImagenesProducto;
+use App\Services\ImportadorProductos;
 use App\Services\MenuCategorias;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
@@ -304,7 +305,10 @@ class UsoInternoController extends Controller
                 ]);
             }
 
-            return view('UsoInterno.Productos.indexProductos', compact('productos', 'categorias'));
+            // Para el modal de carga masiva: los códigos válidos de la columna "Unidad".
+            $unidades = UnidadMedida::orderBy('id')->get();
+
+            return view('UsoInterno.Productos.indexProductos', compact('productos', 'categorias', 'unidades'));
         } catch (\Exception $e) {
             Log::error('Error al cargar productos: ' . $e->getMessage());
 
@@ -452,6 +456,29 @@ class UsoInternoController extends Controller
                 ->with('error', 'Error al crear el producto.')
                 ->withInput();
         }
+    }
+
+    /** Carga masiva desde Excel/CSV; el detalle de lo que falló vuelve en `importacion`. */
+    public function importarProductos(Request $request, ImportadorProductos $importador)
+    {
+        $request->validate(
+            ['archivo' => 'required|file|mimes:xlsx,xls,csv,txt|max:5120'],
+            [
+                'archivo.required' => 'Elegí un archivo para importar.',
+                'archivo.mimes'    => 'El archivo tiene que ser Excel (.xlsx, .xls) o CSV.',
+                'archivo.max'      => 'El archivo no puede superar los 5 MB.',
+            ]
+        );
+
+        try {
+            $resultado = $importador->importar($request->file('archivo'), false);
+        } catch (\Exception $e) {
+            Log::error('Error al importar productos estándar: ' . $e->getMessage());
+            return redirect()->route('uso-interno.productos.index')
+                ->with('error', 'No se pudo leer el archivo. Revisá que sea un Excel o CSV válido.');
+        }
+
+        return redirect()->route('uso-interno.productos.index')->with('importacion', $resultado);
     }
 
     public function editProducto(String $id)

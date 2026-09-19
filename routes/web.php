@@ -67,6 +67,7 @@ Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group
     Route::get('/create-producto',     [UsoInternoController::class, 'createProducto'])->name('productos.create');
     Route::get('/edit-producto/{id}',  [UsoInternoController::class, 'editProducto'])->name('productos.edit');
     Route::post('/store-producto',     [UsoInternoController::class, 'storeProducto'])->name('productos.store');
+    Route::post('/importar-productos', [UsoInternoController::class, 'importarProductos'])->name('productos.importar');
     Route::post('/update-producto/{id}', [UsoInternoController::class, 'updateProducto'])->name('productos.update');
     // El id viaja en el body (hidden del modal), no en la URL.
     Route::post('/activar-producto',    [UsoInternoController::class, 'activarProducto'])->name('productos.activar');
@@ -79,6 +80,7 @@ Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group
     Route::get('/create-producto-especial',      [UsoInternoEspecialesController::class, 'create'])->name('especiales.create');
     Route::get('/edit-producto-especial/{id}',   [UsoInternoEspecialesController::class, 'edit'])->name('especiales.edit');
     Route::post('/store-producto-especial',      [UsoInternoEspecialesController::class, 'store'])->name('especiales.store');
+    Route::post('/importar-productos-especiales', [UsoInternoEspecialesController::class, 'importar'])->name('especiales.importar');
     Route::post('/update-producto-especial/{id}', [UsoInternoEspecialesController::class, 'update'])->name('especiales.update');
     Route::post('/activar-producto-especial',    [UsoInternoEspecialesController::class, 'activar'])->name('especiales.activar');
     Route::post('/desactivar-producto-especial', [UsoInternoEspecialesController::class, 'desactivar'])->name('especiales.desactivar');

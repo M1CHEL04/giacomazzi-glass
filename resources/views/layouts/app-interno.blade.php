@@ -103,6 +103,9 @@
                         <h1 class="internal-page-title">@yield('page-title', 'Panel interno')</h1>
                         <div class="internal-page-breadcrumb">@yield('subhead', 'Administración general')</div>
                     </div>
+                    @hasSection('page-actions')
+                    <div class="internal-actions">@yield('page-actions')</div>
+                    @endif
                 </div>
 
                 <section class="internal-content-card">

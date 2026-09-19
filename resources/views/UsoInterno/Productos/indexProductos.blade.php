@@ -6,24 +6,40 @@
 
 @endsection
 
+@section('page-actions')
+<button type="button" class="btn btn-outline-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-nowrap" style="font-size: 13px;" data-bs-toggle="modal" data-bs-target="#modalCatalogoPdf">
+    <x-fluentui-document-pdf-20-o class="me-1" style="width:14px;height:14px;" />
+    Generar catálogo PDF
+</button>
+<button type="button" class="btn btn-outline-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-nowrap" style="font-size: 13px;" data-bs-toggle="modal" data-bs-target="#modalImportarProductos">
+    <x-fluentui-arrow-upload-20-o class="me-1" style="width:14px;height:14px;" />
+    Carga masiva
+</button>
+<a href="{{ route('uso-interno.productos.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center text-nowrap" style="font-size: 13px;">
+    <x-fluentui-add-20-o class="me-1" style="width:14px;height:14px;" />
+    Crear producto
+</a>
+@endsection
+
 @section('content')
 <div class="d-flex flex-column gap-3">
-    <!-- Filtros y botón crear -->
-    <div class="d-flex flex-column flex-lg-row gap-2 align-items-lg-center">
+    <!-- Filtros -->
+    <div class="d-flex flex-column flex-md-row gap-2">
         <div class="position-relative flex-grow-1">
             <input
                 type="text"
                 name="search"
-                class="form-control form-control-sm ps-5 py-2 rounded-2 border"
+                class="form-control form-control-sm rounded-2 border"
+                style="font-size: 13px; padding-left: 34px;"
                 placeholder="Buscar por nombre o código..."
                 value="{{ request('search') }}"
                 id="searchProducto"
                 data-index-url="{{ route('uso-interno.productos.index') }}"
                 data-show-base="{{ url('uso-interno/show-producto') }}">
-            <x-fluentui-search-20-o class="position-absolute text-secondary" style="width:18px;height:18px;left:10px;top:50%;transform:translateY(-50%);" />
+            <x-fluentui-search-20-o class="position-absolute text-secondary" style="width:16px;height:16px;left:10px;top:50%;transform:translateY(-50%);" />
         </div>
         <div style="min-width: 200px;">
-            <select class="form-select form-select-sm py-2 rounded-2 border" id="filterCategoria">
+            <select class="form-select form-select-sm rounded-2 border" style="font-size: 13px;" id="filterCategoria">
                 <option value="">Todas las categorías</option>
                 @foreach ($categorias as $cat)
                 <option value="{{ $cat->id }}" {{ request('categoria_id') == $cat->id ? 'selected' : '' }}>
@@ -33,20 +49,12 @@
             </select>
         </div>
         <div style="min-width: 150px;">
-            <select class="form-select form-select-sm py-2 rounded-2 border" id="filterActivo">
+            <select class="form-select form-select-sm rounded-2 border" style="font-size: 13px;" id="filterActivo">
                 <option value="">Todos los estados</option>
                 <option value="1" {{ request('activo') === '1' ? 'selected' : '' }}>Activo</option>
                 <option value="0" {{ request('activo') === '0' ? 'selected' : '' }}>Inactivo</option>
             </select>
         </div>
-        <button type="button" class="btn btn-outline-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;" data-bs-toggle="modal" data-bs-target="#modalCatalogoPdf">
-            <x-fluentui-document-pdf-20-o class="me-1" style="width:14px;height:14px;" />
-            Generar catálogo PDF
-        </button>
-        <a href="{{ route('uso-interno.productos.create') }}" class="btn btn-success btn-sm px-2 py-1 rounded-2 d-inline-flex align-items-center" style="font-size: 13px;">
-            <x-fluentui-add-20-o class="me-1" style="width:14px;height:14px;" />
-            Crear producto
-        </a>
     </div>
 
     <div class="border rounded-3 bg-white position-relative">
@@ -132,6 +140,11 @@
 
 @include('UsoInterno.Productos.modals.estadoProducto')
 @include('UsoInterno.Productos.modals.catalogoPdf')
+@include('UsoInterno.Productos.partials.resultadoImportacion')
+@include('UsoInterno.Productos.modals.importarProductos', [
+'rutaImportar' => route('uso-interno.productos.importar'),
+'unidades' => $unidades,
+])
 @endsection
 
 @section('script')

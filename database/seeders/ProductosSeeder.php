@@ -27,7 +27,7 @@ class ProductosSeeder extends Seeder
         foreach ($variantesData as $nombre => $valores) {
             $variante = Variante::firstOrCreate(['nombre' => $nombre]);
             $variante->valores_obj = collect($valores)->map(
-                fn ($v) => ValorVariante::firstOrCreate(
+                fn($v) => ValorVariante::firstOrCreate(
                     ['variante_id' => $variante->id, 'valor' => $v],
                     ['codigo' => Str::upper(Str::slug($v, '_'))]
                 )
@@ -35,7 +35,6 @@ class ProductosSeeder extends Seeder
             $variantes[$nombre] = $variante;
         }
 
-        // Unidades de medida (sembradas por la migración de unidades_medida).
         $unidades = UnidadMedida::pluck('id', 'codigo');
 
         // ── 2. Categorías con su unidad de cotización y sus variantes ─────────
@@ -107,13 +106,13 @@ class ProductosSeeder extends Seeder
 
             // Vincular variantes a la categoría
             $varianteIds = collect($config['variantes'])
-                ->map(fn ($n) => $variantes[$n]->id)
+                ->map(fn($n) => $variantes[$n]->id)
                 ->all();
             $categoria->variantes()->syncWithoutDetaching($varianteIds);
 
             // Recopilar todos los valores disponibles para la categoría
             $valoresPorVariante = collect($config['variantes'])->map(
-                fn ($n) => $variantes[$n]->valores_obj
+                fn($n) => $variantes[$n]->valores_obj
             );
 
             foreach ($config['productos'] as $idx => [$nombre, $descripcion]) {
@@ -126,7 +125,7 @@ class ProductosSeeder extends Seeder
                         'unidad_id'          => $unidades[$config['unidad']],
                         'nombre'             => $nombre,
                         'descripcion'        => $descripcion,
-                        'descripcion_tecnica'=> null,
+                        'descripcion_tecnica' => null,
                         'activo'             => true,
                     ]
                 );
