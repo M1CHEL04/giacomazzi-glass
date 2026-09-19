@@ -730,8 +730,8 @@
 }
 
 .ps-tecnica-figura:hover {
-    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.1);
-    transform: translateY(-2px);
+    box-shadow: var(--g-flota-sombra);
+    transform: var(--g-flota);
 }
 
 .ps-tecnica-figura:focus-visible {
@@ -792,14 +792,16 @@
 }
 
 /* ---- Banner personalización (sección completa) ----
-   Cierre de la página. Toma el mismo recurso con el que Inicio abre el
-   catálogo y con el que cierra el hero: fondo vidrio y una banda verde
-   de 5px arriba. Antes era un verde pálido propio (#edf5f1) que no
-   existía en ninguna otra vista. */
+   Cierre de la página y su banda verde (.g-banda-verde, en externo.css):
+   la misma de "Cómo trabajamos" en Inicio y del cierre de Nosotros. Una
+   por página, y en la ficha cae acá porque es donde se ofrece algo más
+   que el producto que se está mirando.
+
+   Antes era vidrio con un filete verde de 5px arriba; sobre la banda
+   entera el filete se fundía con ella, así que se fue. Todo lo de adentro
+   pasa a la escala blanca: ícono, texto y botón. */
 .ps-banner-personalizar {
     padding: 5rem 0;
-    background-color: var(--g-vidrio);
-    border-top: 5px solid var(--external-primary);
 }
 
 .ps-banner-personalizar-inner {
@@ -816,9 +818,9 @@
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: rgba(40, 116, 82, 0.09);
-    border: 1px solid rgba(40, 116, 82, 0.18);
-    color: var(--external-primary);
+    background: var(--g-hover-blanco);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--external-white);
     flex-shrink: 0;
 }
 
@@ -836,26 +838,29 @@
     font-family: var(--font-display);
     font-size: var(--fs-sub);
     font-weight: 700;
-    color: var(--external-secondary);
+    color: var(--external-white);
     margin-bottom: 0.3rem;
 }
 
 .ps-banner-personalizar-desc {
     font-size: var(--fs-small);
-    color: var(--external-secondary-soft);
+    color: rgba(255, 255, 255, 0.82);
     line-height: 1.65;
     margin: 0;
 }
 
+/* Botón fantasma en blanco: sobre la banda verde, el contorno verde de
+   antes desaparecía. El hover sigue la escala neutra de externo.css
+   (tinte blanco al 12%), no salta a verde. */
 .ps-banner-personalizar-cta {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
     padding: 0.6rem 1.35rem;
     background: transparent;
-    border: 1.5px solid rgba(40, 116, 82, 0.4);
+    border: 1.5px solid rgba(255, 255, 255, 0.55);
     border-radius: 3px;
-    color: var(--external-primary);
+    color: var(--external-white);
     font-size: var(--fs-small);
     font-weight: 600;
     text-decoration: none;
@@ -865,9 +870,14 @@
 }
 
 .ps-banner-personalizar-cta:hover {
-    background: var(--g-hover-verde);
-    border-color: var(--external-primary);
-    color: var(--external-primary-dark);
+    background: var(--g-hover-blanco);
+    border-color: var(--external-white);
+    color: var(--external-white);
+}
+
+.ps-banner-personalizar-cta:focus-visible {
+    outline: 2px solid var(--external-white);
+    outline-offset: 3px;
 }
 
 .ps-banner-personalizar-cta svg {
@@ -1143,8 +1153,8 @@
 
 .ps-mini-card:hover {
     border-color: rgba(40, 116, 82, 0.28);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-    transform: translateY(-2px);
+    box-shadow: var(--g-flota-sombra);
+    transform: var(--g-flota);
 }
 
 .ps-mini-imagen {
@@ -1152,7 +1162,7 @@
     height: 60px;
     border-radius: 3px;
     overflow: hidden;
-    background: linear-gradient(135deg, #edf5f1 0%, #d4e8df 100%);
+    background: linear-gradient(135deg, var(--g-verde-wash) 0%, var(--g-verde-tinte) 100%);
     flex-shrink: 0;
 }
 

@@ -381,7 +381,7 @@
 @endif
 
 {{-- Banner personalización --}}
-<section class="ps-banner-personalizar">
+<section class="ps-banner-personalizar g-banda-verde g-plano g-plano--light">
     <div class="container">
         <div class="ps-banner-personalizar-inner">
             <div class="ps-banner-personalizar-icon">

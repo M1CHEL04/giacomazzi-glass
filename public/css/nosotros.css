@@ -10,8 +10,19 @@
 
      hero → quiénes somos → obras → dónde estamos → escribinos
 
-   Mismo ritmo de bandas que Inicio (foto → claro → oscuro), para que
-   las dos páginas se lean como el mismo sitio.
+   Mismo lenguaje de bandas que Inicio, para que las dos páginas se lean
+   como el mismo sitio:
+
+     hero       foto oscura, con el filete verde de .g-hero
+     quiénes    blanco      + trama
+     obras      vidrio      + trama
+     dónde      vidrio      + trama
+     escribinos VERDE lleno + trama en blanco  ← la banda verde
+
+   La trama (.g-plano) y la banda verde (.g-banda-verde) vienen completas
+   de externo.css: son las mismas de Inicio, máscara incluida. Una sola
+   banda verde por página, y acá es el cierre: es donde la página deja
+   de contar y empieza a pedir algo.
    ===================================================================== */
 
 /* ── HERO ──────────────────────────────────────────────────────────── */
@@ -366,10 +377,11 @@
 }
 
 /* ── ESCRIBINOS ────────────────────────────────────────────────────── */
-/* Franja oscura de cierre, igual que "a medida" en Inicio. */
+/* La banda verde de la página (.g-banda-verde pone el color). Era carbón,
+   igual que "a medida" en Inicio, y con eso Nosotros no tenía ni una
+   banda de color: se leía como otro sitio. El botón blanco (.g-btn--solid)
+   funciona igual sobre verde que sobre carbón. */
 .about-contacto {
-    background: var(--g-carbon);
-    color: var(--external-white);
     padding: 3.5rem 0;
 }
 

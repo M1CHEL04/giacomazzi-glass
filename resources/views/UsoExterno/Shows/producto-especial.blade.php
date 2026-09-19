@@ -35,8 +35,6 @@ $mensajeWa = '¡Hola! Quiero consultar por «' . $producto->nombre . '» ('
             </ol>
         </nav>
 
-        <p class="g-eyebrow pe-linea-eyebrow">Línea adapta · fabricación a medida</p>
-
         <div class="row g-4 g-lg-5">
 
             {{-- Galería: mismo markup e ids que la ficha estándar, para que
@@ -45,6 +43,10 @@ $mensajeWa = '¡Hola! Quiero consultar por «' . $producto->nombre . '» ('
                 <div class="ps-galeria pe-galeria">
 
                     <div id="ps-carousel" class="carousel slide ps-carousel" data-bs-ride="false" data-bs-touch="true">
+                        {{-- La línea se marca igual que en la tarjeta del catálogo:
+                             el mismo sello en la misma esquina de la foto, así se
+                             reconoce el producto al entrar a su ficha. --}}
+                        <span class="producto-badge-especial">Adapta</span>
                         <div class="carousel-inner">
                             @if($imagenes->count() > 0)
                             @foreach($imagenes as $imagen)
@@ -283,7 +285,7 @@ $pasosProceso = [
 ];
 @endphp
 
-<section class="pe-proceso">
+<section class="pe-proceso g-banda-verde g-plano g-plano--light">
     <div class="container">
         <p class="ps-seccion-eyebrow">Así trabajamos</p>
         <h2 class="ps-seccion-titulo pe-proceso-titulo">Tu espacio renovado en 4 pasos</h2>

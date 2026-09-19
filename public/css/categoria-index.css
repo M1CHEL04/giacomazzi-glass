@@ -638,8 +638,8 @@
 }
 
 .producto-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1);
+    transform: var(--g-flota);
+    box-shadow: var(--g-flota-sombra);
     border-color: rgba(40, 116, 82, 0.18);
 }
 
@@ -649,7 +649,7 @@
     width: 100%;
     aspect-ratio: 4 / 3;
     overflow: hidden;
-    background: linear-gradient(135deg, #edf5f1 0%, #d4e8df 100%);
+    background: linear-gradient(135deg, var(--g-verde-wash) 0%, var(--g-verde-tinte) 100%);
     flex-shrink: 0;
 }
 

@@ -7,12 +7,16 @@
    que distingue a esta ficha: el panel de consulta y el proceso.
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Encabezado de línea ──────────────────────────────────────────────── */
+/* ── Marca de línea ───────────────────────────────────────────────────── */
 
-/* Va entre el breadcrumb y la galería/info: se ve primero en cualquier
-   orden de columnas, así que "arriba" vale tanto en desktop como en mobile. */
-.pe-linea-eyebrow {
-    margin: 0.75rem 0 1.25rem;
+/* La ficha ya no abre con el rótulo "Línea adapta · fabricación a medida"
+   entre el breadcrumb y la galería. La pertenencia a la línea la dice el
+   sello "Adapta" sobre la foto: es .producto-badge-especial, el mismo de
+   la tarjeta del catálogo (categoria-index.css), en la misma esquina.
+   Acá sólo se lo sube por encima de los items del carrusel, que durante
+   la transición de Bootstrap se apilan con su propio z-index. */
+.pe-galeria .producto-badge-especial {
+    z-index: 3;
 }
 
 /* ── Panel de consulta ────────────────────────────────────────────────── */
@@ -167,16 +171,24 @@
 
 /* ── Proceso ──────────────────────────────────────────────────────────── */
 
+/* La banda verde de esta ficha (.g-banda-verde, en externo.css). Es el
+   mismo contenido que "Cómo trabajamos" en Inicio —pasos numerados de
+   cómo se trabaja— así que lleva la misma banda. Todo lo de adentro pasa
+   a la escala blanca: rótulo, título, números, filetes y textos. */
 .pe-proceso {
-    background: var(--g-vidrio);
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
     padding: 3.5rem 0;
 }
 
+.pe-proceso .ps-seccion-eyebrow {
+    color: var(--external-primary-soft);
+}
+
 /* .ps-seccion-titulo trae el tamaño (--fs-title-sm) y el peso; acá sólo
-   se ajusta el espaciado, que en esta sección es mayor que en las demás. */
+   se ajusta el espaciado, que en esta sección es mayor que en las demás,
+   y el color, que sobre la banda va en blanco. */
 .pe-proceso-titulo {
     margin: 0.5rem 0 2rem;
+    color: var(--external-white);
 }
 
 /* ── Lista de pasos (mobile) ─────────────────────────────────────────────
@@ -190,11 +202,11 @@
 .pe-proceso-lista {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .pe-proceso-item {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .pe-proceso-item-toggle {
@@ -217,8 +229,10 @@
     width: 1.85rem;
     height: 1.85rem;
     border-radius: 50%;
-    background: var(--external-primary);
-    color: var(--external-white);
+    /* Invertido respecto de antes: sobre la banda verde el círculo es
+       blanco y el número verde. */
+    background: var(--external-white);
+    color: var(--external-primary);
     font-family: var(--font-display);
     font-size: var(--fs-small);
     font-weight: 700;
@@ -229,19 +243,24 @@
     font-family: var(--font-display);
     font-size: var(--fs-sub);
     font-weight: 700;
-    color: var(--g-carbon);
+    color: var(--external-white);
 }
 
 .pe-proceso-item-chevron {
     flex: 0 0 auto;
-    color: var(--external-secondary-soft);
+    color: rgba(255, 255, 255, 0.62);
     font-size: 0.85em;
     transition: transform 0.25s ease, color 0.25s ease;
 }
 
 .pe-proceso-item.open .pe-proceso-item-chevron {
     transform: rotate(180deg);
-    color: var(--external-primary);
+    color: var(--external-white);
+}
+
+.pe-proceso-item-toggle:focus-visible {
+    outline: 2px solid var(--external-white);
+    outline-offset: -2px;
 }
 
 /* El alto en sí lo pone layout.js por JS (arranca en 0, queda en 'auto'
@@ -259,7 +278,7 @@
     font-family: var(--font-body);
     font-size: var(--fs-small);
     line-height: 1.6;
-    color: var(--external-secondary);
+    color: rgba(255, 255, 255, 0.82);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -283,7 +302,7 @@
     flex: 1 1 0;
     position: relative;
     padding-top: 1.25rem;
-    border-top: 2px solid var(--external-primary);
+    border-top: 2px solid rgba(255, 255, 255, 0.35);
 }
 
 .pe-proceso-numero {
@@ -293,8 +312,8 @@
     width: 2rem;
     height: 2rem;
     border-radius: 50%;
-    background: var(--external-primary);
-    color: var(--external-white);
+    background: var(--external-white);
+    color: var(--external-primary);
     font-family: var(--font-display);
     font-size: var(--fs-small);
     font-weight: 700;
@@ -305,7 +324,7 @@
     font-family: var(--font-display);
     font-size: var(--fs-sub);
     font-weight: 700;
-    color: var(--g-carbon);
+    color: var(--external-white);
     margin: 0 0 0.45rem;
 }
 
@@ -313,7 +332,7 @@
     font-family: var(--font-body);
     font-size: var(--fs-small);
     line-height: 1.6;
-    color: var(--external-secondary);
+    color: rgba(255, 255, 255, 0.82);
     margin: 0;
 }
 
