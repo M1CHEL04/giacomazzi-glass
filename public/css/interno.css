@@ -311,10 +311,238 @@
     color: var(--internal-secondary-soft);
 }
 
+/* Acciones de la página (crear, importar, exportar), a la derecha del título */
 .internal-actions {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* Zona para elegir o soltar un archivo. El input va encima, invisible. */
+.internal-dropzone {
+    position: relative;
+    display: flex;
+    align-items: center;
     gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1.5px dashed var(--internal-primary-soft);
+    border-radius: 0.6rem;
+    background: var(--internal-surface);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.internal-dropzone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.internal-dropzone:hover,
+.internal-dropzone.is-over {
+    border-color: var(--internal-primary);
+    background: var(--g-hover-verde);
+}
+
+.internal-dropzone:focus-within {
+    border-color: var(--internal-primary);
+    box-shadow: 0 0 0 3px var(--g-hover-verde-alto);
+}
+
+.internal-dropzone.is-filled {
+    border-style: solid;
+    border-color: var(--internal-primary);
+    background: var(--internal-white);
+}
+
+.internal-dropzone-icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    color: var(--internal-primary);
+}
+
+.internal-dropzone-body {
+    min-width: 0;
+}
+
+.internal-dropzone-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--internal-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.internal-dropzone-hint {
+    font-size: 12px;
+    color: var(--bs-secondary-color);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .internal-dropzone {
+        transition: none;
+    }
+}
+
+/* Resultado de la carga masiva: rojo si hubo filas rechazadas, verde si no. */
+.internal-import-result {
+    --import-color: var(--internal-primary);
+    --import-soft: var(--g-hover-verde);
+    border-top: 4px solid var(--import-color) !important;
+    overflow: hidden;
+}
+
+.internal-import-result.is-error {
+    --import-color: var(--g-peligro);
+    --import-soft: var(--g-hover-peligro);
+}
+
+.internal-import-result-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--import-soft);
+    color: var(--import-color);
+}
+
+.internal-import-result-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.internal-import-result-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--import-color);
+}
+
+.internal-import-result-sub {
+    margin-top: 2px;
+    font-size: 13px;
+    color: var(--bs-secondary-color);
+}
+
+.internal-import-errors {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.internal-import-error {
+    padding: 0.55rem 0.75rem;
+    border-left: 3px solid var(--g-peligro);
+    border-radius: 0.4rem;
+    background: var(--g-hover-peligro);
+}
+
+.internal-import-error-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2px;
+}
+
+.internal-import-error-row {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--g-peligro-dark);
+}
+
+.internal-import-error-code {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--internal-secondary);
+    background: var(--internal-white);
+}
+
+.internal-import-error-reason {
+    font-size: 13px;
+    color: var(--internal-secondary);
+}
+
+.internal-import-section {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.5rem;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--internal-primary);
+}
+
+.internal-import-section.is-error {
+    color: var(--g-peligro-dark);
+}
+
+.internal-import-count {
+    padding: 0 7px;
+    border-radius: 999px;
+    font-size: 11px;
+    line-height: 18px;
+    color: var(--internal-white);
+    background: var(--internal-primary);
+}
+
+.internal-import-section.is-error .internal-import-count {
+    background: var(--g-peligro);
+}
+
+/* Cargados: una línea por producto, con un solo borde para todo el bloque. */
+.internal-import-created {
+    border: 1px solid var(--internal-border);
+    border-left: 3px solid var(--internal-primary);
+    border-radius: 0.4rem;
+    overflow: hidden;
+}
+
+.internal-import-created-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 13px;
+}
+
+.internal-import-created-item + .internal-import-created-item {
+    border-top: 1px solid var(--internal-border);
+}
+
+.internal-import-created-row {
+    flex-shrink: 0;
+    width: 3.6rem;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--internal-primary);
+}
+
+.internal-import-created .internal-import-error-code {
+    flex-shrink: 0;
+    background: var(--internal-surface);
+}
+
+.internal-import-created-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--internal-secondary);
 }
 
 .internal-user-pill {

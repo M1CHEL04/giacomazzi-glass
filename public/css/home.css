@@ -40,9 +40,10 @@
    fondo es la grilla milimetrada (.g-plano, en externo.css). Es la
    única textura de la página: la llevan todas las bandas menos las dos
    que tienen foto a sangre —hero y medida—, siempre igual y siempre
-   con la misma máscara. Cómo se aplica está unos renglones más abajo,
-   en un solo lugar. Nada más se suma encima: ni resplandores, ni
-   tramas anidadas, ni filetes de color sobre las tarjetas.
+   con la misma máscara, que vive en externo.css junto con la clase y
+   es la misma en todas las vistas. Nada más se suma encima: ni
+   resplandores, ni tramas anidadas, ni filetes de color sobre las
+   tarjetas.
    ===================================================================== */
 
 /* ── Primitivas ────────────────────────────────────────────────────── */
@@ -73,25 +74,10 @@
     outline-color: var(--external-white);
 }
 
-/* ── La trama, una sola para toda la página ────────────────────────────
-   Misma grilla, misma máscara y misma dirección en las cuatro bandas que
-   la llevan. Antes cada una la desvanecía desde su propia esquina —una
-   desde arriba a la derecha, otra desde el centro, otra desde abajo a la
-   izquierda— y al scrollear se leían como cuatro fondos distintos en vez
-   de como una página. Entra arriba, donde empieza la banda, y se apaga
-   antes de la mitad: abajo es donde vive el contenido.
-
-   Las dos bandas con foto a sangre —hero y medida— no la llevan: ahí la
-   textura la pone la imagen. Y no hay ninguna otra: ni resplandores ni
-   tramas anidadas adentro de un bloque. La grilla es la textura de la
-   página, en singular. */
-.home-nosotros.g-plano::before,
-.home-lineas.g-plano::before,
-.home-catalogo.g-plano::before,
-.home-adapta.g-plano::before {
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent 62%);
-    mask-image: linear-gradient(to bottom, #000 0%, transparent 62%);
-}
+/* La trama (.g-plano) y la banda verde (.g-banda-verde) son de todo el
+   sitio y viven completas en externo.css, máscara incluida: acá no se
+   redefinen. Las dos bandas con foto a sangre —hero y medida— no llevan
+   trama; ahí la textura la pone la imagen. */
 
 /* ── HERO ──────────────────────────────────────────────────────────── */
 .home-hero {
@@ -100,7 +86,7 @@
     align-items: flex-end;
     /* En teléfono el hero no se lleva la pantalla entera: a 82svh el
        catálogo quedaba tan abajo que la primera pantalla era sólo foto.
-       Con 68svh la banda verde de Nosotros ya asoma sin scrollear.
+       Con 68svh la banda de Nosotros ya asoma sin scrollear.
        El piso de 400px protege pantallas muy cortas: es lo que mide el
        contenido del hero, así que por debajo de eso manda el texto. */
     min-height: max(400px, 68svh);
@@ -380,13 +366,11 @@
    siguen siendo blancos sobre el verde. Es lo mismo que hace la placa de
    nosotros al revés, y es lo que mantiene legible un texto largo dentro
    de una banda de color. */
+/* El verde en sí lo pone .g-banda-verde (externo.css): es la misma banda
+   que cierra Nosotros y las fichas. */
 .home-lineas {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(145deg,
-            var(--external-primary-dark) 0%,
-            var(--external-primary) 100%);
-    color: var(--external-white);
     padding: 3.5rem 0;
 }
 
@@ -1471,8 +1455,8 @@
        flotan, los botones se hunden, y nada cambia de color — se mueve
        un escalón dentro de su propia escala. */
     .home-cat:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 26px rgba(0, 0, 0, 0.14);
+        transform: var(--g-flota);
+        box-shadow: var(--g-flota-sombra);
     }
 
     .home-cat:hover .home-cat-img {
@@ -1483,7 +1467,7 @@
        es más densa que la de una tarjeta sobre blanco: abajo hay verde
        oscuro y una sombra suave ahí no se ve. */
     .home-linea:hover {
-        transform: translateY(-4px);
+        transform: var(--g-flota);
         border-color: rgba(40, 116, 82, 0.2);
         box-shadow: 0 14px 30px rgba(0, 0, 0, 0.18);
     }

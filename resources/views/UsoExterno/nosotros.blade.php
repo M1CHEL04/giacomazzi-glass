@@ -59,7 +59,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 </section>
 
 {{-- ── SOBRE NOSOTROS ───────────────────────────────────────────────── --}}
-<section class="about-intro">
+<section class="about-intro g-plano">
     <div class="container">
         <div class="about-head">
             <p class="g-eyebrow">Sobre nosotros</p>
@@ -98,7 +98,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 
 {{-- ── OBRAS ────────────────────────────────────────────────────────── --}}
 @if(count($obras))
-<section class="about-obras">
+<section class="about-obras g-plano">
     <div class="container">
         <div class="about-head">
             <div>
@@ -146,7 +146,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 
 {{-- ── DÓNDE ESTAMOS ────────────────────────────────────────────────── --}}
 {{-- Ancla #donde-estamos: es adonde llega quien hace clic en "Contacto". --}}
-<section class="about-sedes" id="donde-estamos">
+<section class="about-sedes g-plano" id="donde-estamos">
     <div class="container">
         <div class="about-head">
             <p class="g-eyebrow">Ubicación</p>
@@ -205,7 +205,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 </section>
 
 {{-- ── ESCRIBINOS ───────────────────────────────────────────────────── --}}
-<section class="about-contacto">
+<section class="about-contacto g-banda-verde g-plano g-plano--light">
     <div class="container about-contacto-inner">
         <p class="g-eyebrow g-eyebrow--light">Escribinos</p>
         <h2 class="g-title g-title--light about-contacto-title">

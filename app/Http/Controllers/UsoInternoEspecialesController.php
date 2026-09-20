@@ -7,6 +7,7 @@ use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Models\ProductoEspecial;
 use App\Services\GestorImagenesProducto;
+use App\Services\ImportadorProductos;
 use App\Services\MenuCategorias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -156,6 +157,29 @@ class UsoInternoEspecialesController extends Controller
                 ->with('error', 'Error al crear el producto especial.')
                 ->withInput();
         }
+    }
+
+    /** Carga masiva desde Excel/CSV; el detalle de lo que falló vuelve en `importacion`. */
+    public function importar(Request $request, ImportadorProductos $importador)
+    {
+        $request->validate(
+            ['archivo' => 'required|file|mimes:xlsx,xls,csv,txt|max:5120'],
+            [
+                'archivo.required' => 'Elegí un archivo para importar.',
+                'archivo.mimes'    => 'El archivo tiene que ser Excel (.xlsx, .xls) o CSV.',
+                'archivo.max'      => 'El archivo no puede superar los 5 MB.',
+            ]
+        );
+
+        try {
+            $resultado = $importador->importar($request->file('archivo'), true);
+        } catch (\Exception $e) {
+            Log::error('Error al importar productos especiales: ' . $e->getMessage());
+            return redirect()->route('uso-interno.especiales.index')
+                ->with('error', 'No se pudo leer el archivo. Revisá que sea un Excel o CSV válido.');
+        }
+
+        return redirect()->route('uso-interno.especiales.index')->with('importacion', $resultado);
     }
 
     public function edit(string $id)

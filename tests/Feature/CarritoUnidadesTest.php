@@ -31,7 +31,7 @@ class CarritoUnidadesTest extends TestCase
         ]);
     }
 
-    public function test_la_migracion_siembra_las_cuatro_unidades(): void
+    public function test_el_seeder_siembra_las_cuatro_unidades(): void
     {
         $this->assertSame(
             ['unidades', 'alto', 'ancho', 'alto_ancho'],

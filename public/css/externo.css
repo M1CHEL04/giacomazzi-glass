@@ -97,6 +97,16 @@
     --g-hover-blanco: rgba(255, 255, 255, 0.12);
     --g-hover-gris: rgba(63, 63, 63, 0.07);
 
+    /* Cuánto flota una superficie al pasar el mouse. Uno solo para todas
+       las tarjetas del sitio: había tres (6px en el catálogo, 4px en
+       Inicio, 2px en la ficha) con tres sombras distintas, y la misma
+       tarjeta de producto se movía distinto según la vista en la que
+       estaba. La única que se aparta es la del conector de Inicio, que
+       usa la misma altura pero una sombra más densa: flota sobre verde
+       oscuro y ahí esta no se ve. */
+    --g-flota: translateY(-4px);
+    --g-flota-sombra: 0 12px 26px rgba(0, 0, 0, 0.14);
+
     /* Rojo de las acciones que borran. Uno solo: convivían tres
        (#e74c3c, #dc3545, #c0392b) y con tres rojos ningún hover podía
        ser el mismo. */
@@ -533,20 +543,49 @@ html {
 }
 
 /* ── Trama de plano ───────────────────────────────────────────────────
-   Grilla milimetrada de fondo. Va sobre un ::before propio y no sobre el
-   background del elemento para poder enmascararla sin tocar su color.
-   Quien la usa pone `position: relative` y la máscara: la dirección del
-   desvanecido depende de dónde esté el peso de la sección. */
+   Grilla milimetrada de fondo, y la única textura del sitio externo.
+   Dónde va:
+     - Inicio y Nosotros: todas las bandas menos las que tienen foto a
+       sangre (los heros y la franja de proyectos de Inicio).
+     - Catálogo y fichas: sólo en la banda verde. Ahí el contenido es el
+       producto —grilla de tarjetas, galería, ficha técnica— y una trama
+       por detrás le compite.
+   La banda verde (.g-banda-verde, más abajo) la lleva siempre, en blanco.
+
+   Es completa: se pone la clase y listo. La máscara vive acá y no en
+   cada página porque cuando cada banda elegía la suya —una desde arriba
+   a la derecha, otra desde el centro— se leían como fondos distintos.
+   Entra arriba, donde empieza la banda, y se apaga antes de la mitad o
+   a los 36rem, lo que llegue primero: en una banda alta el porcentaje
+   solo la llevaría por detrás de todo el contenido.
+
+   Va sobre un ::before propio y no sobre el background del elemento para
+   poder enmascararla sin tocar su color. Para quedar debajo del contenido
+   no crea contexto de apilamiento (ni z-index ni isolation en la banda):
+   los hijos pasan a position: relative y, como vienen después del
+   ::before en el árbol, se pintan encima. Un contexto de apilamiento
+   atraparía los drawers y paneles fijos de adentro debajo del navbar.
+   El :where() deja esas dos reglas en especificidad cero, así que un
+   hijo que ya declara su position (absolute, sticky) no se ve afectado. */
+:where(.g-plano) {
+    position: relative;
+}
+
+:where(.g-plano) > * {
+    position: relative;
+}
+
 .g-plano::before {
     content: '';
     position: absolute;
     inset: 0;
-    z-index: 0;
     pointer-events: none;
     background-image:
         linear-gradient(var(--g-plano-linea) 1px, transparent 1px),
         linear-gradient(90deg, var(--g-plano-linea) 1px, transparent 1px);
     background-size: var(--g-plano-paso) var(--g-plano-paso);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent min(62%, 36rem));
+    mask-image: linear-gradient(to bottom, #000 0%, transparent min(62%, 36rem));
 }
 
 /* Sobre fondo oscuro la trama se dibuja en blanco, no en verde */
@@ -554,6 +593,23 @@ html {
     background-image:
         linear-gradient(var(--g-plano-linea-light) 1px, transparent 1px),
         linear-gradient(90deg, var(--g-plano-linea-light) 1px, transparent 1px);
+}
+
+/* ── Banda verde ──────────────────────────────────────────────────────
+   El golpe de color de la marca, en una banda entera. Una por página, no
+   más: en Inicio es "Cómo trabajamos"; en Nosotros, el cierre de
+   contacto; en las fichas, el cierre de fabricación a medida o el
+   proceso. Si el verde aparece tres veces en la misma vista deja de ser
+   el golpe y pasa a ser el fondo.
+
+   Va siempre con la trama en blanco (.g-plano .g-plano--light). Lo que
+   se apoya adentro con texto largo va en blanco sobre el verde —tarjetas,
+   paneles—; los títulos y bajadas van en blanco directo. */
+.g-banda-verde {
+    background: linear-gradient(145deg,
+            var(--external-primary-dark) 0%,
+            var(--external-primary) 100%);
+    color: var(--external-white);
 }
 
 /* Foco visible y consistente en todo lo accionable */

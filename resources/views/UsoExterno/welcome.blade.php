@@ -112,7 +112,7 @@ $lineas = [
     </div>
 </section>
 
-<section class="home-lineas g-plano g-plano--light">
+<section class="home-lineas g-banda-verde g-plano g-plano--light">
     <div class="container home-lineas-inner">
         <div class="home-lineas-head" data-reveal>
             <p class="home-eyebrow home-eyebrow--light">Cómo trabajamos</p>
