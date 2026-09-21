@@ -50,6 +50,7 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
         sizes="100vw"
         alt="" class="about-hero-bg" aria-hidden="true"
         width="2400" height="745"
+        style="--hero-y-lap:100%;--hero-y-esc:100%"
         fetchpriority="high" decoding="async">
     <span class="about-hero-scrim"></span>
     <div class="container about-hero-inner">

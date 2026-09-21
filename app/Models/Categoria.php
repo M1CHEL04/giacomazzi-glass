@@ -12,53 +12,70 @@ class Categoria extends Model
     public const ENCUADRE_DEFECTO = ['x' => 50.0, 'y' => 50.0, 'zoom' => 1.0];
 
     /**
-     * Los dos recuadros que el admin encuadra por separado, con la relación de
-     * aspecto representativa de cada uno. El editor del panel dibuja estos
-     * mismos valores, así que el marco que se ve ahí es el que se publica.
+     * Las cuatro bandas en que el hero cambia de forma, y el encuadre que el
+     * admin ajusta para cada una.
      *
-     * Salen de calcular el alto real de .g-hero —min-height de 30svh hasta
-     * 767px y 42svh desde ahí— sobre las pantallas más frecuentes. El
-     * min-height gana siempre: ni un título de dos renglones llega a estirarlo,
-     * así que el alto no depende del contenido y estas formas son estables.
+     * `ratio` es el mismo número que declara `aspect-ratio` en externo.css, no
+     * un promedio representativo: esta constante y el CSS son una sola fuente
+     * de verdad, y por eso el recuadro del panel es exactamente lo que se
+     * publica. Si se toca un ratio acá, hay que tocarlo allá.
      *
-     *   teléfonos      1.76:1 (Pixel 7) … 2.26:1 (iPhone SE)   promedio 1.91
-     *   laptops/monitores  4.40:1 (1440) … 5.02:1 (1366)       promedio 4.7
+     * Las bandas salen de pegarle a los altos que el hero tenía cuando dependía
+     * del viewport (30svh / 42svh), para que el cambio no se note: diez de doce
+     * dispositivos frecuentes quedan dentro de ±7%.
      *
-     * La excepción es la tablet en vertical: mide ≈1.95:1, forma de teléfono,
-     * pero cae del lado de escritorio porque el corte del CSS es un único
-     * 768px. El punto focal la sostiene igual —lo que el admin eligió sigue en
-     * cuadro—, sólo que se ve más foto arriba y abajo de lo que muestra el
-     * marco. Arreglarlo de verdad pide un tercer encuadre para tablet.
-     *
-     * `minimo` es el ancho en píxeles de foto que el recuadro necesita para no
-     * verse ampliado: un teléfono de 430px a 2.5× de densidad pide ~1075, y el
-     * hero de escritorio se sirve hasta 2400px de ancho. La cota del editor se
-     * pone en alerta cuando el recorte elegido baja de ahí.
+     * `minimo` es el ancho en píxeles de foto que la banda necesita para no
+     * verse ampliada, calculado sobre su ancho CSS máximo. La cota del editor
+     * se pone en alerta cuando el recorte elegido baja de ahí.
      */
     public const RECUADROS_HERO = [
-        'movil'      => ['nombre' => 'Teléfono', 'ratio' => 1.9, 'leyenda' => 'hasta 767px · 1.9:1', 'minimo' => 1100],
-        'escritorio' => ['nombre' => 'Escritorio', 'ratio' => 4.8, 'leyenda' => 'desde 768px · 4.8:1', 'minimo' => 1800],
+        'movil' => [
+            'nombre'  => 'Teléfono',
+            'ratio'   => 19 / 10,
+            'leyenda' => 'hasta 767px · 1.9:1',
+            'minimo'  => 1200,
+        ],
+        'tablet' => [
+            'nombre'  => 'Tablet',
+            'ratio'   => 21 / 10,
+            'leyenda' => '768–1023px · 2.1:1',
+            'minimo'  => 1500,
+        ],
+        'laptop' => [
+            'nombre'  => 'Laptop',
+            'ratio'   => 7 / 2,
+            'leyenda' => '1024–1365px · 3.5:1',
+            'minimo'  => 1800,
+        ],
+        'escritorio' => [
+            'nombre'  => 'Escritorio',
+            'ratio'   => 47 / 10,
+            'leyenda' => 'desde 1366px · 4.7:1',
+            'minimo'  => 2000,
+        ],
+    ];
+
+    /**
+     * Sufijo de las variables CSS de cada banda. El móvil usa las variables
+     * base y las demás las sufijadas, en el mismo orden mobile-first que sigue
+     * externo.css.
+     */
+    private const SUFIJOS_HERO = [
+        'movil'      => '',
+        'tablet'     => '-tab',
+        'laptop'     => '-lap',
+        'escritorio' => '-esc',
     ];
 
     protected $fillable = [
         'nombre',
         'activo',
         'imagen_hero',
-        'hero_movil_x',
-        'hero_movil_y',
-        'hero_movil_zoom',
-        'hero_escritorio_x',
-        'hero_escritorio_y',
-        'hero_escritorio_zoom',
+        'hero_encuadre',
     ];
 
     protected $casts = [
-        'hero_movil_x'         => 'float',
-        'hero_movil_y'         => 'float',
-        'hero_movil_zoom'      => 'float',
-        'hero_escritorio_x'    => 'float',
-        'hero_escritorio_y'    => 'float',
-        'hero_escritorio_zoom' => 'float',
+        'hero_encuadre' => 'array',
     ];
 
     public function productos()
@@ -71,13 +88,21 @@ class Categoria extends Model
         return $this->belongsToMany(Variante::class, 'categorias_variantes', 'categoria_id', 'variante_id');
     }
 
-    /** El encuadre de un recuadro ('movil' | 'escritorio'), con defecto si falta. */
+    /**
+     * El encuadre de una banda, con el defecto donde falte.
+     *
+     * Tolera un JSON ausente, incompleto o con bandas nuevas todavía sin
+     * guardar: cada eje cae al centro por su cuenta. Eso es lo que hace que
+     * agregar una banda no necesite migración ni backfill.
+     */
     public function encuadreHero(string $recuadro): array
     {
+        $guardado = ($this->hero_encuadre ?? [])[$recuadro] ?? [];
+
         return [
-            'x'    => $this->{"hero_{$recuadro}_x"} ?? self::ENCUADRE_DEFECTO['x'],
-            'y'    => $this->{"hero_{$recuadro}_y"} ?? self::ENCUADRE_DEFECTO['y'],
-            'zoom' => $this->{"hero_{$recuadro}_zoom"} ?? self::ENCUADRE_DEFECTO['zoom'],
+            'x'    => (float) ($guardado['x'] ?? self::ENCUADRE_DEFECTO['x']),
+            'y'    => (float) ($guardado['y'] ?? self::ENCUADRE_DEFECTO['y']),
+            'zoom' => (float) ($guardado['zoom'] ?? self::ENCUADRE_DEFECTO['zoom']),
         ];
     }
 
@@ -87,15 +112,13 @@ class Categoria extends Model
      * El sitio público no corre JS para esto: externo.css lee las variables en
      * object-position, transform-origin y scale (ver .g-hero-bg). Las que están
      * en su valor por defecto no se emiten — el fallback del CSS ya las cubre y
-     * así el markup de una categoría sin retocar queda igual que antes.
+     * así una categoría sin retocar deja el markup igual que antes.
      */
     public function estiloEncuadreHero(): string
     {
         $vars = [];
 
-        // El móvil usa las variables base y escritorio las sufijadas, en el
-        // mismo orden mobile-first que sigue externo.css.
-        foreach (['movil' => '', 'escritorio' => '-esc'] as $recuadro => $sufijo) {
+        foreach (self::SUFIJOS_HERO as $recuadro => $sufijo) {
             $encuadre = $this->encuadreHero($recuadro);
 
             foreach (['x', 'y'] as $eje) {

@@ -755,11 +755,6 @@ class UsoInternoController extends Controller
 
     /**
      * Reglas del encuadre del hero: punto focal en porcentaje y zoom.
-     *
-     * Los seis campos los escribe el editor de encuadre (hero-imagen.js) en
-     * inputs ocultos, así que un valor fuera de rango sólo llega de un
-     * formulario manipulado — por eso alcanza con acotarlo y no hay mensajes
-     * propios: el admin nunca los va a ver.
      */
     private function reglasEncuadreHero(): array
     {
@@ -774,32 +769,22 @@ class UsoInternoController extends Controller
         return $reglas;
     }
 
-    /** Los seis campos del encuadre tal como vinieron del formulario. */
+    /** El encuadre del formulario, armado para la columna `hero_encuadre`. */
     private function encuadreHeroDesde(Request $request): array
     {
-        $datos = [];
+        $encuadre = [];
 
         foreach (array_keys(Categoria::RECUADROS_HERO) as $recuadro) {
             foreach (Categoria::ENCUADRE_DEFECTO as $eje => $defecto) {
-                $campo = "hero_{$recuadro}_{$eje}";
-                $datos[$campo] = (float) $request->input($campo, $defecto);
+                $encuadre[$recuadro][$eje] = (float) $request->input("hero_{$recuadro}_{$eje}", $defecto);
             }
         }
 
-        return $datos;
+        return ['hero_encuadre' => $encuadre];
     }
 
-    /** Encuadre centrado y sin ampliar: cómo se veía el hero antes de ser editable. */
     private function encuadreHeroPorDefecto(): array
     {
-        $datos = [];
-
-        foreach (array_keys(Categoria::RECUADROS_HERO) as $recuadro) {
-            foreach (Categoria::ENCUADRE_DEFECTO as $eje => $defecto) {
-                $datos["hero_{$recuadro}_{$eje}"] = $defecto;
-            }
-        }
-
-        return $datos;
+        return ['hero_encuadre' => null];
     }
 }

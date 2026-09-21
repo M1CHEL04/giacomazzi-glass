@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('nombre')->unique();
             $table->boolean('activo')->default(true);
             $table->string('imagen_hero')->nullable();
+            $table->json('hero_encuadre')->nullable();
             $table->timestamps();
         });
     }

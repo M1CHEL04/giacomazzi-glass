@@ -138,37 +138,50 @@ html {
     color: var(--external-secondary);
 }
 
-/* =====================================================================
-   PRIMITIVAS DE UI COMPARTIDAS
-   Nacieron en home.css y hoy las usan Inicio y Nosotros, así que viven
-   acá para no tener dos copias que se vayan separando con el tiempo.
-
-   Doble selector a propósito: .g-* es el nombre nuevo y .home-* queda
-   como alias mientras welcome.blade.php siga usando esas clases. Son
-   la misma regla, no una copia. Al migrar welcome a .g-*, se borran
-   los alias y nada más.
-
-   La firma de la marca es .g-cota: la línea de cota del plano de
-   taller. Acá se mide en milímetros, así que la cota informa, no
-   decora — por eso se usa poco y en lugares elegidos.
-   ===================================================================== */
 
 /* ── Hero de página interior ───────────────────────────────────────────
    Encabezado de sección con foto de fondo. Lo usan Nosotros y Catálogo.
-   Mide 30vh en teléfono y 42vh desde 768px: la mitad que el hero de
-   Inicio, porque acá presenta la sección, no la convence.
+   Siempre la mitad que el hero de Inicio, porque acá presenta la sección,
+   no la convence.
 
-   Igual que las primitivas de abajo, doble selector: .g-hero es el
-   nombre nuevo y .about-hero el alias que mantiene andando a Nosotros
-   sin tocarle el markup.
+   El alto sale de una relación de aspecto declarada y no del alto de la
+   ventana. Antes era 30svh / 42svh, y eso tenía dos costos: el hero no
+   tenía forma propia —iba de 1.76:1 a 2.26:1 entre teléfonos y de 4.39:1
+   a 5.02:1 entre monitores—, así que el editor del panel sólo podía
+   mostrar una forma representativa; y como el min-height cedía ante el
+   contenido, un título de dos renglones estiraba ese hero y dejaba de
+   medir igual que sus hermanos ("Todos los productos" contra "Mamparas").
+
+   Las cuatro bandas están elegidas para pegarle a los altos que tenía
+   antes, no por prolijidad: diez de doce dispositivos frecuentes quedan
+   dentro de ±7%. Los ratios son los mismos números que declara
+   Categoria::RECUADROS_HERO — esto y esa constante son una sola fuente
+   de verdad, y por eso el recuadro del panel es lo que se publica.
+
+   Doble selector: .g-hero es el nombre nuevo y .about-hero el alias que
+   mantiene andando a Nosotros sin tocarle el markup. Los dos tienen que
+   estar: con uno solo, la mitad de los heros del sitio queda sin reglas.
    ──────────────────────────────────────────────────────────────────── */
 .g-hero,
 .about-hero {
     position: relative;
     display: flex;
     align-items: center;
-    /* svh y no vh: la barra del navegador móvil no lo estira de más */
-    min-height: 30svh;
+    aspect-ratio: 19 / 10;
+    /* Sin esto el hero se angosta y queda una franja blanca al costado.
+       Cuando el max-height de abajo ata —ventanas bajas—, el navegador
+       toma el alto recortado y le aplica la relación para calcular el
+       ANCHO, en vez de dejarlo llenar el contenedor: una ventana de
+       1909×700 daba un hero de 1645px (350 × 4.7) en vez de 1909.
+       Con el ancho declarado, el que cede es el ratio y no el ancho. */
+    width: 100%;
+    /* Rieles para lo que el ratio solo no cubre. El techo es por un caso
+       concreto: un teléfono en horizontal (844×390) cae en la banda de
+       tablet y sin él el hero mediría 402px sobre una ventana de 390px.
+       Ata sólo ahí y en monitores ultra anchos; en todo lo demás manda el
+       ratio. El piso evita que overflow:hidden recorte el texto. */
+    max-height: 50svh;
+    min-height: 11rem;
     overflow: hidden;
     /* Cancela el padding-top de .external-main (1rem hasta 767.98px).
        Tiene que coincidir con ese padding: de más, el hero se mete
@@ -182,17 +195,7 @@ html {
     border-bottom: 5px solid var(--external-primary);
 }
 
-/* El encuadre lo elige el admin y viaja en el `style` del <img> como
-   variables (ver Categoria::estiloEncuadreHero). Sin ellas queda el centro
-   sin ampliar, que es como se veían los heros antes de que fueran editables
-   — por eso los heros fijos de Nosotros y Todos los productos no cambian.
 
-   Los tres valores trabajan juntos: object-position pone el punto elegido de
-   la foto en esa misma posición del recuadro, y transform-origin repite las
-   coordenadas para que el zoom crezca *alrededor* de ese punto en vez de
-   alrededor del centro. Así el punto que el admin marcó queda clavado donde
-   lo dejó, sin importar el alto que tome el hero en la ventana del visitante:
-   por eso alcanza un par de números y no hace falta recortar el archivo. */
 .g-hero-bg,
 .about-hero-bg {
     position: absolute;
@@ -218,12 +221,31 @@ html {
             rgba(15, 17, 19, 0.14) 100%);
 }
 
+
 .g-hero-inner,
 .about-hero-inner {
     position: relative;
     z-index: 2;
-    padding-top: 3rem;
-    padding-bottom: 2.5rem;
+    padding-block: clamp(1.5rem, 3.5vw, 3rem);
+}
+
+/* El h1 es el último hijo en las tres vistas que usan el hero, así que su
+   margen inferior es aire muerto dentro de una caja que ya tiene padding. */
+.g-hero-title:last-child,
+.about-hero-title:last-child {
+    margin-bottom: 0;
+}
+
+/* Ventana baja: el teléfono en horizontal. Ahí el techo de 50svh achata el
+   hero a ~195px y un título de dos renglones —"Todos los productos"— se
+   pasaba por diez píxeles, que overflow:hidden recortaba. Es el único lugar
+   donde el aire no alcanza, así que se recorta el aire y no el texto. */
+@media (max-height: 520px) {
+
+    .g-hero-inner,
+    .about-hero-inner {
+        padding-block: 1rem;
+    }
 }
 
 .g-hero-eyebrow,
@@ -255,28 +277,21 @@ html {
     max-width: 26rem;
 }
 
+/* Banda tablet. Cada banda cambia dos cosas y sólo dos: su relación de
+   aspecto y de qué variables lee el encuadre. Lo demás se hereda. */
 @media (min-width: 768px) {
     .g-hero,
     .about-hero {
         /* .external-main pasa a padding-top: 1.5rem desde acá */
         margin-top: -1.5rem;
-        min-height: 42svh;
+        aspect-ratio: 21 / 10;
     }
 
-    .g-hero-inner,
-    .about-hero-inner {
-        padding-top: 4rem;
-        padding-bottom: 4rem;
-    }
-
-    /* Desde acá el recuadro pasa de ≈1.8:1 a ≈4.5:1, una franja mucho más
-       apaisada: lo que encuadra bien en el teléfono suele descabezar la foto.
-       Por eso escritorio tiene su propio encuadre y no hereda el del móvil. */
     .g-hero-bg,
     .about-hero-bg {
-        object-position: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
-        transform-origin: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
-        scale: var(--hero-zoom-esc, 1);
+        object-position: var(--hero-x-tab, 50%) var(--hero-y-tab, 50%);
+        transform-origin: var(--hero-x-tab, 50%) var(--hero-y-tab, 50%);
+        scale: var(--hero-zoom-tab, 1);
     }
 
     /* En pantalla ancha el degradado se inclina: oscurece el lado donde
@@ -287,6 +302,40 @@ html {
                 rgba(15, 17, 19, 0.62) 0%,
                 rgba(15, 17, 19, 0.36) 55%,
                 rgba(15, 17, 19, 0.1) 100%);
+    }
+}
+
+/* Banda laptop: tablet en horizontal y laptops chicas. */
+@media (min-width: 1024px) {
+
+    .g-hero,
+    .about-hero {
+        aspect-ratio: 7 / 2;
+    }
+
+    .g-hero-bg,
+    .about-hero-bg {
+        object-position: var(--hero-x-lap, 50%) var(--hero-y-lap, 50%);
+        transform-origin: var(--hero-x-lap, 50%) var(--hero-y-lap, 50%);
+        scale: var(--hero-zoom-lap, 1);
+    }
+}
+
+/* Banda escritorio: la franja más apaisada de todas, casi cinco a uno. Lo
+   que encuadra bien en el teléfono acá descabeza la foto, y por eso cada
+   banda guarda su propio punto focal en vez de heredar el de la anterior. */
+@media (min-width: 1366px) {
+
+    .g-hero,
+    .about-hero {
+        aspect-ratio: 47 / 10;
+    }
+
+    .g-hero-bg,
+    .about-hero-bg {
+        object-position: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
+        transform-origin: var(--hero-x-esc, 50%) var(--hero-y-esc, 50%);
+        scale: var(--hero-zoom-esc, 1);
     }
 }
 
@@ -542,31 +591,7 @@ html {
     color: var(--external-light);
 }
 
-/* ── Trama de plano ───────────────────────────────────────────────────
-   Grilla milimetrada de fondo, y la única textura del sitio externo.
-   Dónde va:
-     - Inicio y Nosotros: todas las bandas menos las que tienen foto a
-       sangre (los heros y la franja de proyectos de Inicio).
-     - Catálogo y fichas: sólo en la banda verde. Ahí el contenido es el
-       producto —grilla de tarjetas, galería, ficha técnica— y una trama
-       por detrás le compite.
-   La banda verde (.g-banda-verde, más abajo) la lleva siempre, en blanco.
 
-   Es completa: se pone la clase y listo. La máscara vive acá y no en
-   cada página porque cuando cada banda elegía la suya —una desde arriba
-   a la derecha, otra desde el centro— se leían como fondos distintos.
-   Entra arriba, donde empieza la banda, y se apaga antes de la mitad o
-   a los 36rem, lo que llegue primero: en una banda alta el porcentaje
-   solo la llevaría por detrás de todo el contenido.
-
-   Va sobre un ::before propio y no sobre el background del elemento para
-   poder enmascararla sin tocar su color. Para quedar debajo del contenido
-   no crea contexto de apilamiento (ni z-index ni isolation en la banda):
-   los hijos pasan a position: relative y, como vienen después del
-   ::before en el árbol, se pintan encima. Un contexto de apilamiento
-   atraparía los drawers y paneles fijos de adentro debajo del navbar.
-   El :where() deja esas dos reglas en especificidad cero, así que un
-   hijo que ya declara su position (absolute, sticky) no se ve afectado. */
 :where(.g-plano) {
     position: relative;
 }
@@ -671,19 +696,6 @@ html {
     }
 }
 
-/* ── Navbar pegado ────────────────────────────────────────────────────
-   El header acompaña el scroll: el catálogo y la ficha de producto son
-   páginas largas y el carrito tiene que estar siempre a un toque.
-
-   Va sobre el <header> y no sobre el <nav>: el nav mide exactamente lo
-   que el header, así que pegado ahí no tendría recorrido. El header es
-   un flex item de .external-body, y sticky en un flex item se resuelve
-   contra el contenedor —el body—, que sí es más alto que la pantalla.
-
-   z-index 1030 (el mismo que .sticky-top de Bootstrap) lo deja arriba
-   del contenido y del botón de WhatsApp (1000), pero abajo del backdrop
-   del offcanvas del carrito (1040) y del drawer móvil (2000): cuando se
-   abre un panel, el navbar se oscurece con el resto. */
 .external-header {
     position: sticky;
     top: 0;
@@ -840,15 +852,7 @@ html {
     font-weight: 600;
 }
 
-/* ── Menú de Productos en dos niveles ─────────────────────────────────────
-   El menú es una sola columna con las ramas. El panel de cada rama sale al
-   costado, y sólo mientras esa rama está apuntada: por eso va posicionado
-   fuera del flujo, para que aparecer y desaparecer no cambie el tamaño del
-   menú debajo del cursor.
 
-   El despliegue es :hover y :focus-within, sin JS: así funciona igual con
-   teclado (tabular a la rama abre su panel y sigue abierto mientras el foco
-   esté adentro) y en un notebook táctil, donde tocar el botón le da foco. */
 .external-dropdown-menu.nav-prod {
     display: none;
     padding: 0.4rem 0;

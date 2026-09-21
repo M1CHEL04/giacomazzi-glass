@@ -49,8 +49,8 @@
 }
 
 .hero-encuadre-marcos {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 1.125rem;
 }
 
@@ -115,7 +115,9 @@
     width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 14rem;
+    /* En media columna la foto ya viene angosta; sin este alto extra los
+       recuadros más apaisados quedan demasiado chatos para arrastrarlos. */
+    max-height: 16rem;
     user-select: none;
     -webkit-user-drag: none;
 }
@@ -350,16 +352,15 @@
     display: none;
 }
 
-/* Desde tablet los dos lienzos entran uno al lado del otro y se comparan
-   de un vistazo, que es de lo que se trata tener dos. */
+/* Cuatro bandas en 2×2 y no en fila: con los cuatro lienzos uno al lado
+   del otro, el recuadro de escritorio —que es el más apaisado— queda de
+   unos 70px de alto y deja de poder arrastrarse. En dos filas cada lienzo
+   conserva media columna de ancho y los cuatro siguen entrando juntos en
+   pantalla, que es para lo que están separados. */
 @media (min-width: 768px) {
     .hero-encuadre-marcos {
-        flex-direction: row;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1.25rem;
-    }
-
-    .hero-marco {
-        flex: 1;
     }
 }
 

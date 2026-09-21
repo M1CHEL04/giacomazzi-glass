@@ -38,6 +38,9 @@ $hero = $heroPorSeccion[$esLineaSingular ? 'adapta' : 'todos'];
         sizes="100vw"
         alt="" class="g-hero-bg" aria-hidden="true"
         width="1584" height="672"
+        {{-- Sin encuadre a mano, al revés que Nosotros: acá los racks ocupan
+             el centro de la foto (y 60-540 de 594) y el recorte centrado ya
+             cae donde tiene que caer — en escritorio muestra y 148-446. --}}
         fetchpriority="high" decoding="async">
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">

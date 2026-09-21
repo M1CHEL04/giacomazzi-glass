@@ -132,11 +132,10 @@ foreach (array_keys($recuadrosHero) as $clave) {
                     @endif
 
                     <p class="text-muted mb-2" style="font-size:11px;">
-                        Subí la foto en grande &mdash; <strong>2400 px de ancho o más</strong>, JPG o PNG, máx. 4 MB.
-                        No hay una medida que entre exacta: el hero es casi cuadrado en el teléfono
-                        (≈1.9:1) y una franja bien apaisada en escritorio (≈4.8:1), así que
-                        <strong>siempre se recorta algo</strong>. Una foto apaisada normal (≈3:1) anda bien
-                        en los dos; abajo elegís qué parte se ve en cada uno.
+                        Subí la foto en grande &mdash; <strong>2400 × 750 px</strong> anda bien, JPG o PNG, máx. 4 MB.
+                        No hay una medida que entre exacta: el hero va de 1.9:1 en el teléfono a
+                        4.7:1 en escritorio, así que <strong>siempre se recorta algo</strong>.
+                        Abajo elegís qué parte se ve en cada tamaño de pantalla.
                     </p>
                     @error('imagen_hero')
                     <div class="text-danger mb-2" style="font-size:12px;">{{ $message }}</div>
