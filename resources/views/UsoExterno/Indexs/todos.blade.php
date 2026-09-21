@@ -6,18 +6,38 @@ $esLineaSingular = $esLineaSingular ?? false;
 // línea singular, que siempre lo manda): fallback por las dudas.
 $gridBaseUrl = $gridBaseUrl ?? route('productos.todos');
 
-// Hero por sección, cada una con su propia imagen y título: nada de reciclar
-// un único bloque entre "todos" y "línea adapta" con un ternario. Hoy las dos
-// entradas apuntan al mismo archivo porque todavía no hay una foto propia
-// por línea, pero el día que la haya alcanza con cambiar 'imagen' acá abajo,
-// sin tocar el markup. Si en el futuro "línea estándar" pasa a tener su
-// propia entrada (hoy es sólo "todos" sin el tipo especial filtrado), suma
-// una tercera clave siguiendo el mismo patrón.
+// Hero por sección, cada una con su propia imagen, título y encuadre: nada de
+// reciclar un único bloque entre "todos" y "línea adapta" con un ternario. Si
+// en el futuro "línea estándar" pasa a tener su propia entrada (hoy es sólo
+// "todos" sin el tipo especial filtrado), suma una tercera clave siguiendo el
+// mismo patrón.
+//
+// 'encuadre' son las variables que lee .g-hero-bg en externo.css. Estas fotos
+// no son de una categoría, así que no pasan por el editor del panel y el
+// encuadre se escribe acá. Vacío = centrado, que es el comportamiento previo.
 $heroPorSeccion = [
-    'todos'  => ['imagen' => 'images/heros/hero_todos_productos_2.jpg', 'titulo' => 'Todos los productos'],
-    'adapta' => ['imagen' => 'images/heros/hero_todos_productos_2.jpg', 'titulo' => 'Línea adapta'],
+    'todos' => [
+        'imagen'   => 'images/heros/hero_todos_productos_2.jpg',
+        'titulo'   => 'Todos los productos',
+        // 2.36:1, con los racks ocupando el centro (y 60-540 de 594): el
+        // recorte centrado ya cae donde tiene que caer.
+        'encuadre' => '',
+    ],
+    'adapta' => [
+        'imagen'   => 'images/heros/hero_adapta.jpg',
+        'titulo'   => 'Línea adapta',
+        // 4:3, así que en escritorio sólo entra el 28% de su alto. El cielo
+        // ocupa el tercio de arriba y el asfalto la franja de abajo; el foco
+        // sube a medida que la banda se angosta, para que lo que quede sea el
+        // volumen de la fachada y no el cielo.
+        'encuadre' => '--hero-y:62%;--hero-y-tab:68%;--hero-y-lap:44%;--hero-y-esc:38%',
+    ],
 ];
 $hero = $heroPorSeccion[$esLineaSingular ? 'adapta' : 'todos'];
+
+// El width/height del <img> es sólo una pista de proporción para el navegador,
+// pero tiene que ser la de ESTA foto: las dos secciones ya no comparten forma.
+$heroMedidas = imagen_medidas($hero['imagen']);
 @endphp
 
 @section('title', $hero['titulo'] . ' - Aberturas Giacomazzi')
@@ -37,10 +57,8 @@ $hero = $heroPorSeccion[$esLineaSingular ? 'adapta' : 'todos'];
         srcset="{{ imagen_srcset($hero['imagen']) }}"
         sizes="100vw"
         alt="" class="g-hero-bg" aria-hidden="true"
-        width="1584" height="672"
-        {{-- Sin encuadre a mano, al revés que Nosotros: acá los racks ocupan
-             el centro de la foto (y 60-540 de 594) y el recorte centrado ya
-             cae donde tiene que caer — en escritorio muestra y 148-446. --}}
+        width="{{ $heroMedidas['ancho'] ?? 2400 }}" height="{{ $heroMedidas['alto'] ?? 1000 }}"
+        @if($hero['encuadre']) style="{{ $hero['encuadre'] }}" @endif
         fetchpriority="high" decoding="async">
     <span class="g-hero-scrim"></span>
     <div class="container g-hero-inner">
