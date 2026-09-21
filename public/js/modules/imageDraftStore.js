@@ -7,7 +7,7 @@
  * la página, por seguridad del navegador).
  *
  * IndexedDB y no sessionStorage: las imágenes de producto pesan hasta
- * 5 MB cada una y sessionStorage tiene una cuota de unos pocos MB por
+ * 8 MB cada una y sessionStorage tiene una cuota de unos pocos MB por
  * origen, justo el rango que dispara el error que este cambio atiende.
  */
 

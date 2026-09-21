@@ -11,15 +11,18 @@ use Illuminate\Http\UploadedFile;
  * imágenes en un mismo request, el mensaje genérico no permite saber cuál de
  * todas hay que corregir.
  *
- * Los topes son los mismos que tenía GestorImagenesProducto::REGLAS_IMAGEN:
- * 5 MB de peso y 8000x8000 px, este último por el consumo de memoria de GD
- * al decodificar (ver comentario en OptimizadorImagen).
+ * Topes: 8 MB de peso y 8000x8000 px. El que acota la memoria de GD al
+ * decodificar es el de píxeles (ver comentario en OptimizadorImagen); el de
+ * peso no, así que se puede subir sin volver a medir. Lo que sí hay que
+ * acompañar es el tamaño de request: 10 imágenes por alta, ver
+ * post_max_size en docker/php/php.ini y client_max_body_size en
+ * docker/nginx/app.conf y docker/proxy/*.conf.
  */
 class ImagenProductoValida implements ValidationRule
 {
     private const MIMES_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
 
-    private const PESO_MAX_KB = 5120;
+    private const PESO_MAX_KB = 8192;
 
     private const LADO_MAX_PX = 8000;
 
@@ -39,7 +42,8 @@ class ImagenProductoValida implements ValidationRule
 
         if ($value->getSize() > self::PESO_MAX_KB * 1024) {
             $pesoMb = round($value->getSize() / 1024 / 1024, 1);
-            $fail("«{$nombre}» pesa {$pesoMb} MB; el máximo permitido es 5 MB.");
+            $fail("«{$nombre}» pesa {$pesoMb} MB; el máximo permitido es "
+                . (self::PESO_MAX_KB / 1024) . ' MB.');
             return;
         }
 

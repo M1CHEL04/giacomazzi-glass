@@ -74,21 +74,11 @@
     outline-color: var(--external-white);
 }
 
-/* La trama (.g-plano) y la banda verde (.g-banda-verde) son de todo el
-   sitio y viven completas en externo.css: acá no se
-   redefinen. Las dos bandas con foto a sangre —hero y medida— no llevan
-   trama; ahí la textura la pone la imagen. */
-
 /* ── HERO ──────────────────────────────────────────────────────────── */
 .home-hero {
     position: relative;
     display: flex;
     align-items: flex-end;
-    /* En teléfono el hero no se lleva la pantalla entera: a 82svh el
-       catálogo quedaba tan abajo que la primera pantalla era sólo foto.
-       Con 68svh la banda de Nosotros ya asoma sin scrollear.
-       El piso de 400px protege pantallas muy cortas: es lo que mide el
-       contenido del hero, así que por debajo de eso manda el texto. */
     min-height: max(400px, 68svh);
     overflow: hidden;
     /* Cancela el padding-top de .external-main (1rem hasta 767.98px) */
@@ -292,24 +282,10 @@
     }
 }
 
-/* ── NOSOTROS (mini) ───────────────────────────────────────────────── */
-/* La banda que recibe al hero, en vidrio (el mismo gris celeste de
-   "Dónde encontrarnos" en Nosotros): después de una foto oscura y a
-   sangre, el respiro es lo que hace que se lea. El golpe de color queda
-   para el conector, que es donde la página empieza a ofrecer algo.
-
-   Lo que la sostiene visualmente es la trama del plano, no el color: sin
-   ella una banda blanca entre una foto y una franja verde se lee como un
-   hueco.
-
-   En escritorio va a dos columnas: el párrafo solo, centrado y angosto,
-   dejaba media franja vacía a cada lado. La columna derecha no agrega
-   información — desarma la misma frase en materiales, atributos y
-   alcance— así que si se cae a una columna en mobile no se pierde nada. */
 .home-nosotros {
     position: relative;
     overflow: hidden;
-    background: var(--g-vidrio);
+    background: var(--g-verde-tinte);
     color: var(--external-secondary);
     padding: 3.5rem 0;
 }
@@ -328,21 +304,11 @@
     margin: 0 0 0.75rem;
 }
 
-/* El isotipo de la franja. Sólo de escritorio (≥992px) para arriba:
-   apilado debajo del texto en teléfono estiraba la sección hacia abajo
-   sin sumar nada. Acá está oculto y el <img> es lazy, así que en mobile
-   ni se descarga — esconder con display:none una imagen que igual se
-   baja es pagar el ancho de banda por nada. */
 .home-nosotros-figure {
     display: none;
     margin: 0;
 }
 
-/* Sin placa: el logo va apoyado sobre el blanco de la franja y nada más.
-   Para eso es la banda blanca — un recuadro alrededor lo volvía a
-   encerrar y el logo terminaba siendo la imagen de una chapa en vez de
-   la marca. Lo único que queda acá es el centrado vertical contra la
-   columna de texto. */
 .home-nosotros-plate {
     display: flex;
     align-items: center;
@@ -646,7 +612,7 @@
 .home-catalogo {
     position: relative;
     overflow: hidden;
-    background: var(--g-vidrio);
+    background: var(--g-verde-tinte);
     padding: 3.5rem 0;
 }
 

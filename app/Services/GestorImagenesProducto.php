@@ -24,10 +24,10 @@ class GestorImagenesProducto
      * Delegadas en ImagenProductoValida en lugar de la tira de reglas nativas
      * "image|mimes:...|max:...|dimensions:..." para que el mensaje de error
      * incluya el nombre del archivo: con varias imágenes en el mismo request,
-     * "cada imagen no puede superar los 5 MB" no dice cuál hay que corregir.
+     * "cada imagen no puede superar los 8 MB" no dice cuál hay que corregir.
      *
-     * El tope de tamaño (5 MB) y de dimensiones (8000x8000 px) que aplica esa
-     * regla es el mismo de siempre: 8000x8000 es la guarda de memoria de GD al
+     * Esa regla aplica un tope de tamaño (8 MB) y otro de dimensiones
+     * (8000x8000 px). El de dimensiones es la guarda de memoria de GD al
      * decodificar (ver comentario en OptimizadorImagen) y deja entrar a los
      * celulares de 48/50 MP sin pasar el techo de 512M que ese servicio se
      * pone durante la conversión. Si se sube ese número hay que volver a medir
