@@ -25,9 +25,10 @@
 
     /* Trama del plano de taller. La firma de la marca es la cota, y esto
        es su fondo: la grilla milimetrada. Se aplica con .g-plano (o
-       repitiendo estas dos variables en un ::before) y siempre con una
-       máscara que la desvanece — una grilla pareja de borde a borde se
-       lee como papel cuadriculado, no como plano. */
+       repitiendo estas dos variables en un ::before) y cubre la banda
+       entera, pareja de borde a borde. Todas las bandas la anclan igual
+       arriba a la izquierda, así las líneas verticales siguen de una
+       banda a la otra y se lee como una sola trama. */
     --g-plano-linea: rgba(40, 116, 82, 0.07);
     --g-plano-linea-light: rgba(255, 255, 255, 0.07);
     --g-plano-paso: 32px;
@@ -609,8 +610,6 @@ html {
         linear-gradient(var(--g-plano-linea) 1px, transparent 1px),
         linear-gradient(90deg, var(--g-plano-linea) 1px, transparent 1px);
     background-size: var(--g-plano-paso) var(--g-plano-paso);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, transparent min(62%, 36rem));
-    mask-image: linear-gradient(to bottom, #000 0%, transparent min(62%, 36rem));
 }
 
 /* Sobre fondo oscuro la trama se dibuja en blanco, no en verde */

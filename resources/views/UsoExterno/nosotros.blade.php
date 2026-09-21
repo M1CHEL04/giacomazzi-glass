@@ -70,23 +70,21 @@ $obras = array_values(array_filter($obras, fn($o) => !empty($o['imagen'])));
 
         <div class="about-intro-body">
             <p class="about-intro-text">
-                En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de aberturas de
-                PVC y aluminio, ofreciendo soluciones funcionales, duraderas y de calidad para todo
-                tipo de proyectos.
-            </p>
-            <p class="about-intro-text">
-                Trabajamos en la fabricación de puertas, ventanas, cerramientos, espejos, mamparas,
+                En Aberturas Giacomazzi nos dedicamos a la fabricación de puertas, ventanas, cerramientos, espejos, mamparas,
                 barandas, y más, adaptándonos a las necesidades de cada obra con opciones
                 personalizadas y terminaciones cuidadas.
+            </p>
+            <p class="about-intro-text">
+                Trabajamos con perfileria de alta calidad tanto en aberturas de pvc como aluminio, ofreciendo soluciones funcionales, duraderas y de calidad para cada proyecto.
+            </p>
+            <p class="about-intro-text">
+                También realizamos trabajos de herrería, brindando soluciones integrales para obras
+                particulares, comerciales y desarrollos a medida.
             </p>
             <p class="about-intro-text">
                 Además, somos representantes oficiales de puertas Oblak y
                 equipamiento para cocinas TST, lo que nos permite ampliar nuestra oferta con
                 productos reconocidos por su calidad y diseño.
-            </p>
-            <p class="about-intro-text">
-                También realizamos trabajos de herrería, brindando soluciones integrales para obras
-                particulares, comerciales y desarrollos a medida.
             </p>
             <p class="about-intro-text">
                 Nuestro compromiso es acompañar cada proyecto con asesoramiento personalizado,

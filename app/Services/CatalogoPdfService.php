@@ -8,24 +8,26 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Barryvdh\DomPDF\PDF as DomPdfDocument;
 use Illuminate\Support\Collection;
 
-/**
- * Arma y renderiza el catálogo PDF de productos estándar activos, agrupados
- * por categoría, con el mismo criterio de visibilidad que la web pública
- * (producto activo + categoría activa).
- */
+
 class CatalogoPdfService
 {
     private const MESES = [
-        1 => 'enero', 2 => 'febrero', 3 => 'marzo', 4 => 'abril',
-        5 => 'mayo', 6 => 'junio', 7 => 'julio', 8 => 'agosto',
-        9 => 'septiembre', 10 => 'octubre', 11 => 'noviembre', 12 => 'diciembre',
+        1 => 'enero',
+        2 => 'febrero',
+        3 => 'marzo',
+        4 => 'abril',
+        5 => 'mayo',
+        6 => 'junio',
+        7 => 'julio',
+        8 => 'agosto',
+        9 => 'septiembre',
+        10 => 'octubre',
+        11 => 'noviembre',
+        12 => 'diciembre',
     ];
 
     public function generar(): DomPdfDocument
     {
-        // DomPDF descarga cada foto de portada por HTTP (viven en el file
-        // server, no en public_path()); con un catálogo grande el límite
-        // default de PHP se puede quedar corto.
         set_time_limit(120);
 
         $pdf = Pdf::loadView('UsoInterno.Productos.pdf.catalogo', [
@@ -35,10 +37,6 @@ class CatalogoPdfService
             'contacto'  => $this->contacto(),
         ]);
 
-        // El header/footer con el logo y "Página X de Y" se dibuja con PHP
-        // embebido (ver catalogo.blade.php): es la única forma de excluir la
-        // portada, ya que un elemento position:fixed de CSS se repite en
-        // todas las páginas sin excepción, portada incluida.
         $pdf->setOption('isPhpEnabled', true);
 
         return $pdf->setPaper('a4', 'portrait');
@@ -59,11 +57,6 @@ class CatalogoPdfService
         return $pdf->setPaper('a4', 'portrait');
     }
 
-    /**
-     * Un capítulo por categoría (activa, con al menos un producto activo),
-     * ordenados alfabéticamente, con sus productos ya listos para la vista:
-     * portada resuelta y variantes agrupadas como en la ficha pública.
-     */
     private function capitulos(): Collection
     {
         return Producto::estandar()
@@ -90,11 +83,7 @@ class CatalogoPdfService
         return $producto->imagenes->firstWhere('es_principal', true) ?? $producto->imagenes->first();
     }
 
-    /**
-     * Mismo agrupamiento de valoresVariantes que UsoExternoController::showProducto
-     * (por variante_id, nombre + lista de valores), pero sin los ids de
-     * opción: acá sólo se necesita el texto para mostrarlo estático.
-     */
+
     private function agruparVariantes(Producto $producto): Collection
     {
         return $producto->valoresVariantes
@@ -115,19 +104,14 @@ class CatalogoPdfService
         return file_exists($ruta) ? $ruta : null;
     }
 
-    /**
-     * Datos de contacto para el encabezado del catálogo con marca. El
-     * teléfono sale del mismo WHATSAPP_NUMBER que usa el botón de cotizar
-     * por WhatsApp del sitio; el mail es un placeholder hasta que haya uno
-     * oficial para el catálogo.
-     */
+
     private function contacto(): array
     {
         $whatsapp = preg_replace('/\D/', '', config('app.whatsapp_number', ''));
 
         return [
             'telefono'  => $whatsapp ? substr($whatsapp, 0, 4) . ' ' . substr($whatsapp, 4) : null,
-            'email'     => 'ventas@aberturasgiacomazzi.com.ar',
+            'email'     => 'presupuestos@aberturasgiacomazzi.com.ar',
             'direccion' => 'San Juan 1978, Quilmes Oeste',
         ];
     }

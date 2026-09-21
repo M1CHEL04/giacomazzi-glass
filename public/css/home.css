@@ -40,7 +40,7 @@
    fondo es la grilla milimetrada (.g-plano, en externo.css). Es la
    única textura de la página: la llevan todas las bandas menos las dos
    que tienen foto a sangre —hero y medida—, siempre igual y siempre
-   con la misma máscara, que vive en externo.css junto con la clase y
+   de borde a borde, que vive en externo.css junto con la clase y
    es la misma en todas las vistas. Nada más se suma encima: ni
    resplandores, ni tramas anidadas, ni filetes de color sobre las
    tarjetas.
@@ -75,7 +75,7 @@
 }
 
 /* La trama (.g-plano) y la banda verde (.g-banda-verde) son de todo el
-   sitio y viven completas en externo.css, máscara incluida: acá no se
+   sitio y viven completas en externo.css: acá no se
    redefinen. Las dos bandas con foto a sangre —hero y medida— no llevan
    trama; ahí la textura la pone la imagen. */
 
@@ -293,13 +293,14 @@
 }
 
 /* ── NOSOTROS (mini) ───────────────────────────────────────────────── */
-/* La banda que recibe al hero, en blanco: después de una foto oscura y a
+/* La banda que recibe al hero, en vidrio (el mismo gris celeste de
+   "Dónde encontrarnos" en Nosotros): después de una foto oscura y a
    sangre, el respiro es lo que hace que se lea. El golpe de color queda
    para el conector, que es donde la página empieza a ofrecer algo.
 
    Lo que la sostiene visualmente es la trama del plano, no el color: sin
    ella una banda blanca entre una foto y una franja verde se lee como un
-   hueco. Por eso acá la grilla se desvanece desde la esquina del logo.
+   hueco.
 
    En escritorio va a dos columnas: el párrafo solo, centrado y angosto,
    dejaba media franja vacía a cada lado. La columna derecha no agrega
@@ -308,7 +309,7 @@
 .home-nosotros {
     position: relative;
     overflow: hidden;
-    background: var(--external-white);
+    background: var(--g-vidrio);
     color: var(--external-secondary);
     padding: 3.5rem 0;
 }
@@ -406,9 +407,8 @@
    la transición de alto que ese script anima. */
 .home-lineas-acordeon {
     /* La sangría del panel arranca donde arranca el nombre, así que el
-       número y su separación se miden una sola vez y las usan las dos. */
+       margen se mide una sola vez y lo usan las dos. */
     --lin-pad: 1.1rem;
-    --lin-num: 1.6rem;
     --lin-gap: 0.85rem;
 
     list-style: none;
@@ -446,17 +446,6 @@
 .home-lin-head:focus-visible {
     outline: 2px solid var(--external-primary);
     outline-offset: -3px;
-}
-
-.home-lin-num {
-    flex-shrink: 0;
-    width: var(--lin-num);
-    font-family: var(--font-display);
-    font-size: var(--fs-sub);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: 0.06em;
-    color: var(--external-primary);
 }
 
 .home-lin-titles {
@@ -530,10 +519,9 @@
 }
 
 .home-lin-panel-in {
-    /* Alineado con el nombre, no con el número: el texto es la
-       continuación de ese renglón. */
-    padding: 0 var(--lin-pad) 1.15rem
-        calc(var(--lin-pad) + var(--lin-num) + var(--lin-gap));
+    /* Alineado con el nombre: el texto es la continuación de ese
+       renglón. */
+    padding: 0 var(--lin-pad) 1.15rem;
 }
 
 .home-lin-text {
@@ -602,17 +590,6 @@
                 border-color 0.25s ease;
 }
 
-.home-linea-num {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--fs-sub);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: 0.06em;
-    color: var(--external-primary);
-    margin-bottom: 0.55rem;
-}
-
 .home-linea-name {
     font-family: var(--font-display);
     font-size: var(--fs-sub);
@@ -669,7 +646,7 @@
 .home-catalogo {
     position: relative;
     overflow: hidden;
-    background: var(--external-white);
+    background: var(--g-vidrio);
     padding: 3.5rem 0;
 }
 
@@ -1307,14 +1284,15 @@
         padding: 5rem 0;
     }
 
-    /* Sube a tamaño de título: en la franja de apertura esto es una
-       declaración, no un párrafo de apoyo. El tope de 34ch es para que
-       en pantalla ancha no se estire a un renglón larguísimo — abajo de
-       eso manda el ancho de la columna. */
+    /* Casi tamaño de título: en la franja de apertura esto es una
+       declaración, no un párrafo de apoyo. Va un 12% abajo de
+       --fs-title-sm para no competir con el h2. El tope de 38ch es para
+       que en pantalla ancha no se estire a un renglón larguísimo — abajo
+       de eso manda el ancho de la columna. */
     .home-nosotros-lead {
-        font-size: var(--fs-title-sm);
+        font-size: calc(var(--fs-title-sm) * 0.88);
         line-height: 1.4;
-        max-width: 34ch;
+        max-width: 38ch;
     }
 
     /* Las tres líneas pasan a columnas: se leen de un vistazo como el

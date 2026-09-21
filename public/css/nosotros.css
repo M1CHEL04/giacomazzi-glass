@@ -20,7 +20,7 @@
      escribinos VERDE lleno + trama en blanco  ← la banda verde
 
    La trama (.g-plano) y la banda verde (.g-banda-verde) vienen completas
-   de externo.css: son las mismas de Inicio, máscara incluida. Una sola
+   de externo.css: son las mismas de Inicio. Una sola
    banda verde por página, y acá es el cierre: es donde la página deja
    de contar y empieza a pedir algo.
    ===================================================================== */
@@ -45,17 +45,16 @@
     padding: 3.5rem 0;
 }
 
-/* Una sola columna, de corrido y a un ancho cómodo de lectura.
+/* Una sola columna, de corrido, a todo el ancho del contenedor.
    El primer párrafo entra un punto más grande para dar entrada. */
-.about-intro-body {
-    max-width: 74ch;
-}
-
 .about-intro-text {
     font-size: var(--fs-body);
     line-height: 1.7;
     color: var(--external-secondary);
     margin: 0 0 1.1rem;
+    text-align: justify;
+    /* Sin cortes, el justificado abre huecos grandes en teléfono. */
+    hyphens: auto;
 }
 
 .about-intro-text:first-child {

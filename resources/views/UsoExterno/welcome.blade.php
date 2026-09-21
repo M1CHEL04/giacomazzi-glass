@@ -24,33 +24,25 @@ $obras = ['Viviendas', 'Edificios', 'Locales comerciales', 'Hoteles'];
 $nosotrosImagen = 'images/img-catalogo/logo-marca.png';
 
 
-// El índice de adapta ya no se corta en seis: la caja tiene alto fijo y
-// scrollea, así que van todas y la franja mide lo mismo con 4 que con 40.
 
 
 $lineas = [
 [
-'num' => '01',
 'nombre' => 'Línea estándar',
-'resumen' => 'Precio al instante en la web',
-'texto' => 'Modelos de medidas y tamaños fijos, con entrega casi inmediata. Los elegís del catálogo y obtenés el precio al instante.',
+'texto' => 'Productos con medidas estandar en stock permamente. Los agregas al carrito y solicitas la cotización inmediata.',
 'accion' => 'Ver la línea estándar',
 'href' => route('productos.todos', ['tipos' => ['estandar']]),
 ],
 [
-'num' => '02',
 'nombre' => 'Línea adapta',
-'resumen' => 'Personalizada, por encargo',
 'texto' => 'Productos que no se fabrican en serie ni tienen medidas fijas. Los producimos por encargo y podemos ajustar dimensiones o detalles según lo que requiera tu espacio.',
 'accion' => 'Ver la línea adapta',
 'href' => route('productos.especiales'),
 ],
 [
-'num' => '03',
 'nombre' => 'Proyectos a medida',
-'resumen' => 'Obra integral, desde el plano',
-'texto' => 'Cuando la obra es integral, la encaramos desde cero: casas, edificios, locales comerciales y hoteles, con cada abertura pensada junto al plano.',
-'accion' => 'Ver qué obras realizadas',
+'texto' => 'Partimos de tu idea, plano o espacio y desarrollamos una solución pensada para lo que necesitás. Desde un proyecto desde cero hasta la renovación de un espacio existente.',
+'accion' => 'Ver obras realizadas',
 'href' => '#proyectos',
 ],
 ];
@@ -90,9 +82,9 @@ $lineas = [
         <div class="home-nosotros-copy" data-reveal>
             <p class="home-eyebrow">Sobre nosotros</p>
             <p class="home-nosotros-lead">
-                En Aberturas Giacomazzi nos dedicamos a la fabricación y provisión de
-                aberturas de PVC y aluminio, ofreciendo soluciones funcionales,
-                duraderas y de calidad para todo tipo de proyectos.
+                En Aberturas Giacomazzi nos dedicamos a la fabricación de puertas, ventanas, cerramientos, espejos, mamparas,
+                barandas, y más, adaptándonos a las necesidades de cada obra con opciones
+                personalizadas y terminaciones cuidadas.
             </p>
             <a href="{{ route('nosotros') }}" class="home-link">
                 Leer más <x-heroicon-o-arrow-right />
@@ -116,10 +108,9 @@ $lineas = [
     <div class="container home-lineas-inner">
         <div class="home-lineas-head" data-reveal>
             <p class="home-eyebrow home-eyebrow--light">Cómo trabajamos</p>
-            <h2 class="home-title home-title--light home-lineas-title">Una solución para cada necesidad</h2>
+            <h2 class="home-title home-title--light home-lineas-title">Tres formas de encontrar la solución que necesitás</h2>
             <p class="home-lineas-intro">
-                Tres formas de resolver lo que necesitás, con la misma calidad de fabricación en cada una.
-            </p>
+                ELegí la opción que mejor se adapta a tu proyecto, sin resignar calidad de fabricación.</p>
         </div>
 
         <ul class="home-lineas-acordeon" data-reveal data-reveal-delay="1">
@@ -129,10 +120,8 @@ $lineas = [
                     data-acordeon-toggle
                     aria-expanded="{{ $i === 0 ? 'true' : 'false' }}"
                     aria-controls="linea-panel-{{ $i }}">
-                    <span class="home-lin-num">{{ $linea['num'] }}</span>
                     <span class="home-lin-titles">
                         <span class="home-lin-name">{{ $linea['nombre'] }}</span>
-                        <span class="home-lin-resumen">{{ $linea['resumen'] }}</span>
                     </span>
                     <span class="home-lin-chevron" aria-hidden="true">
                         <x-heroicon-o-chevron-down />
@@ -156,7 +145,6 @@ $lineas = [
             @foreach($lineas as $i => $linea)
             <li data-reveal data-reveal-delay="{{ $i + 1 }}">
                 <a href="{{ $linea['href'] }}" class="home-linea">
-                    <span class="home-linea-num">{{ $linea['num'] }}</span>
                     <h3 class="home-linea-name">{{ $linea['nombre'] }}</h3>
                     <p class="home-linea-text">{{ $linea['texto'] }}</p>
                     <span class="home-linea-go">
@@ -322,7 +310,6 @@ $lineas = [
                 </li>
                 @endforeach
             </ol>
-            <p class="home-medida-nota">Y cualquier otra obra que lo requiera.</p>
         </div>
     </div>
 </section>
