@@ -273,7 +273,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 data-submit data-loading-text="{{ $isEdit ? 'Guardando…' : 'Creando…' }}">
                 <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"
                     data-spinner></span>
-                <span data-submit-text>{{ $isEdit ? 'Guardar cambios' : 'Crear producto especial' }}</span>
+                <span data-submit-text>{{ $isEdit ? 'Guardar cambios' : 'Crear producto' }}</span>
             </button>
         </div>
 

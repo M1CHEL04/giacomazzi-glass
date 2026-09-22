@@ -19,7 +19,7 @@ $waNumero = whatsapp_numero();
 $waHref = whatsapp_href('¡Hola! tengo un proyecto y me gustaria trabajar con ustedes.');
 
 
-$obras = ['Viviendas', 'Edificios', 'Locales comerciales', 'Hoteles'];
+$obras = ['Casas', 'Edificios', 'Locales comerciales', 'Hoteles'];
 
 $nosotrosImagen = 'images/img-catalogo/logo-marca.png';
 
