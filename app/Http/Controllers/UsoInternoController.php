@@ -176,6 +176,36 @@ class UsoInternoController extends Controller
         }
     }
 
+    public function storeCategoriaJson(Request $request)
+    {
+        $datos = $request->validate([
+            'nombre' => 'required|string|max:255|unique:categorias,nombre',
+        ], [
+            'nombre.required' => 'El nombre de la categoria es obligatorio.',
+            'nombre.string'   => 'El nombre de la categoria debe ser un texto.',
+            'nombre.max'      => 'El nombre de la categoria no puede superar los 255 caracteres.',
+            'nombre.unique'   => 'Ya existe una categoria con ese nombre.',
+        ]);
+
+        try {
+            $categoria = Categoria::create(array_merge([
+                'nombre'      => $datos['nombre'],
+                'activo'      => true,
+                'imagen_hero' => null,
+            ], $this->encuadreHeroPorDefecto()));
+
+            MenuCategorias::olvidar();
+
+            return response()->json([
+                'id'     => $categoria->id,
+                'nombre' => $categoria->nombre,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Error al crear categoría desde el formulario de producto: ' . $e->getMessage());
+            return response()->json(['message' => 'Error al crear la categoría.'], 500);
+        }
+    }
+
     public function editCategoria(int $id)
     {
         try {

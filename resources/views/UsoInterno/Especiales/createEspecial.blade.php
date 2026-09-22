@@ -71,25 +71,11 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 </div>
 
                 {{-- Categoría --}}
-                <div class="col-12">
-                    <label for="categoria_id" class="form-label small mb-1">
-                        Categoría <span class="text-danger">*</span>
-                    </label>
-                    <select id="categoria_id" name="categoria_id"
-                        class="form-select form-select-sm py-2 rounded-2 @error('categoria_id') is-invalid @enderror"
-                        required>
-                        <option value="">Seleccioná una categoría...</option>
-                        @foreach ($categorias as $cat)
-                        <option value="{{ $cat->id }}"
-                            {{ old('categoria_id', $producto->categoria_id ?? '') == $cat->id ? 'selected' : '' }}>
-                            {{ $cat->nombre }}
-                        </option>
-                        @endforeach
-                    </select>
-                    @error('categoria_id')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+                @include('UsoInterno.Productos.partials.selectCategoria', [
+                'categorias' => $categorias,
+                'categoriaSeleccionada' => old('categoria_id', $producto->categoria_id ?? ''),
+                'colClass' => 'col-12',
+                ])
 
                 {{-- Descripción --}}
                 <div class="col-12">
@@ -304,5 +290,7 @@ $prodConfigJson = json_encode([
 <div id="tpl-icon-arrow-uturn-left" class="d-none" aria-hidden="true"><x-heroicon-m-arrow-uturn-left /></div>
 <div id="tpl-icon-star-fill" class="d-none" aria-hidden="true"><x-heroicon-s-star /></div>
 <div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
+{{-- Fuera del <form> del producto: acá no queda anidado. --}}
+@include('UsoInterno.Productos.modals.crearCategoria')
 <script type="module" src="{{ versioned_asset('js/manageEspecial.js') }}"></script>
 @endsection

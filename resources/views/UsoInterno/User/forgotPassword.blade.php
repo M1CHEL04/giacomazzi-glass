@@ -20,33 +20,6 @@
 <body class="internal-body auth-body d-flex flex-column min-vh-100">
     @include('layouts.partials.toast')
 
-    <template id="toast-success-template">
-        <div class="internal-toast internal-toast-success" role="status" data-toast>
-            <span class="internal-toast-icon" aria-hidden="true">
-                <x-fluentui-checkmark-20-o />
-            </span>
-            <div>
-                <div class="internal-toast-message" data-toast-message></div>
-            </div>
-            <button class="internal-toast-close" type="button" aria-label="Cerrar" data-toast-close>
-                <x-fluentui-dismiss-20-o />
-            </button>
-        </div>
-    </template>
-    <template id="toast-error-template">
-        <div class="internal-toast internal-toast-error" role="alert" data-toast>
-            <span class="internal-toast-icon" aria-hidden="true">
-                <x-fluentui-warning-20-o />
-            </span>
-            <div>
-                <div class="internal-toast-message" data-toast-message></div>
-            </div>
-            <button class="internal-toast-close" type="button" aria-label="Cerrar" data-toast-close>
-                <x-fluentui-dismiss-20-o />
-            </button>
-        </div>
-    </template>
-
     <main class="flex-grow-1 d-flex align-items-center py-5">
             <div class="container">
                 <div class="row justify-content-center">

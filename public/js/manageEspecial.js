@@ -10,6 +10,7 @@ import { initSubmitState }    from './modules/submitState.js';
 import { initCharCounters }   from './modules/charCounter.js';
 import { initTecnicaImageManager } from './modules/tecnicaImageManager.js';
 import { initImageDraftPersistence } from './modules/imageDraftPersistence.js';
+import { initCategoriaCreator } from './modules/categoriaCreator.js';
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         cfg, gallery, tecnicas,
     });
     initCharCounters();
+    initCategoriaCreator();
 
     // Último: así su listener de submit corre después del de imágenes,
     // que es el que escribe el hidden de portada antes de que salga.

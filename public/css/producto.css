@@ -499,3 +499,40 @@
             width: 72px;
         }
     }
+
+    /* ── Destello del select tras crear una categoría ─────────── */
+    /* Lo aplica categoriaCreator.js cuando inyecta la categoría nueva y la deja
+       seleccionada: sin esto el cambio ocurre sin que nada lo señale, porque el
+       modal se cierra justo encima del select. */
+    @keyframes select-destacado-flash {
+        0% {
+            box-shadow: 0 0 0 0 rgba(40, 116, 82, 0.55);
+            background-color: rgba(40, 116, 82, 0.14);
+            border-color: #287452;
+        }
+
+        60% {
+            box-shadow: 0 0 0 0.35rem rgba(40, 116, 82, 0);
+            background-color: rgba(40, 116, 82, 0.07);
+            border-color: #287452;
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(40, 116, 82, 0);
+            background-color: transparent;
+        }
+    }
+
+    .select-destacado {
+        animation: select-destacado-flash 1.4s ease-out;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        /* Sin animación: el anillo queda fijo y el JS lo saca con su timeout. */
+        .select-destacado {
+            animation: none;
+            box-shadow: 0 0 0 0.2rem rgba(40, 116, 82, 0.35);
+            border-color: #287452;
+        }
+    }

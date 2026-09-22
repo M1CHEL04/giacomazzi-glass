@@ -126,10 +126,15 @@ export function initVariantManager({ cfg, iconXMark }) {
     }
 
     // ─── Evento: cambio de categoría ────────────────────────────
-    categoriaSelect.addEventListener('change', function () {
+    categoriaSelect.addEventListener('change', function (e) {
         const id = this.value;
 
-        if (variantesData.length > 0) {
+        // Categoría recién creada desde el modal (categoriaCreator.js): no se
+        // pregunta. El usuario ya vio el aviso de las variantes ahí, y un
+        // "Cancelar" acá revertiría el select justo después de haberla creado.
+        const esCategoriaNueva = e.detail?.categoriaNueva === true;
+
+        if (variantesData.length > 0 && !esCategoriaNueva) {
             const ok = confirm('Cambiar la categoría eliminará las variantes cargadas del producto. ¿Continuás?');
             if (!ok) {
                 this.value = prevCategoriaId;
