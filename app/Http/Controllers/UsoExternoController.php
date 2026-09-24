@@ -248,8 +248,7 @@ class UsoExternoController extends Controller
                 'categoria:id,nombre,activo',
                 'unidad',
                 'imagenes' => fn($q) => $q
-                    ->orderByDesc('es_principal')
-                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb', 'es_principal']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb', 'es_principal', 'orden']),
                 'imagenesTecnicas' => fn($q) => $q
                     ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
                 'valoresVariantes' => fn($q) => $q->select(['valores_variante.id', 'valores_variante.variante_id', 'valores_variante.valor']),
@@ -395,8 +394,7 @@ class UsoExternoController extends Controller
             $producto = ProductoEspecial::with([
                 'categoria:id,nombre,activo',
                 'imagenes' => fn($q) => $q
-                    ->orderByDesc('es_principal')
-                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb', 'es_principal']),
+                    ->select(['id', 'producto_id', 'ruta', 'ruta_thumb', 'es_principal', 'orden']),
                 'imagenesTecnicas' => fn($q) => $q
                     ->select(['id', 'producto_id', 'ruta', 'ruta_thumb']),
             ])

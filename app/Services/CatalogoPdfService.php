@@ -77,10 +77,15 @@ class CatalogoPdfService
             ->values();
     }
 
-    /** Foto de portada del producto, o su primera imagen activa si ninguna está marcada como principal. */
+    /**
+     * Foto de portada del producto.
+     *
+     * Es simplemente la primera: la relación ordena por `orden` y la portada es
+     * la de orden 0. No hace falta buscar por es_principal.
+     */
     private function portada(Producto $producto): ?ImagenProducto
     {
-        return $producto->imagenes->firstWhere('es_principal', true) ?? $producto->imagenes->first();
+        return $producto->imagenes->first();
     }
 
 

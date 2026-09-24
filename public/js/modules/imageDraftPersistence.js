@@ -28,8 +28,17 @@ export function initImageDraftPersistence({ form, cfg, gallery, tecnicas }) {
     }
 
     if (cfg.hasErrors) {
-        restaurar(keyGaleria, gallery);
-        restaurar(keyTecnicas, tecnicas);
+        // El orden se aplica recién cuando los archivos ya están en sus inputs:
+        // los tokens `nueva:<i>` se resuelven por posición entre las tarjetas con
+        // archivo, así que antes de reponerlos no habría a qué apuntar. addFile()
+        // setea los files de forma sincrónica (sólo el preview es async), por eso
+        // alcanza con esperar el Promise.all.
+        Promise.all([
+            restaurar(keyGaleria, gallery),
+            restaurar(keyTecnicas, tecnicas),
+        ]).then(() => {
+            gallery?.applyOrder?.(document.getElementById('imagenes-orden')?.value);
+        });
     } else {
         // Carga "limpia" del formulario: cualquier borrador viejo (de un
         // intento anterior que nunca se reintentó) queda obsoleto.

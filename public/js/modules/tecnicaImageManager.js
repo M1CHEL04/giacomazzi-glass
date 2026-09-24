@@ -2,15 +2,15 @@
  * tecnicaImageManager.js  —  imágenes técnicas del formulario de producto
  * ─────────────────────────────────────────────────────────────
  * Mismo gesto que imageManager.js (tarjeta con dropzone, preview, limpiar,
- * quitar, y baja lógica de las ya guardadas) pero sin nada de portada: una
- * imagen técnica nunca es principal, así que acá no hay estrella ni hidden
- * de portada que escribir al enviar.
+ * quitar, y baja lógica de las ya guardadas) pero sin portada ni orden: una
+ * imagen técnica nunca es principal y van por orden de carga, así que acá no
+ * hay estrella, ni badge, ni arrastre, ni hidden que escribir al enviar.
  *
- * Va en un módulo aparte en lugar de parametrizar imageManager.js porque
- * ese archivo tiene la lógica de portada entretejida en casi todos sus
- * caminos (portadaCard, portadaExistenteId, updatePortadaVisuals, el
- * listener de submit); un modo "sin portada" ahí sería más frágil que
- * este archivo, que reutiliza las mismas clases CSS de producto.css.
+ * Va en un módulo aparte en lugar de parametrizar imageManager.js porque ese
+ * archivo tiene entretejidos la portada y el orden en casi todos sus caminos
+ * (conImagen, refrescarPortada, Sortable, el manifiesto del submit); un modo
+ * "sin nada de eso" ahí sería más frágil que este archivo, que reutiliza las
+ * mismas clases CSS de producto.css.
  */
 export function initTecnicaImageManager({ cfg, iconXMark, iconArrowBack }) {
 

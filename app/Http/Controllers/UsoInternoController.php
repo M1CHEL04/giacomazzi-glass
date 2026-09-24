@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Categoria;
 use App\Models\Cotizacion;
-use App\Models\ImagenProducto;
 use App\Models\Producto;
 use App\Models\ProductoEspecial;
 use App\Models\UnidadMedida;
@@ -12,6 +11,7 @@ use App\Services\CatalogoPdfService;
 use App\Services\GestorImagenesProducto;
 use App\Services\ImportadorProductos;
 use App\Services\MenuCategorias;
+use App\Services\SincronizadorImagenesProducto;
 use App\Services\SkuService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
@@ -23,7 +23,7 @@ class UsoInternoController extends Controller
 {
     public function __construct(
         private SkuService $skuService,
-        private GestorImagenesProducto $gestorImagenes,
+        private SincronizadorImagenesProducto $sincronizadorImagenes,
         private CatalogoPdfService $catalogoPdfService,
     ) {}
 
@@ -434,6 +434,7 @@ class UsoInternoController extends Controller
             'imagenes_tecnicas.*' => GestorImagenesProducto::reglasImagen(),
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
+            'imagenes_orden'      => 'nullable|string|max:300',
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
@@ -462,21 +463,8 @@ class UsoInternoController extends Controller
                 'activo'              => true,
             ]);
 
-            $imagenesRequest = array_values(array_filter($request->file('imagenes', [])));
-            if (!empty($imagenesRequest)) {
-                $portadaField = $request->input('imagen_portada', '');
-                $portadaIdx   = str_starts_with($portadaField, 'nueva:')
-                    ? (int) substr($portadaField, 6) : 0;
-                foreach ($imagenesRequest as $idx => $imagen) {
-                    $this->gestorImagenes->guardar($producto, $imagen, $idx === $portadaIdx);
-                }
-            }
-
-            // Técnicas: nunca son portada, de ahí el false en el tercer argumento.
-            $tecnicasRequest = array_values(array_filter($request->file('imagenes_tecnicas', [])));
-            foreach ($tecnicasRequest as $imagen) {
-                $this->gestorImagenes->guardar($producto, $imagen, false, true);
-            }
+            $this->sincronizadorImagenes->sincronizarGaleria($producto, $request);
+            $this->sincronizadorImagenes->sincronizarTecnicas($producto, $request);
 
             $this->skuService->sincronizarVariantes($producto, $request);
 
@@ -574,6 +562,7 @@ class UsoInternoController extends Controller
             'imagenes_tecnicas_eliminar.*' => 'exists:imagenes_producto,id',
             'variantes_json'      => 'nullable|string',
             'imagen_portada'      => 'nullable|string',
+            'imagenes_orden'      => 'nullable|string|max:300',
         ], [
             'categoria_id.required' => 'La categoría es obligatoria.',
             'categoria_id.exists'   => 'La categoría seleccionada no existe.',
@@ -601,70 +590,8 @@ class UsoInternoController extends Controller
                 'activo'              => (bool) $request->input('activo', 0),
             ]);
 
-            if ($request->filled('imagenes_eliminar')) {
-                ImagenProducto::whereIn('id', $request->imagenes_eliminar)
-                    ->where('producto_id', $producto->id)
-                    ->where('es_tecnica', false)
-                    ->update(['activa' => false, 'es_principal' => false]);
-            }
-
-            $portadaField = $request->input('imagen_portada', '');
-            if (str_starts_with($portadaField, 'existente:')) {
-                $portadaId = (int) substr($portadaField, 10);
-                // es_tecnica false: una técnica no puede terminar de portada
-                // aunque llegue su id en el hidden.
-                if (ImagenProducto::where('id', $portadaId)
-                    ->where('producto_id', $producto->id)
-                    ->where('es_tecnica', false)
-                    ->exists()
-                ) {
-                    $producto->imagenes()->update(['es_principal' => false]);
-                    ImagenProducto::where('id', $portadaId)->update(['es_principal' => true]);
-                }
-            }
-
-            $imagenesNuevas = array_values(array_filter($request->file('imagenes', [])));
-            if (!empty($imagenesNuevas)) {
-                // Cupo sobre las imágenes activas: las eliminadas siguen en la
-                // tabla con activa = false y no ocupan lugar.
-                $remaining  = Producto::MAX_IMAGENES - $producto->fresh()->imagenes()->count();
-                $portadaIdx = str_starts_with($portadaField, 'nueva:')
-                    ? (int) substr($portadaField, 6) : null;
-                if ($portadaIdx !== null) {
-                    $producto->imagenes()->update(['es_principal' => false]);
-                }
-                foreach ($imagenesNuevas as $idx => $imagen) {
-                    if ($remaining <= 0) break;
-                    $this->gestorImagenes->guardar($producto, $imagen, $portadaIdx !== null && $idx === $portadaIdx);
-                    $remaining--;
-                }
-            }
-
-            // ── Imágenes técnicas: mismo circuito que las de galería, pero con
-            //    su propio cupo y sin portada de por medio.
-            if ($request->filled('imagenes_tecnicas_eliminar')) {
-                ImagenProducto::whereIn('id', $request->imagenes_tecnicas_eliminar)
-                    ->where('producto_id', $producto->id)
-                    ->where('es_tecnica', true)
-                    ->update(['activa' => false]);
-            }
-
-            $tecnicasNuevas = array_values(array_filter($request->file('imagenes_tecnicas', [])));
-            if (!empty($tecnicasNuevas)) {
-                // Igual que arriba: cuentan sólo las técnicas activas, que son
-                // las que el formulario muestra.
-                $remainingTecnicas = Producto::MAX_IMAGENES_TECNICAS - $producto->fresh()->imagenesTecnicas()->count();
-                foreach ($tecnicasNuevas as $imagen) {
-                    if ($remainingTecnicas <= 0) break;
-                    $this->gestorImagenes->guardar($producto, $imagen, false, true);
-                    $remainingTecnicas--;
-                }
-            }
-
-            $producto->load('imagenes');
-            if ($producto->imagenes->isNotEmpty() && $producto->imagenes->where('es_principal', true)->isEmpty()) {
-                $producto->imagenes->first()->update(['es_principal' => true]);
-            }
+            $this->sincronizadorImagenes->sincronizarGaleria($producto, $request);
+            $this->sincronizadorImagenes->sincronizarTecnicas($producto, $request);
 
             $this->skuService->sincronizarVariantes($producto, $request);
 

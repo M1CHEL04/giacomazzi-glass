@@ -126,7 +126,10 @@ $tecnicas = $producto->imagenesTecnicas;
 
                 @if($imagenes->isNotEmpty())
                 <div class="prod-photos-grid">
-                    @foreach($imagenes->sortByDesc('es_principal') as $img)
+                    {{-- Sin sortBy: la relación ya trae la galería en el orden que
+                         armó el usuario, y la portada es la primera. Reordenar acá
+                         mostraría algo distinto de lo que ve el cliente. --}}
+                    @foreach($imagenes as $img)
                     <div class="prod-photo-wrap{{ $img->es_principal ? ' is-portada' : '' }}">
                         <img src="{{ $img->ruta_miniatura }}"
                             alt="{{ $img->nombre_imagen }}"

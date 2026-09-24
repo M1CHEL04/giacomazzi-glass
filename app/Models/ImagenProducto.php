@@ -17,23 +17,20 @@ class ImagenProducto extends Model
         'es_principal',
         'es_tecnica',
         'activa',
+        'orden',
+    ];
+
+    protected $casts = [
+        'es_principal' => 'boolean',
+        'es_tecnica'   => 'boolean',
+        'activa'       => 'boolean',
+        'orden'        => 'integer',
     ];
 
     public function producto()
     {
         return $this->belongsTo(Producto::class, 'producto_id');
     }
-
-    /**
-     * URL a usar donde la imagen se muestra chica (grids, miniaturas).
-     *
-     * Centraliza el fallback a la imagen grande para que ninguna vista tenga
-     * que repetirlo: sin thumb la página se ve igual, sólo pesa más.
-     *
-     * Ojo: si la consulta no seleccionó `ruta_thumb`, esto devuelve `ruta` sin
-     * avisar y se pierde la optimización. Los select() de UsoExternoController
-     * la incluyen por eso.
-     */
     protected function rutaMiniatura(): Attribute
     {
         return Attribute::get(fn() => $this->ruta_thumb ?: $this->ruta);

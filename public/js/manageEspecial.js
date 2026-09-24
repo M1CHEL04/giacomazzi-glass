@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const prodConfigEl = document.getElementById('prod-config');
     const cfg = prodConfigEl
         ? JSON.parse(prodConfigEl.dataset.config)
-        : { isEdit: false, existingImgCount: 0, existingTecnicasCount: 0, initialVariantes: [], categoriaId: '', portadaExistenteId: null, productoId: null, hasErrors: false };
+        : { isEdit: false, existingTecnicasCount: 0, initialVariantes: [], categoriaId: '', maxImagenes: 5, productoId: null, hasErrors: false };
 
     const iconXMark       = document.getElementById('tpl-icon-x-mark')?.innerHTML          || '×';
     const iconArrowBack   = document.getElementById('tpl-icon-arrow-uturn-left')?.innerHTML || '↩';
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initCharCounters();
     initCategoriaCreator();
 
-    // Último: así su listener de submit corre después del de imágenes,
-    // que es el que escribe el hidden de portada antes de que salga.
+    // Último: así su listener de submit corre después del de imágenes, que es el
+    // que escribe los hidden de orden y de portada antes de que salga.
     initSubmitState(document.querySelector('form[enctype="multipart/form-data"]'));
 });

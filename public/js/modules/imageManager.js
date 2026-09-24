@@ -4,38 +4,65 @@
  * Gestión de imágenes en el formulario de producto:
  *   - Tarjetas de nueva imagen con previsualización
  *   - Toggle de eliminación de imágenes guardadas (edición)
- *   - Lógica de imagen portada (estrella)
+ *   - Orden de la galería por arrastre, teclado o estrella
+ *
+ * El orden de las tarjetas dentro de #imagenes-container ES el orden que se
+ * guarda, y la primera es la portada. Por eso no hay estado de portada en
+ * variables: preguntarle al DOM hace imposible que lo que se ve y lo que se
+ * envía se contradigan. El submit traduce ese orden a `imagenes_orden`, como
+ * `existente:41,nueva:0,…`, donde `nueva:<i>` es la posición del archivo entre
+ * los inputs con archivo —el mismo índice que le llega a PHP después de
+ * array_filter—.
  */
 export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, iconStarOutline }) {
 
     const imagenesContainer = document.getElementById('imagenes-container');
     const addImagenBtn      = document.getElementById('add-imagen-btn');
-    const MAX_IMG = 5;
+    if (!imagenesContainer) return { addFile: () => false, collectFiles: () => [], applyOrder: () => {} };
 
-    let newImgCount      = 0;
-    let existingImgCount = cfg.existingImgCount;
-    let portadaCard        = null;
-    let portadaExistenteId = cfg.portadaExistenteId ? String(cfg.portadaExistenteId) : null;
+    const MAX_IMG = cfg.maxImagenes || 5;
 
-    function totalImagenes() {
-        return newImgCount + existingImgCount;
-    }
+    // ── Estado = DOM ─────────────────────────────────────────────
+
+    const cards         = () => Array.from(imagenesContainer.children).filter(el => el.matches('.imagen-card'));
+    const esGuardada    = c => c.classList.contains('imagen-existente-card');
+    const estaEliminada = c => c.classList.contains('marcada-eliminar');
+    const tieneArchivo  = c => !!c.querySelector('.imagen-file-input')?.files?.length;
+
+    /**
+     * Las que van a existir después de guardar, en orden. La primera es la
+     * portada. Una tarjeta nueva todavía vacía no cuenta —no produce fila—, así
+     * que arrastrarla al frente no le roba la portada a la que sí tiene imagen.
+     */
+    const conImagen = () => cards().filter(c => esGuardada(c) ? !estaEliminada(c) : tieneArchivo(c));
+
+    /**
+     * Cupo: toda tarjeta nueva ocupa lugar aunque esté vacía (el usuario ya
+     * reservó el espacio), y las guardadas sólo si no están marcadas para
+     * borrar, porque esas liberan su lugar al guardar.
+     */
+    const cuentaParaCupo = c => !esGuardada(c) || !estaEliminada(c);
 
     function syncAddImagenBtn() {
-        if (addImagenBtn) addImagenBtn.disabled = totalImagenes() >= MAX_IMG;
+        if (addImagenBtn) addImagenBtn.disabled = cards().filter(cuentaParaCupo).length >= MAX_IMG;
     }
 
-    function addImagenRow() {
-        if (totalImagenes() >= MAX_IMG) return;
+    // ── Tarjetas de nueva imagen ─────────────────────────────────
 
-        const isFirst = totalImagenes() === 0;
+    function addImagenRow() {
+        if (cards().filter(cuentaParaCupo).length >= MAX_IMG) return;
 
         const wrapper = document.createElement('div');
-        wrapper.className = 'imagen-input-card';
+        wrapper.className = 'imagen-input-card imagen-card';
+        wrapper.setAttribute('role', 'listitem');
+        wrapper.tabIndex = 0;
 
+        // Todas llevan botón de quitar: la vieja regla de "la primera no" era
+        // posicional, y la posición ahora la mueve el usuario.
         wrapper.innerHTML = `
-            ${!isFirst ? `<button type="button" class="imagen-remove-card-btn" title="Quitar">${iconXMark}</button>` : ''}
-            <button type="button" class="imagen-portada-btn d-none" title="Marcar como portada">${iconStarOutline}</button>
+            <button type="button" class="imagen-remove-card-btn" title="Quitar">${iconXMark}</button>
+            <button type="button" class="imagen-portada-btn d-none" title="Poner primera (portada)"
+                    aria-label="Poner primera (portada)">${iconStarOutline}</button>
             <label class="imagen-dropzone">
                 <input type="file" name="imagenes[]" accept="image/jpeg,image/png,image/webp" class="imagen-file-input">
                 <div class="imagen-dropzone-placeholder">
@@ -74,10 +101,7 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             };
             reader.readAsDataURL(file);
             portadaBtn.classList.remove('d-none');
-            if (portadaCard === null && portadaExistenteId === null) {
-                portadaCard = wrapper;
-                updatePortadaVisuals();
-            }
+            refrescarPortada();
         });
 
         clearBtn.addEventListener('click', () => {
@@ -86,46 +110,40 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             previewBox.classList.add('d-none');
             dropzone.classList.remove('d-none');
             portadaBtn.classList.add('d-none');
-            if (portadaCard === wrapper) {
-                portadaCard = null;
-                autoSelectPortadaIfOnlyOne();
-            }
+            refrescarPortada();
         });
 
-        portadaBtn.addEventListener('click', () => {
-            portadaCard = wrapper;
-            portadaExistenteId = null;
-            updatePortadaVisuals();
+        removeCardBtn.addEventListener('click', () => {
+            wrapper.remove();
+            // Que el formulario nunca quede sin ninguna tarjeta.
+            if (!cards().length) addImagenRow();
+            syncAddImagenBtn();
+            refrescarPortada();
         });
-
-        if (removeCardBtn) {
-            removeCardBtn.addEventListener('click', () => {
-                if (portadaCard === wrapper) portadaCard = null;
-                wrapper.remove();
-                newImgCount--;
-                syncAddImagenBtn();
-                autoSelectPortadaIfOnlyOne();
-            });
-        }
 
         imagenesContainer.appendChild(wrapper);
-        newImgCount++;
         syncAddImagenBtn();
+        return wrapper;
     }
 
-    if (addImagenBtn) addImagenBtn.addEventListener('click', addImagenRow);
-    if (existingImgCount === 0) addImagenRow();
+    if (addImagenBtn) addImagenBtn.addEventListener('click', () => {
+        const card = addImagenRow();
+        if (card) refrescarPortada();
+    });
+
+    // En alta no hay tarjetas guardadas, así que arranca con una vacía lista.
+    if (!cards().length) addImagenRow();
 
     /** Reutiliza la primera tarjeta vacía si hay una; si no, crea una nueva. */
     function addFile(file) {
-        const cardsAntes = imagenesContainer.querySelectorAll('.imagen-input-card');
-        let card = Array.from(cardsAntes).find(c => !c.querySelector('.imagen-file-input').files.length);
+        let card = cards().find(c => {
+            const inp = c.querySelector('.imagen-file-input');
+            return inp && !inp.files.length;
+        });
 
         if (!card) {
-            addImagenRow();
-            const cardsDespues = imagenesContainer.querySelectorAll('.imagen-input-card');
-            if (cardsDespues.length === cardsAntes.length) return false; // MAX_IMG alcanzado
-            card = cardsDespues[cardsDespues.length - 1];
+            card = addImagenRow();
+            if (!card) return false; // MAX_IMG alcanzado
         }
 
         const input = card.querySelector('.imagen-file-input');
@@ -142,9 +160,9 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             .filter(Boolean);
     }
 
-    // ── Funciones globales (llamadas desde onclick en el blade) ──
+    // ── Borrado de imágenes guardadas ────────────────────────────
 
-    window.toggleEliminarImagen = function (id, btn) {
+    function toggleEliminar(id, btn) {
         const input = document.getElementById('eliminar-' + id);
         const card  = document.getElementById('imagen-card-' + id);
         if (!input || !card) return;
@@ -156,11 +174,6 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             btn.innerHTML = iconArrowBack;
             btn.classList.replace('btn-danger', 'btn-secondary');
             btn.title = 'Deshacer';
-            if (String(id) === portadaExistenteId) {
-                portadaExistenteId = null;
-                updatePortadaVisuals();
-            }
-            existingImgCount--;
         } else {
             input.value    = '';
             input.disabled = true;
@@ -168,72 +181,205 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
             btn.innerHTML = iconXMark;
             btn.classList.replace('btn-secondary', 'btn-danger');
             btn.title = 'Eliminar';
-            existingImgCount++;
         }
         syncAddImagenBtn();
-        autoSelectPortadaIfOnlyOne();
-    };
-
-    window.setPortadaExistente = function (btn) {
-        portadaExistenteId = btn.dataset.imagenId;
-        portadaCard = null;
-        updatePortadaVisuals();
-    };
-
-    syncAddImagenBtn();
+        refrescarPortada();
+    }
 
     // ── Portada ──────────────────────────────────────────────────
 
-    function updatePortadaVisuals() {
-        document.querySelectorAll('.imagen-portada-btn[data-imagen-id]').forEach(b => {
-            const active = b.dataset.imagenId === portadaExistenteId;
-            b.classList.toggle('activa', active);
-            b.innerHTML = active ? iconStarFill : iconStarOutline;
-        });
-        imagenesContainer.querySelectorAll('.imagen-input-card').forEach(card => {
-            const b = card.querySelector('.imagen-portada-btn');
-            if (!b) return;
-            const active = card === portadaCard;
-            b.classList.toggle('activa', active);
-            b.innerHTML = active ? iconStarFill : iconStarOutline;
-        });
-    }
+    /**
+     * Pinta quién es la portada: la primera con imagen. No recibe nada y no
+     * guarda nada, así que no puede desincronizarse del orden real.
+     */
+    function refrescarPortada() {
+        const primera = conImagen()[0] || null;
 
-    function autoSelectPortadaIfOnlyOne() {
-        if (portadaCard !== null || portadaExistenteId !== null) return;
-        const cardsConArchivo = Array.from(imagenesContainer.querySelectorAll('.imagen-input-card'))
-            .filter(c => !c.querySelector('.imagen-portada-btn')?.classList.contains('d-none'));
-        const totalActivo = existingImgCount + cardsConArchivo.length;
-        if (totalActivo !== 1) return;
-        if (existingImgCount === 1) {
-            const existCard = document.querySelector('.imagen-existente-card:not(.marcada-eliminar)');
-            const btn = existCard?.querySelector('.imagen-portada-btn[data-imagen-id]');
-            if (btn) { portadaExistenteId = btn.dataset.imagenId; updatePortadaVisuals(); }
-        } else if (cardsConArchivo.length === 1) {
-            portadaCard = cardsConArchivo[0];
-            updatePortadaVisuals();
-        }
-    }
+        cards().forEach(card => {
+            const esPortada = card === primera;
 
-    // ── Submit: escribe el hidden input de portada ───────────────
+            const estrella = card.querySelector('.imagen-portada-btn');
+            if (estrella) {
+                estrella.classList.toggle('activa', esPortada);
+                estrella.innerHTML = esPortada ? iconStarFill : iconStarOutline;
+            }
 
-    const prodForm = document.querySelector('form[enctype="multipart/form-data"]');
-    if (prodForm) {
-        prodForm.addEventListener('submit', function () {
-            const hiddenPortada = document.getElementById('imagen-portada');
-            if (!hiddenPortada) return;
-            if (portadaExistenteId) {
-                hiddenPortada.value = 'existente:' + portadaExistenteId;
-            } else if (portadaCard) {
-                const allCards = Array.from(imagenesContainer.querySelectorAll('.imagen-input-card'))
-                    .filter(c => { const inp = c.querySelector('.imagen-file-input'); return inp && inp.files && inp.files.length > 0; });
-                const idx = allCards.indexOf(portadaCard);
-                hiddenPortada.value = idx >= 0 ? 'nueva:' + idx : '';
-            } else {
-                hiddenPortada.value = '';
+            const badge = card.querySelector('.imagen-portada-badge');
+            if (esPortada && !badge) {
+                const nuevo = document.createElement('span');
+                nuevo.className = 'imagen-portada-badge';
+                nuevo.textContent = 'Portada';
+                card.appendChild(nuevo);
+            } else if (!esPortada && badge) {
+                badge.remove();
             }
         });
     }
 
-    return { addFile, collectFiles };
+    /** Le dice a un lector de pantalla dónde quedó la tarjeta que se movió. */
+    function anunciar(card) {
+        const estado = document.getElementById('imagenes-orden-estado');
+        if (!estado) return;
+        const lista = conImagen();
+        const pos   = lista.indexOf(card);
+        if (pos < 0) return;
+        estado.textContent = `Imagen ${pos + 1} de ${lista.length}${pos === 0 ? ', portada' : ''}`;
+    }
+
+    function alFrente(card) {
+        imagenesContainer.insertBefore(card, imagenesContainer.firstElementChild);
+        refrescarPortada();
+        anunciar(card);
+    }
+
+    // ── Eventos delegados ────────────────────────────────────────
+    // Un solo listener en el contenedor en lugar de los onclick inline que
+    // tenían los blades: las tarjetas se mueven de lugar, y así no hay que
+    // reenganchar nada.
+
+    imagenesContainer.addEventListener('click', e => {
+        const estrella = e.target.closest('.imagen-portada-btn');
+        if (estrella && imagenesContainer.contains(estrella)) {
+            const card = estrella.closest('.imagen-card');
+            if (card && !estaEliminada(card)) alFrente(card);
+            return;
+        }
+
+        const borrar = e.target.closest('[data-imagen-eliminar]');
+        if (borrar && imagenesContainer.contains(borrar)) {
+            toggleEliminar(borrar.dataset.imagenEliminar, borrar);
+        }
+    });
+
+    // Reordenar por teclado: sin esto la feature no existe para quien no puede
+    // arrastrar. Con Alt para no pisar el uso normal de las flechas.
+    imagenesContainer.addEventListener('keydown', e => {
+        if (!e.altKey) return;
+
+        const card = e.target.closest?.('.imagen-card');
+        if (!card || !imagenesContainer.contains(card) || estaEliminada(card)) return;
+
+        const movibles = cards().filter(c => !estaEliminada(c));
+        const i = movibles.indexOf(card);
+        if (i < 0) return;
+
+        if (e.key === 'Home') {
+            e.preventDefault();
+            alFrente(card);
+        } else if (e.key === 'ArrowLeft' && i > 0) {
+            e.preventDefault();
+            imagenesContainer.insertBefore(card, movibles[i - 1]);
+            refrescarPortada();
+            anunciar(card);
+        } else if (e.key === 'ArrowRight' && i < movibles.length - 1) {
+            e.preventDefault();
+            imagenesContainer.insertBefore(movibles[i + 1], card);
+            refrescarPortada();
+            anunciar(card);
+        } else {
+            return;
+        }
+
+        card.focus();
+    });
+
+    // ── Arrastre ─────────────────────────────────────────────────
+
+    if (window.Sortable) {
+        window.Sortable.create(imagenesContainer, {
+            draggable: '.imagen-card',
+            // La superficie de arrastre es la imagen. Quedan afuera los botones
+            // y el dropzone vacío (que no tiene nada que ordenar).
+            filter: '.marcada-eliminar, .imagen-dropzone, button',
+            // Sortable lo trae en true, y eso hace preventDefault() sobre el
+            // evento filtrado: rompería el click del label al selector de
+            // archivos y todos los botones de la tarjeta.
+            preventOnFilter: false,
+            animation: 150,
+            // En touch el arrastre arranca con pulsación larga, así el scroll
+            // vertical de la página sigue funcionando sobre la fila.
+            delay: 150,
+            delayOnTouchOnly: true,
+            touchStartThreshold: 5,
+            ghostClass: 'imagen-card-ghost',
+            chosenClass: 'imagen-card-chosen',
+            onEnd: evt => {
+                refrescarPortada();
+                if (evt.item) anunciar(evt.item);
+            },
+        });
+    }
+
+    // ── Restaurar el orden tras un error de validación ───────────
+
+    /**
+     * Reubica las tarjetas según un manifiesto ya emitido. Los archivos los
+     * repone imageDraftPersistence desde IndexedDB; esto repone el orden, que
+     * de otro modo se perdería para las imágenes guardadas (el blade las
+     * vuelve a pintar en orden de base).
+     *
+     * Si los archivos no volvieron, los tokens `nueva:<i>` no resuelven y se
+     * saltean: las guardadas igual quedan en el orden del usuario.
+     */
+    function applyOrder(raw) {
+        if (!raw) return;
+
+        const nuevas = cards().filter(c => !esGuardada(c) && tieneArchivo(c));
+
+        const enOrden = raw.split(',').map(token => {
+            token = token.trim();
+            if (token.startsWith('existente:')) {
+                return imagenesContainer.querySelector(
+                    `.imagen-card[data-imagen-id="${CSS.escape(token.slice(10))}"]`
+                );
+            }
+            if (token.startsWith('nueva:')) {
+                return nuevas[Number(token.slice(6))] || null;
+            }
+            return null;
+        }).filter(Boolean);
+
+        if (!enOrden.length) return;
+
+        // Lo que el manifiesto no nombra (dropzones vacías) queda detrás.
+        const resto = cards().filter(c => !enOrden.includes(c));
+        [...enOrden, ...resto].forEach(c => imagenesContainer.appendChild(c));
+        refrescarPortada();
+    }
+
+    // ── Submit: escribe el manifiesto ───────────────────────────
+
+    const prodForm = document.querySelector('form[enctype="multipart/form-data"]');
+    if (prodForm) {
+        prodForm.addEventListener('submit', function () {
+            const tokens = [];
+            let idxNueva = 0;
+
+            cards().forEach(card => {
+                if (esGuardada(card)) {
+                    // Marcada para borrar: no va a existir, no ocupa posición.
+                    if (estaEliminada(card)) return;
+                    tokens.push('existente:' + card.dataset.imagenId);
+                } else {
+                    // Tarjeta vacía: no viaja ningún archivo por ella, así que
+                    // tampoco consume un índice de `nueva:`.
+                    if (!tieneArchivo(card)) return;
+                    tokens.push('nueva:' + (idxNueva++));
+                }
+            });
+
+            const orden = document.getElementById('imagenes-orden');
+            if (orden) orden.value = tokens.join(',');
+
+            // Respaldo para el caso de que el manifiesto no llegue: la portada
+            // es la posición 0.
+            const portada = document.getElementById('imagen-portada');
+            if (portada) portada.value = tokens[0] || '';
+        });
+    }
+
+    syncAddImagenBtn();
+    refrescarPortada();
+
+    return { addFile, collectFiles, applyOrder };
 }

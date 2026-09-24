@@ -6,6 +6,7 @@ $formAction = $isEdit
 : route('uso-interno.especiales.store');
 $maxDescripcion = \App\Models\Producto::MAX_DESCRIPCION;
 $maxDescripcionTecnica = \App\Models\Producto::MAX_DESCRIPCION_TECNICA;
+$maxImagenes = \App\Models\Producto::MAX_IMAGENES;
 $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
 @endphp
 @section('title', ($isEdit ? 'Editar' : 'Crear') . ' producto especial - Panel interno - Aberturas Giacomazzi')
@@ -138,7 +139,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
         <div class="border rounded-3 bg-white p-3">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
-                    Imágenes <span class="text-muted fw-normal text-lowercase">(máx. 5)</span>
+                    Imágenes <span class="text-muted fw-normal text-lowercase">(máx. {{ $maxImagenes }})</span>
                 </p>
                 <button type="button" id="add-imagen-btn"
                     class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
@@ -148,11 +149,12 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 </button>
             </div>
 
-            {{-- Imágenes existentes + inputs nuevos en el mismo flex row --}}
-            <div class="d-flex flex-wrap gap-3">
+            <div id="imagenes-container" class="imagenes-galeria-row" role="list"
+                aria-describedby="imagenes-orden-ayuda">
                 @if ($isEdit && $producto->imagenes->count() > 0)
                 @foreach ($producto->imagenes as $imagen)
-                <div class="imagen-existente-card" id="imagen-card-{{ $imagen->id }}">
+                <div class="imagen-existente-card imagen-card" id="imagen-card-{{ $imagen->id }}"
+                    data-imagen-id="{{ $imagen->id }}" role="listitem" tabindex="0">
                     <img src="{{ $imagen->ruta_miniatura }}"
                         alt="{{ $imagen->nombre_imagen }}"
                         class="imagen-thumb"
@@ -162,32 +164,35 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                         <button type="button"
                             class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
                             style="width:20px;height:20px;"
-                            data-imagen-id="{{ $imagen->id }}"
-                            onclick="toggleEliminarImagen(this.dataset.imagenId, this)"
+                            data-imagen-eliminar="{{ $imagen->id }}"
                             title="Eliminar">
                             <x-heroicon-m-x-mark style="width:12px;height:12px;" />
                         </button>
                     </div>
                     <button type="button"
-                        class="imagen-portada-btn {{ $imagen->es_principal ? 'activa' : '' }}"
-                        data-imagen-id="{{ $imagen->id }}"
-                        onclick="setPortadaExistente(this)"
-                        title="Marcar como portada">
-                        @if($imagen->es_principal)
+                        class="imagen-portada-btn {{ $loop->first ? 'activa' : '' }}"
+                        title="Poner primera (portada)"
+                        aria-label="Poner primera (portada)">
+                        @if($loop->first)
                         <x-heroicon-s-star style="width:12px;height:12px;" />
                         @else
                         <x-heroicon-o-star style="width:12px;height:12px;" />
                         @endif
                     </button>
+                    @if($loop->first)
+                    <span class="imagen-portada-badge">Portada</span>
+                    @endif
                     <input type="hidden" name="imagenes_eliminar[]"
                         id="eliminar-{{ $imagen->id }}" value="" disabled>
                 </div>
                 @endforeach
                 @endif
-
-                {{-- Inputs nuevas imágenes (JS appends here) --}}
-                <div id="imagenes-container" style="display:contents;"></div>
             </div>
+
+            <p class="imagenes-orden-ayuda" id="imagenes-orden-ayuda">
+                Arrastrá las imágenes para ordenarlas; la primera es la portada.
+            </p>
+            <div class="visually-hidden" id="imagenes-orden-estado" aria-live="polite"></div>
 
             @error('imagenes.*')
             <div class="text-danger small mt-1">{{ $message }}</div>
@@ -212,7 +217,8 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 Planos, cortes, despieces o tablas de medidas.
             </p>
 
-            <div class="d-flex flex-wrap gap-3">
+
+            <div id="tecnicas-container" class="imagenes-galeria-row">
                 @if ($isEdit && $producto->imagenesTecnicas->count() > 0)
                 @foreach ($producto->imagenesTecnicas as $tecnica)
                 <div class="imagen-existente-card" id="tecnica-card-{{ $tecnica->id }}">
@@ -235,9 +241,6 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
                 </div>
                 @endforeach
                 @endif
-
-                {{-- Inputs nuevas imágenes técnicas (JS appends here) --}}
-                <div id="tecnicas-container" style="display:contents;"></div>
             </div>
 
             @error('imagenes_tecnicas')
@@ -248,7 +251,7 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
             @enderror
         </div>
 
-        {{-- Hidden: portada de imagen --}}
+        <input type="hidden" name="imagenes_orden" id="imagenes-orden" value="{{ old('imagenes_orden') }}">
         <input type="hidden" name="imagen_portada" id="imagen-portada" value="">
 
         {{-- Submit --}}
@@ -269,18 +272,14 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
 
 @section('script')
 @php
-$portadaExistenteId = $isEdit
-? ($producto->imagenes->firstWhere('es_principal', true)?->id ?? $producto->imagenes->first()?->id)
-: null;
 $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
 'productoId' => $producto->id ?? null,
 'hasErrors' => $errors->any(),
-'existingImgCount' => $isEdit ? $producto->imagenes->count() : 0,
 'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
 'initialVariantes' => [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
-'portadaExistenteId' => $portadaExistenteId,
+'maxImagenes' => $maxImagenes,
 ], JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 @endphp
 {{-- data-config es inmune al formatter; JSON_HEX_* evita conflictos con htmlspecialchars --}}
@@ -292,5 +291,8 @@ $prodConfigJson = json_encode([
 <div id="tpl-icon-star-outline" class="d-none" aria-hidden="true"><x-heroicon-o-star /></div>
 {{-- Fuera del <form> del producto: acá no queda anidado. --}}
 @include('UsoInterno.Productos.modals.crearCategoria')
+<script defer src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"
+    integrity="sha384-HZZ/fukV+9G8gwTNjN7zQDG0Sp7MsZy5DDN6VfY3Be7V9dvQpEpR2jF2HlyFUUjU"
+    crossorigin="anonymous"></script>
 <script type="module" src="{{ versioned_asset('js/manageEspecial.js') }}"></script>
 @endsection

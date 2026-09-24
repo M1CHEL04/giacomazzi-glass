@@ -15,6 +15,11 @@ use Illuminate\Support\Facades\Storage;
  * Está tipado a Producto, así que también recibe ProductoEspecial: los dos
  * comparten la tabla imagenes_producto y por lo tanto el mismo circuito de
  * optimización, thumbs y baja lógica.
+ *
+ * Sube el archivo y crea la fila, nada más: `orden` y `es_principal` los escribe
+ * SincronizadorImagenesProducto, que es quien ve el conjunto completo. Las filas
+ * que nacen acá toman el default orden = 0 y las desempata el id hasta que ese
+ * servicio las renumere.
  */
 class GestorImagenesProducto
 {
@@ -43,7 +48,6 @@ class GestorImagenesProducto
     public function guardar(
         Producto $producto,
         UploadedFile $imagen,
-        bool $esPrincipal = false,
         bool $esTecnica = false
     ): ImagenProducto {
         if (!$imagen->isValid()) {
@@ -55,9 +59,8 @@ class GestorImagenesProducto
         }
 
         $imagenProducto = ImagenProducto::create([
-            'producto_id'  => $producto->id,
-            'es_principal' => $esPrincipal,
-            'es_tecnica'   => $esTecnica,
+            'producto_id' => $producto->id,
+            'es_tecnica'  => $esTecnica,
         ]);
 
         // Se descarta la extensión original: lo que se sube siempre es WebP.

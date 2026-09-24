@@ -174,9 +174,14 @@
         border: 1px solid #dee2e6;
     }
 
+    /* Las medidas van explícitas y no heredadas de la <img>: la miniatura es
+       loading="lazy", y una que todavía no pintó dejaría la tarjeta en cero
+       justo cuando Sortable la está midiendo para armar el hueco del arrastre. */
     .imagen-existente-card {
         position: relative;
-        display: inline-block;
+        width: 100px;
+        height: 100px;
+        flex-shrink: 0;
     }
 
     .imagen-eliminar-overlay {
@@ -535,4 +540,73 @@
             box-shadow: 0 0 0 0.2rem rgba(40, 116, 82, 0.35);
             border-color: #287452;
         }
+    }
+
+    /* ── Fila de imágenes reordenable ─────────────────────────────────
+       Antes esto eran utilidades de Bootstrap inline en el blade, con un div
+       display:contents adentro para que las tarjetas nuevas cayeran en la misma
+       línea. Ese div no generaba caja, así que no podía ser el contenedor de
+       Sortable: no tiene rect que medir ni superficie donde soltar. Ahora hay un
+       solo contenedor real, y por eso el layout vive acá. */
+    .imagenes-galeria-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-start;
+        /* Que la fila siga siendo blanco de drop aunque quede vacía. */
+        min-height: 100px;
+    }
+
+    .imagen-card {
+        cursor: grab;
+        /* Sin esto el navegador se queda el gesto para hacer zoom de doble tap y
+           el arrastre por touch nunca arranca. */
+        touch-action: manipulation;
+    }
+
+    .imagen-card:active {
+        cursor: grabbing;
+    }
+
+    .imagen-card:focus-visible {
+        outline: 2px solid #287452;
+        outline-offset: 2px;
+    }
+
+    /* El hueco que deja la tarjeta mientras viaja. */
+    .imagen-card-ghost {
+        opacity: .4;
+    }
+
+    .imagen-card-chosen {
+        box-shadow: 0 0 0 2px #287452;
+    }
+
+    /* Una tarjeta marcada para borrar no tiene posición: no se arrastra. */
+    .imagen-card.marcada-eliminar {
+        cursor: not-allowed;
+    }
+
+    /* Dice cuál sale como portada sin tener que pasar el mouse por la estrella,
+       que es lo único que se ve desde el celular. */
+    .imagen-portada-badge {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        z-index: 4;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: #eab308;
+        color: #1c1917;
+        font-size: 9px;
+        font-weight: 600;
+        line-height: 1.5;
+        letter-spacing: .02em;
+        pointer-events: none;
+    }
+
+    .imagenes-orden-ayuda {
+        margin: .6rem 0 0;
+        color: #6c757d;
+        font-size: 12px;
     }
