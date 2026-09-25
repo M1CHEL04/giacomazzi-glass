@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const prodConfigEl = document.getElementById('prod-config');
     const cfg = prodConfigEl
         ? JSON.parse(prodConfigEl.dataset.config)
-        : { isEdit: false, existingTecnicasCount: 0, initialVariantes: [], categoriaId: '', maxImagenes: 5, productoId: null, hasErrors: false };
+        : { isEdit: false, initialVariantes: [], categoriaId: '', maxImagenes: 5, maxImagenesTecnicas: 5, productoId: null, hasErrors: false };
 
     const iconXMark       = document.getElementById('tpl-icon-x-mark')?.innerHTML          || '×';
     const iconArrowBack   = document.getElementById('tpl-icon-arrow-uturn-left')?.innerHTML || '↩';

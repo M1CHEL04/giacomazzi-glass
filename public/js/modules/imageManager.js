@@ -2,23 +2,38 @@
  * imageManager.js
  * ─────────────────────────────────────────────────────────────
  * Gestión de imágenes en el formulario de producto:
- *   - Tarjetas de nueva imagen con previsualización
+ *   - Zona de carga única: se eligen o se sueltan varias de una
+ *   - Una miniatura por imagen, con su input propio
  *   - Toggle de eliminación de imágenes guardadas (edición)
  *   - Orden de la galería por arrastre, teclado o estrella
+ *
+ * Hay un solo selector de archivos —el de la zona de carga, que no tiene
+ * `name` y por lo tanto nunca se envía—. Cada archivo elegido se convierte en
+ * una miniatura que lleva su propio input `imagenes[]` con un único archivo,
+ * que es lo que el backend espera. Así "elegir varias" y "sumar de a una" son
+ * el mismo gesto en el mismo lugar, en vez de dos botones que hacen lo mismo.
  *
  * El orden de las tarjetas dentro de #imagenes-container ES el orden que se
  * guarda, y la primera es la portada. Por eso no hay estado de portada en
  * variables: preguntarle al DOM hace imposible que lo que se ve y lo que se
  * envía se contradigan. El submit traduce ese orden a `imagenes_orden`, como
  * `existente:41,nueva:0,…`, donde `nueva:<i>` es la posición del archivo entre
- * los inputs con archivo —el mismo índice que le llega a PHP después de
+ * las miniaturas nuevas —el mismo índice que le llega a PHP después de
  * array_filter—.
  */
+import { asignar, avisar, filtrarPorPeso, initBajaGuardadas, initDropZone } from './imageIntake.js';
+
 export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, iconStarOutline }) {
 
     const imagenesContainer = document.getElementById('imagenes-container');
-    const addImagenBtn      = document.getElementById('add-imagen-btn');
-    if (!imagenesContainer) return { addFile: () => false, collectFiles: () => [], applyOrder: () => {} };
+    if (!imagenesContainer) return { addFile: () => null, collectFiles: () => [], applyOrder: () => {} };
+
+    const bloque   = document.getElementById('imagenes-bloque') || imagenesContainer;
+    const dropzone = document.getElementById('imagenes-dropzone');
+    const picker   = document.getElementById('imagenes-picker');
+    const contador = document.getElementById('imagenes-contador');
+    const titulo   = dropzone?.querySelector('.imagen-dropzone-titulo');
+    const tituloOriginal = titulo?.textContent ?? '';
 
     const MAX_IMG = cfg.maxImagenes || 5;
 
@@ -27,131 +42,114 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     const cards         = () => Array.from(imagenesContainer.children).filter(el => el.matches('.imagen-card'));
     const esGuardada    = c => c.classList.contains('imagen-existente-card');
     const estaEliminada = c => c.classList.contains('marcada-eliminar');
-    const tieneArchivo  = c => !!c.querySelector('.imagen-file-input')?.files?.length;
 
     /**
      * Las que van a existir después de guardar, en orden. La primera es la
-     * portada. Una tarjeta nueva todavía vacía no cuenta —no produce fila—, así
-     * que arrastrarla al frente no le roba la portada a la que sí tiene imagen.
+     * portada. Toda miniatura tiene imagen —no se crea ninguna vacía—, así que
+     * lo único que sobra son las guardadas marcadas para borrar.
      */
-    const conImagen = () => cards().filter(c => esGuardada(c) ? !estaEliminada(c) : tieneArchivo(c));
+    const conImagen = () => cards().filter(c => !estaEliminada(c));
 
-    /**
-     * Cupo: toda tarjeta nueva ocupa lugar aunque esté vacía (el usuario ya
-     * reservó el espacio), y las guardadas sólo si no están marcadas para
-     * borrar, porque esas liberan su lugar al guardar.
-     */
-    const cuentaParaCupo = c => !esGuardada(c) || !estaEliminada(c);
+    /** Cupo y contador salen del mismo lugar: las que van a quedar guardadas. */
+    function syncCupo() {
+        const usadas = conImagen().length;
+        const lleno  = usadas >= MAX_IMG;
 
-    function syncAddImagenBtn() {
-        if (addImagenBtn) addImagenBtn.disabled = cards().filter(cuentaParaCupo).length >= MAX_IMG;
+        if (contador) contador.textContent = `${usadas} de ${MAX_IMG}`;
+
+        // Con menos de dos imágenes no hay nada que ordenar.
+        const ayuda = document.getElementById('imagenes-orden-ayuda');
+        if (ayuda) ayuda.classList.toggle('d-none', usadas < 2);
+
+        if (picker) picker.disabled = lleno;
+        if (dropzone) dropzone.classList.toggle('lleno', lleno);
+        if (titulo) {
+            titulo.textContent = lleno
+                ? `Llegaste al máximo de ${MAX_IMG} imágenes`
+                : tituloOriginal;
+        }
     }
 
-    // ── Tarjetas de nueva imagen ─────────────────────────────────
+    // ── Miniaturas de imagen nueva ───────────────────────────────
 
-    function addImagenRow() {
-        if (cards().filter(cuentaParaCupo).length >= MAX_IMG) return;
+    /**
+     * `anchor` es la tarjeta detrás de la cual va la nueva; sin él va al final.
+     * Es lo que mantiene el orden cuando entran varios archivos de una: cada
+     * uno se encadena detrás del anterior.
+     */
+    function crearTarjeta(file, anchor) {
+        if (conImagen().length >= MAX_IMG) return null;
 
         const wrapper = document.createElement('div');
         wrapper.className = 'imagen-input-card imagen-card';
         wrapper.setAttribute('role', 'listitem');
         wrapper.tabIndex = 0;
 
-        // Todas llevan botón de quitar: la vieja regla de "la primera no" era
-        // posicional, y la posición ahora la mueve el usuario.
         wrapper.innerHTML = `
+            <input type="file" name="imagenes[]" class="imagen-file-input">
+            <img src="" alt="Vista previa" class="imagen-thumb">
             <button type="button" class="imagen-remove-card-btn" title="Quitar">${iconXMark}</button>
-            <button type="button" class="imagen-portada-btn d-none" title="Poner primera (portada)"
+            <button type="button" class="imagen-portada-btn" title="Poner primera (portada)"
                     aria-label="Poner primera (portada)">${iconStarOutline}</button>
-            <label class="imagen-dropzone">
-                <input type="file" name="imagenes[]" accept="image/jpeg,image/png,image/webp" class="imagen-file-input">
-                <div class="imagen-dropzone-placeholder">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.4">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                              d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159
-                                 m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909
-                                 M3 20.25h18M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span>Seleccionar</span>
-                </div>
-            </label>
-            <div class="imagen-preview-box d-none">
-                <img src="" alt="Vista previa" class="imagen-preview-thumb">
-                <button type="button" class="imagen-clear-btn" title="Limpiar imagen">${iconArrowBack}</button>
-            </div>
         `;
 
-        const fileInput     = wrapper.querySelector('.imagen-file-input');
-        const dropzone      = wrapper.querySelector('.imagen-dropzone');
-        const previewBox    = wrapper.querySelector('.imagen-preview-box');
-        const previewImg    = wrapper.querySelector('.imagen-preview-thumb');
-        const clearBtn      = wrapper.querySelector('.imagen-clear-btn');
-        const removeCardBtn = wrapper.querySelector('.imagen-remove-card-btn');
-        const portadaBtn    = wrapper.querySelector('.imagen-portada-btn');
+        asignar(wrapper.querySelector('.imagen-file-input'), file);
 
-        fileInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => {
-                previewImg.src = e.target.result;
-                dropzone.classList.add('d-none');
-                previewBox.classList.remove('d-none');
-            };
-            reader.readAsDataURL(file);
-            portadaBtn.classList.remove('d-none');
-            refrescarPortada();
-        });
+        const reader = new FileReader();
+        reader.onload = e => { wrapper.querySelector('.imagen-thumb').src = e.target.result; };
+        reader.readAsDataURL(file);
 
-        clearBtn.addEventListener('click', () => {
-            fileInput.value = '';
-            previewImg.src  = '';
-            previewBox.classList.add('d-none');
-            dropzone.classList.remove('d-none');
-            portadaBtn.classList.add('d-none');
-            refrescarPortada();
-        });
-
-        removeCardBtn.addEventListener('click', () => {
+        wrapper.querySelector('.imagen-remove-card-btn').addEventListener('click', () => {
             wrapper.remove();
-            // Que el formulario nunca quede sin ninguna tarjeta.
-            if (!cards().length) addImagenRow();
-            syncAddImagenBtn();
+            syncCupo();
             refrescarPortada();
         });
 
-        imagenesContainer.appendChild(wrapper);
-        syncAddImagenBtn();
+        imagenesContainer.insertBefore(wrapper, anchor ? anchor.nextSibling : null);
+        syncCupo();
         return wrapper;
     }
 
-    if (addImagenBtn) addImagenBtn.addEventListener('click', () => {
-        const card = addImagenRow();
-        if (card) refrescarPortada();
-    });
+    /**
+     * Entrada de a varios: el selector de archivos y lo que se suelta. Los que
+     * no entran en el cupo se descartan con aviso, en vez de perderse en
+     * silencio.
+     */
+    function repartir(files) {
+        let anchor = null;
+        let omitidos = 0;
 
-    // En alta no hay tarjetas guardadas, así que arranca con una vacía lista.
-    if (!cards().length) addImagenRow();
-
-    /** Reutiliza la primera tarjeta vacía si hay una; si no, crea una nueva. */
-    function addFile(file) {
-        let card = cards().find(c => {
-            const inp = c.querySelector('.imagen-file-input');
-            return inp && !inp.files.length;
+        filtrarPorPeso(files).forEach(file => {
+            const card = crearTarjeta(file, anchor);
+            if (!card) {
+                omitidos++;
+                return;
+            }
+            anchor = card;
         });
 
-        if (!card) {
-            card = addImagenRow();
-            if (!card) return false; // MAX_IMG alcanzado
-        }
+        refrescarPortada();
 
-        const input = card.querySelector('.imagen-file-input');
-        const dt = new DataTransfer();
-        dt.items.add(file);
-        input.files = dt.files;
-        input.dispatchEvent(new Event('change'));
-        return true;
+        if (omitidos) {
+            avisar(`Solo se pueden cargar ${MAX_IMG} imágenes: ` +
+                (omitidos === 1 ? 'se omitió 1.' : `se omitieron ${omitidos}.`));
+        }
+    }
+
+    if (picker) picker.addEventListener('change', function () {
+        if (this.files.length) repartir(this.files);
+        // El picker no guarda nada: cada archivo ya vive en su miniatura. Además
+        // vaciarlo permite volver a elegir el mismo archivo si se lo quitó.
+        this.value = '';
+    });
+
+    initDropZone(bloque, repartir);
+
+    /** Para imageDraftPersistence, que repone los archivos de a uno. */
+    function addFile(file) {
+        const card = crearTarjeta(file);
+        refrescarPortada();
+        return card;
     }
 
     function collectFiles() {
@@ -162,29 +160,14 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
 
     // ── Borrado de imágenes guardadas ────────────────────────────
 
-    function toggleEliminar(id, btn) {
-        const input = document.getElementById('eliminar-' + id);
-        const card  = document.getElementById('imagen-card-' + id);
-        if (!input || !card) return;
-
-        if (input.disabled) {
-            input.value    = id;
-            input.disabled = false;
-            card.classList.add('marcada-eliminar');
-            btn.innerHTML = iconArrowBack;
-            btn.classList.replace('btn-danger', 'btn-secondary');
-            btn.title = 'Deshacer';
-        } else {
-            input.value    = '';
-            input.disabled = true;
-            card.classList.remove('marcada-eliminar');
-            btn.innerHTML = iconXMark;
-            btn.classList.replace('btn-secondary', 'btn-danger');
-            btn.title = 'Eliminar';
-        }
-        syncAddImagenBtn();
-        refrescarPortada();
-    }
+    initBajaGuardadas(imagenesContainer, {
+        iconXMark,
+        iconArrowBack,
+        alCambiar: () => {
+            syncCupo();
+            refrescarPortada();
+        },
+    });
 
     // ── Portada ──────────────────────────────────────────────────
 
@@ -239,16 +222,10 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
 
     imagenesContainer.addEventListener('click', e => {
         const estrella = e.target.closest('.imagen-portada-btn');
-        if (estrella && imagenesContainer.contains(estrella)) {
-            const card = estrella.closest('.imagen-card');
-            if (card && !estaEliminada(card)) alFrente(card);
-            return;
-        }
+        if (!estrella || !imagenesContainer.contains(estrella)) return;
 
-        const borrar = e.target.closest('[data-imagen-eliminar]');
-        if (borrar && imagenesContainer.contains(borrar)) {
-            toggleEliminar(borrar.dataset.imagenEliminar, borrar);
-        }
+        const card = estrella.closest('.imagen-card');
+        if (card && !estaEliminada(card)) alFrente(card);
     });
 
     // Reordenar por teclado: sin esto la feature no existe para quien no puede
@@ -288,12 +265,11 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     if (window.Sortable) {
         window.Sortable.create(imagenesContainer, {
             draggable: '.imagen-card',
-            // La superficie de arrastre es la imagen. Quedan afuera los botones
-            // y el dropzone vacío (que no tiene nada que ordenar).
-            filter: '.marcada-eliminar, .imagen-dropzone, button',
+            // Quedan afuera las marcadas para borrar (no tienen posición) y los
+            // botones de la tarjeta.
+            filter: '.marcada-eliminar, button',
             // Sortable lo trae en true, y eso hace preventDefault() sobre el
-            // evento filtrado: rompería el click del label al selector de
-            // archivos y todos los botones de la tarjeta.
+            // evento filtrado: rompería todos los botones de la tarjeta.
             preventOnFilter: false,
             animation: 150,
             // En touch el arrastre arranca con pulsación larga, así el scroll
@@ -324,7 +300,7 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
     function applyOrder(raw) {
         if (!raw) return;
 
-        const nuevas = cards().filter(c => !esGuardada(c) && tieneArchivo(c));
+        const nuevas = cards().filter(c => !esGuardada(c));
 
         const enOrden = raw.split(',').map(token => {
             token = token.trim();
@@ -341,7 +317,6 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
 
         if (!enOrden.length) return;
 
-        // Lo que el manifiesto no nombra (dropzones vacías) queda detrás.
         const resto = cards().filter(c => !enOrden.includes(c));
         [...enOrden, ...resto].forEach(c => imagenesContainer.appendChild(c));
         refrescarPortada();
@@ -361,9 +336,6 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
                     if (estaEliminada(card)) return;
                     tokens.push('existente:' + card.dataset.imagenId);
                 } else {
-                    // Tarjeta vacía: no viaja ningún archivo por ella, así que
-                    // tampoco consume un índice de `nueva:`.
-                    if (!tieneArchivo(card)) return;
                     tokens.push('nueva:' + (idxNueva++));
                 }
             });
@@ -378,7 +350,7 @@ export function initImageManager({ cfg, iconXMark, iconArrowBack, iconStarFill, 
         });
     }
 
-    syncAddImagenBtn();
+    syncCupo();
     refrescarPortada();
 
     return { addFile, collectFiles, applyOrder };

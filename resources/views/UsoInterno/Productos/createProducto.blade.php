@@ -156,120 +156,25 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
         </div>
 
         {{-- ── IMÁGENES ── --}}
-        <div class="border rounded-3 bg-white p-3">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
-                    Imágenes <span class="text-muted fw-normal text-lowercase">(máx. {{ $maxImagenes }})</span>
-                </p>
-                <button type="button" id="add-imagen-btn"
-                    class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
-                    style="font-size:12px;">
-                    <x-fluentui-add-20-o class="me-1" style="width:12px;height:12px;" />
-                    Agregar imagen
-                </button>
-            </div>
-
-            <div id="imagenes-container" class="imagenes-galeria-row" role="list"
-                aria-describedby="imagenes-orden-ayuda">
-                @if ($isEdit && $producto->imagenes->count() > 0)
-                @foreach ($producto->imagenes as $imagen)
-                <div class="imagen-existente-card imagen-card" id="imagen-card-{{ $imagen->id }}"
-                    data-imagen-id="{{ $imagen->id }}" role="listitem" tabindex="0">
-                    <img src="{{ $imagen->ruta_miniatura }}"
-                        alt="{{ $imagen->nombre_imagen }}"
-                        class="imagen-thumb"
-                        width="100" height="100"
-                        loading="lazy" decoding="async">
-                    <div class="imagen-eliminar-overlay">
-                        <button type="button"
-                            class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
-                            style="width:20px;height:20px;"
-                            data-imagen-eliminar="{{ $imagen->id }}"
-                            title="Eliminar">
-                            <x-heroicon-m-x-mark style="width:12px;height:12px;" />
-                        </button>
-                    </div>
-
-                    <button type="button"
-                        class="imagen-portada-btn {{ $loop->first ? 'activa' : '' }}"
-                        title="Poner primera (portada)"
-                        aria-label="Poner primera (portada)">
-                        @if($loop->first)
-                        <x-heroicon-s-star style="width:12px;height:12px;" />
-                        @else
-                        <x-heroicon-o-star style="width:12px;height:12px;" />
-                        @endif
-                    </button>
-                    @if($loop->first)
-                    <span class="imagen-portada-badge">Portada</span>
-                    @endif
-                    <input type="hidden" name="imagenes_eliminar[]"
-                        id="eliminar-{{ $imagen->id }}" value="" disabled>
-                </div>
-                @endforeach
-                @endif
-            </div>
-
-            <p class="imagenes-orden-ayuda" id="imagenes-orden-ayuda">
-                Arrastrá las imágenes para ordenarlas; la primera es la portada.
-            </p>
-            <div class="visually-hidden" id="imagenes-orden-estado" aria-live="polite"></div>
-
-            @error('imagenes.*')
-            <div class="text-danger small mt-1">{{ $message }}</div>
-            @enderror
-        </div>
+        @include('UsoInterno.Productos.partials.bloqueImagenes', [
+        'prefijo' => 'imagenes',
+        'campo' => 'imagenes',
+        'titulo' => 'Imágenes',
+        'maximo' => $maxImagenes,
+        'imagenes' => $isEdit ? $producto->imagenes : collect(),
+        'ordenable' => true,
+        ])
 
         {{-- ── IMÁGENES TÉCNICAS ── --}}
-        <div class="border rounded-3 bg-white p-3">
-            <div class="d-flex align-items-center justify-content-between mb-1">
-                <p class="text-uppercase fw-semibold text-secondary mb-0" style="font-size:11px;letter-spacing:.06em;">
-                    Imágenes técnicas
-                    <span class="text-muted fw-normal text-lowercase">(máx. {{ $maxImagenesTecnicas }}, opcional)</span>
-                </p>
-                <button type="button" id="add-imagen-tecnica-btn"
-                    class="btn btn-outline-secondary btn-sm px-2 py-1 d-inline-flex align-items-center rounded-2"
-                    style="font-size:12px;">
-                    <x-fluentui-add-20-o class="me-1" style="width:12px;height:12px;" />
-                    Agregar imagen
-                </button>
-            </div>
-            <p class="text-secondary mb-3" style="font-size:12px;">
-                Planos, cortes, despieces o tablas de medidas.
-            </p>
-
-            <div id="tecnicas-container" class="imagenes-galeria-row">
-                @if ($isEdit && $producto->imagenesTecnicas->count() > 0)
-                @foreach ($producto->imagenesTecnicas as $tecnica)
-                <div class="imagen-existente-card" id="tecnica-card-{{ $tecnica->id }}">
-                    <img src="{{ $tecnica->ruta_miniatura }}"
-                        alt="{{ $tecnica->nombre_imagen }}"
-                        class="imagen-thumb"
-                        width="100" height="100"
-                        loading="lazy" decoding="async">
-                    <div class="imagen-eliminar-overlay">
-                        <button type="button"
-                            class="btn btn-danger btn-sm rounded-circle p-0 d-flex align-items-center justify-content-center"
-                            style="width:20px;height:20px;"
-                            data-tecnica-eliminar="{{ $tecnica->id }}"
-                            title="Eliminar">
-                            <x-heroicon-m-x-mark style="width:12px;height:12px;" />
-                        </button>
-                    </div>
-                    <input type="hidden" name="imagenes_tecnicas_eliminar[]"
-                        id="eliminar-tecnica-{{ $tecnica->id }}" value="" disabled>
-                </div>
-                @endforeach
-                @endif
-            </div>
-
-            @error('imagenes_tecnicas')
-            <div class="text-danger small mt-1">{{ $message }}</div>
-            @enderror
-            @error('imagenes_tecnicas.*')
-            <div class="text-danger small mt-1">{{ $message }}</div>
-            @enderror
-        </div>
+        @include('UsoInterno.Productos.partials.bloqueImagenes', [
+        'prefijo' => 'tecnicas',
+        'campo' => 'imagenes_tecnicas',
+        'titulo' => 'Imágenes técnicas',
+        'nota' => 'opcional',
+        'descripcion' => 'Planos, cortes, despieces o tablas de medidas.',
+        'maximo' => $maxImagenesTecnicas,
+        'imagenes' => $isEdit ? $producto->imagenesTecnicas : collect(),
+        ])
 
         {{-- ── VARIANTES ── --}}
         <div class="border rounded-3 bg-white p-3">
@@ -390,10 +295,6 @@ $maxImagenesTecnicas = \App\Models\Producto::MAX_IMAGENES_TECNICAS;
         <input type="hidden" name="variantes_json" id="variantes-json"
             value="{{ old('variantes_json', '[]') }}">
 
-        <input type="hidden" name="imagenes_orden" id="imagenes-orden" value="{{ old('imagenes_orden') }}">
-
-        <input type="hidden" name="imagen_portada" id="imagen-portada" value="">
-
         {{-- Submit --}}
         <div class="d-flex justify-content-end border rounded-3 bg-white p-3">
             {{-- El envío sube las imágenes por SFTP y puede tardar: el
@@ -416,10 +317,10 @@ $prodConfigJson = json_encode([
 'isEdit' => $isEdit,
 'productoId' => $producto->id ?? null,
 'hasErrors' => $errors->any(),
-'existingTecnicasCount' => $isEdit ? $producto->imagenesTecnicas->count() : 0,
 'initialVariantes' => $initialVariantes ?? [],
 'categoriaId' => old('categoria_id', $producto->categoria_id ?? ''),
 'maxImagenes' => $maxImagenes,
+'maxImagenesTecnicas' => $maxImagenesTecnicas,
 ], JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 @endphp
 {{-- data-config es inmune al formatter; JSON_HEX_* evita conflictos con htmlspecialchars --}}
