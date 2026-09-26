@@ -193,27 +193,27 @@ class AccountsController extends Controller
 
             $user = User::where('email', $validatedData['email'])->first();
 
-            if (!$user) {
+            request()->session()->put('reset_email', $validatedData['email']);
+            request()->session()->put('reset_expira', now()->addMinutes(15)->timestamp);
+            request()->session()->forget('reset_verificado');
+
+            if ($user) {
+                $verificationCode = random_int(100000, 999999);
+                $user->verification_code = Hash::make($verificationCode);
+                $user->save();
+
+                Mail::to($user->email)->send(new \App\Mail\RecuperacionCodigo($verificationCode));
+            } else {
                 Log::warning('Intento de recuperación de contraseña para un correo no registrado: ' . $validatedData['email']);
-                if (request()->expectsJson()) {
-                    return response()->json(['message' => 'Usuario no encontrado.'], 404);
-                }
-                return back()->with('error', 'Usuario no encontrado.');
             }
 
-            $verificationCode = rand(100000, 999999);
-            $user->verification_code = Hash::make($verificationCode);
-            $user->save();
-
-            request()->session()->put('user_email', $user->email);
-
-            Mail::to($user->email)->send(new \App\Mail\RecuperacionCodigo($verificationCode));
+            $mensaje = 'Si el correo está registrado, te enviamos un código de verificación.';
 
             if (request()->expectsJson()) {
-                return response()->json(['message' => 'Código de verificación enviado a tu correo.']);
+                return response()->json(['message' => $mensaje]);
             }
 
-            return back()->with('success', 'Código de verificación enviado a tu correo.');
+            return back()->with('success', $mensaje);
         } catch (\Exception $e) {
             Log::error('Error al enviar el correo de recuperación: ' . $e->getMessage());
             if (request()->expectsJson()) {
@@ -233,23 +233,32 @@ class AccountsController extends Controller
                 'verification_code.string' => 'El código de verificación debe ser un texto válido.',
             ]);
 
-            $user = User::where('email', session('user_email'))->first();
+            $user    = User::where('email', session('reset_email'))->first();
+            $vencido = session('reset_expira', 0) < now()->timestamp;
 
-            if (!$user || !Hash::check($validatedData['verification_code'], $user->verification_code)) {
+            if (
+                !$user || $vencido || !$user->verification_code
+                || !Hash::check($validatedData['verification_code'], $user->verification_code)
+            ) {
+                $mensaje = $vencido
+                    ? 'El código venció. Pedí uno nuevo.'
+                    : 'El código de verificación no es correcto.';
                 if ($request->expectsJson()) {
-                    return response()->json(['message' => 'El código de verificación no es correcto.'], 422);
+                    return response()->json(['message' => $mensaje], 422);
                 }
-                return back()->with('error', 'El código de verificación no es correcto.');
+                return back()->with('error', $mensaje);
             }
 
             $user->verification_code = null;
             $user->save();
 
+            $request->session()->put('reset_verificado', true);
+
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Código de verificación correcto.']);
             }
 
-            return redirect()->route('uso-interno.estadisticas')->with('success', 'Código de verificación correcto. Bienvenido, ' . $user->name . '!');
+            return back()->with('success', 'Código de verificación correcto.');
         } catch (\Exception $e) {
             Log::error('Error al verificar código: ' . $e->getMessage());
             if ($request->expectsJson()) {
@@ -271,14 +280,20 @@ class AccountsController extends Controller
                 'new_password.confirmed' => 'La confirmación de la nueva contraseña no coincide.',
             ]);
 
-            $user = User::where('email', session('user_email'))->first();
+            $user = session('reset_verificado') === true
+                && session('reset_expira', 0) >= now()->timestamp
+                ? User::where('email', session('reset_email'))->first()
+                : null;
 
             if (!$user) {
+                $mensaje = 'Primero verificá el código que te enviamos por correo.';
                 if ($request->expectsJson()) {
-                    return response()->json(['message' => 'Usuario no encontrado.'], 404);
+                    return response()->json(['message' => $mensaje], 403);
                 }
-                return back()->with('error', 'Usuario no encontrado.');
+                return back()->with('error', $mensaje);
             }
+
+            $request->session()->forget(['reset_email', 'reset_expira', 'reset_verificado']);
 
             $user->password = Hash::make($validatedData['new_password']);
             $user->cambio_contraseña = true;

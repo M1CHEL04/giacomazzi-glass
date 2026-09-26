@@ -62,6 +62,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
     function renderCategories(categorias) {
         const listContainer = document.getElementById('categorias-list');
         
@@ -80,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
             html += `
                 <div class="d-flex flex-column d-md-grid producto-grid categoria-grid gap-2 px-3 py-2 border-bottom category-row" data-category-id="${categoria.id}">
                     <div>
-                        <div class="fw-semibold mb-1 category-name" style="font-size: 14px;">${categoria.nombre}</div>
+                        <div class="fw-semibold mb-1 category-name" style="font-size: 14px;">${escapeHtml(categoria.nombre)}</div>
                         <div class="small text-secondary" style="font-size: 12px;">${categoria.productos_count} productos asignados</div>
                     </div>
                     <div>

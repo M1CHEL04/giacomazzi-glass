@@ -94,7 +94,7 @@ class UsoExternoController extends Controller
                 );
             }
 
-            $filtros = $request->input('variantes', []);
+            $filtros = $this->filtrosVariantes($request);
             foreach ($filtros as $varianteId => $valores) {
                 $valores = array_filter((array) $valores);
                 if (!empty($valores)) {
@@ -194,7 +194,7 @@ class UsoExternoController extends Controller
                 );
             }
 
-            $filtros = $request->input('variantes', []);
+            $filtros = $this->filtrosVariantes($request);
             foreach ($filtros as $varianteId => $valores) {
                 $valores = array_filter((array) $valores);
                 if (!empty($valores)) {
@@ -237,6 +237,16 @@ class UsoExternoController extends Controller
 
             abort(500);
         }
+    }
+
+    /**
+     * Filtros de variantes de la URL. Cada clave suma una subconsulta, así que
+     * se acotan: el sitio nunca manda más de un puñado, y un string suelto
+     * rompía el foreach con un 500.
+     */
+    private function filtrosVariantes(Request $request): array
+    {
+        return array_slice((array) $request->input('variantes', []), 0, 20, true);
     }
 
     public function showProducto(int $id)

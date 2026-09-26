@@ -28,23 +28,28 @@ Route::get('/productos/especiales/{id}',           [UsoExternoController::class,
 Route::get('/productos/{id}',           [UsoExternoController::class, 'showProducto'])->whereNumber('id')->name('productos.show');
 
 // ── Carrito ───────────────────────────────────────────────────────────────────
-Route::get('/carrito',           [CarritoController::class, 'obtener'])->name('carrito.obtener');
-Route::post('/carrito/agregar',  [CarritoController::class, 'agregar'])->name('carrito.agregar');
-Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
-Route::post('/carrito/cantidad', [CarritoController::class, 'actualizarCantidad'])->name('carrito.cantidad');
-Route::post('/carrito/vaciar',   [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
-Route::post('/carrito/cotizar',  [CarritoController::class, 'cotizar'])->name('carrito.cotizar');
+// Límites por IP. El tercer parámetro de throttle es el nombre del contador:
+// sin él todas las rutas compartirían uno, y el carrito agotaría el del login.
+Route::middleware('throttle:60,1,carrito')->group(function () {
+    Route::get('/carrito',           [CarritoController::class, 'obtener'])->name('carrito.obtener');
+    Route::post('/carrito/agregar',  [CarritoController::class, 'agregar'])->name('carrito.agregar');
+    Route::post('/carrito/eliminar', [CarritoController::class, 'eliminar'])->name('carrito.eliminar');
+    Route::post('/carrito/cantidad', [CarritoController::class, 'actualizarCantidad'])->name('carrito.cantidad');
+    Route::post('/carrito/vaciar',   [CarritoController::class, 'vaciar'])->name('carrito.vaciar');
+});
+// Cada cotización es una fila en las estadísticas: tope aparte y más bajo.
+Route::post('/carrito/cotizar',  [CarritoController::class, 'cotizar'])->middleware('throttle:10,1,cotizar')->name('carrito.cotizar');
 
 // ── Autenticación ─────────────────────────────────────────────────────────────
 Route::get('/login',              [AccountsController::class, 'loginView'])->name('login-view');
-Route::post('/login-form',        [AccountsController::class, 'login'])->name('login');
+Route::post('/login-form',        [AccountsController::class, 'login'])->middleware('throttle:5,1,login')->name('login');
 Route::post('/logout',            [AccountsController::class, 'logout'])->name('logout');
-Route::post('/cambiar-contrasena-form', [AccountsController::class, 'changePassword'])->name('change-password');
+Route::post('/cambiar-contrasena-form', [AccountsController::class, 'changePassword'])->middleware('throttle:5,1,cambio')->name('change-password');
 Route::get('/cambiar-contraseña', [AccountsController::class, 'changePasswordView'])->name('change-password-view');
 Route::get('/olvido-contrasena',  [AccountsController::class, 'forgotPasswordView'])->name('forgot-password-view');
-Route::post('/enviar-codigo-verificacion', [AccountsController::class, 'sendVerifyCode'])->name('send-verify-code');
-Route::post('/verificar-codigo',           [AccountsController::class, 'verifyCode'])->name('verify-code');
-Route::post('/cambiar-contrasena-codigo',  [AccountsController::class, 'changePasswordAfterCode'])->name('change-password-after-code');
+Route::post('/enviar-codigo-verificacion', [AccountsController::class, 'sendVerifyCode'])->middleware('throttle:3,10,codigo-envio')->name('send-verify-code');
+Route::post('/verificar-codigo',           [AccountsController::class, 'verifyCode'])->middleware('throttle:5,1,codigo-verif')->name('verify-code');
+Route::post('/cambiar-contrasena-codigo',  [AccountsController::class, 'changePasswordAfterCode'])->middleware('throttle:5,1,codigo-cambio')->name('change-password-after-code');
 
 // ── Uso Interno ───────────────────────────────────────────────────────────────
 Route::prefix('uso-interno')->name('uso-interno.')->middleware(['admin'])->group(function () {

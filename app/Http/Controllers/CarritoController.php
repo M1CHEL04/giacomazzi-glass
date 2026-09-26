@@ -15,6 +15,9 @@ class CarritoController extends Controller
     /** Tope de piezas por línea del carrito. */
     private const MAX_UNIDADES = 10;
 
+    /** Tope de líneas: el carrito vive en la sesión, que se guarda en la base. */
+    private const MAX_LINEAS = 50;
+
     /** Tope de una medida en metros (guarda contra errores de tipeo). */
     private const MAX_METROS = 100;
 
@@ -156,6 +159,13 @@ class CarritoController extends Controller
                 . $this->sufijoMedidas($alto, $ancho);
 
             $carrito = session('carrito', []);
+
+            if (!isset($carrito[$key]) && count($carrito) >= self::MAX_LINEAS) {
+                return response()->json([
+                    'ok'      => false,
+                    'message' => 'El carrito admite hasta ' . self::MAX_LINEAS . ' productos por cotización.',
+                ], 422);
+            }
 
             // Si la línea ya existe (mismo producto, variantes y medidas),
             // sumamos las piezas (tope MAX_UNIDADES).

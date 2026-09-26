@@ -705,7 +705,10 @@ class UsoInternoController extends Controller
         if (!is_dir($destino)) {
             mkdir($destino, 0755, true);
         }
-        $nombre = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $imagen->getClientOriginalName());
+        // hashName() toma la extensión del contenido, no del nombre que manda el
+        // cliente: con el nombre original, un GIF llamado x.php quedaba en
+        // public/ y nginx lo ejecutaba.
+        $nombre = $imagen->hashName();
         $imagen->move($destino, $nombre);
         return 'images/heros/' . $nombre;
     }
