@@ -886,6 +886,62 @@
     color: #b45309;
 }
 
+/* Listados de productos: encabezado y filas comparten las mismas columnas
+   fijas, así no se corren según el largo del contenido de cada fila. */
+@media (min-width: 768px) {
+    .producto-grid {
+        grid-template-columns: 110px minmax(0, 1fr) 180px 100px 60px;
+        align-items: center;
+    }
+
+    .producto-grid.categoria-grid {
+        grid-template-columns: minmax(0, 1fr) 90px 100px 60px;
+    }
+}
+
+.producto-grid > * {
+    min-width: 0;
+}
+
+.producto-grid .badge {
+    vertical-align: middle;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Tarjeta que abre un modal (sin imagen > 0) */
+.stat-card--action {
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Lista de productos sin imagen: cada fila es un link a su edición */
+#modalSinImagen li + li {
+    border-top: 1px solid var(--internal-border);
+}
+
+#modalSinImagen a.internal-import-created-item:hover {
+    background: var(--internal-surface);
+}
+
+.sin-imagen-cat {
+    margin: 0.75rem 0 0.35rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--internal-secondary);
+}
+
+.sin-imagen-cat:first-of-type {
+    margin-top: 0;
+}
+
+.sin-imagen-vacio {
+    font-size: 13px;
+    color: var(--internal-secondary-soft);
+}
+
 /* Paneles */
 .dash-panel-head {
     display: flex;

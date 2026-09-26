@@ -68,34 +68,34 @@
             </div>
         </div>
 
-        <div class="d-none d-md-flex align-items-center text-uppercase small fw-semibold text-secondary border-bottom px-3 py-2" style="font-size: 11px;">
-            <div style="width: 110px;">Código</div>
-            <div class="flex-grow-1">Nombre</div>
-            <div style="width: 180px;">Categoría</div>
-            <div style="width: 100px;">Estado</div>
-            <div class="text-end" style="width: 60px;">Acciones</div>
+        <div class="d-none d-md-grid producto-grid gap-2 text-uppercase small fw-semibold text-secondary border-bottom px-3 py-2" style="font-size: 11px;">
+            <div>Código</div>
+            <div>Nombre</div>
+            <div>Categoría</div>
+            <div>Estado</div>
+            <div class="text-end">Acciones</div>
         </div>
 
         <div class="d-flex flex-column" id="productos-list">
             @forelse ($productos as $producto)
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 px-3 py-2 border-bottom producto-row" data-producto-id="{{ $producto->id }}">
-                <div style="width: 110px;">
+            <div class="d-flex flex-column d-md-grid producto-grid gap-2 px-3 py-2 border-bottom producto-row" data-producto-id="{{ $producto->id }}">
+                <div>
                     <span class="badge bg-secondary-subtle text-secondary rounded-1" style="font-size: 11px; font-weight: 600;">
                         {{ $producto->codigo ?? '—' }}
                     </span>
                 </div>
-                <div class="flex-grow-1">
+                <div>
                     <div class="fw-semibold mb-1" style="font-size: 14px;">{{ $producto->nombre }}</div>
                     @if($producto->descripcion)
-                    <div class="small text-secondary text-truncate" style="font-size: 12px; max-width: 400px;">{{ $producto->descripcion }}</div>
+                    <div class="small text-secondary text-truncate" style="font-size: 12px;">{{ $producto->descripcion }}</div>
                     @endif
                 </div>
-                <div style="width: 180px;">
+                <div>
                     <span class="badge rounded-pill text-primary bg-primary-subtle" style="font-size: 10px; padding: 3px 10px;">
                         {{ $producto->categoria?->nombre ?? '—' }}
                     </span>
                 </div>
-                <div style="width: 100px;">
+                <div>
                     {{-- El badge es el disparador del modal de alta/baja --}}
                     <button type="button"
                         class="badge border-0 rounded-pill {{ $producto->activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle' }}"
@@ -108,7 +108,7 @@
                         {{ $producto->activo ? 'Activo' : 'Inactivo' }}
                     </button>
                 </div>
-                <div class="text-end" style="width: 60px;">
+                <div class="text-end">
                     <a
                         href="{{ route('uso-interno.productos.show', $producto) }}"
                         class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"

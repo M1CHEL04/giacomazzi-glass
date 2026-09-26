@@ -74,34 +74,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 ? `<span class="badge bg-secondary-subtle text-secondary rounded-1" style="font-size: 11px; font-weight: 600;">${escapeHtml(producto.codigo)}</span>`
                 : '<span class="text-secondary">—</span>';
 
-            // Los especiales no tienen unidad de cotizacion: el listado de
-            // especiales no manda el campo y la columna simplemente no va.
-            const unidad = producto.unidad === undefined
-                ? ''
-                : `<div style="width: 150px;">
-                        <span class="badge rounded-pill text-secondary bg-secondary-subtle" style="font-size: 10px; padding: 3px 10px;">
-                            ${escapeHtml(producto.unidad)}
-                        </span>
-                    </div>`;
-
             const descripcion = producto.descripcion
-                ? `<div class="small text-secondary text-truncate" style="font-size: 12px; max-width: 400px;">${escapeHtml(producto.descripcion)}</div>`
+                ? `<div class="small text-secondary text-truncate" style="font-size: 12px;">${escapeHtml(producto.descripcion)}</div>`
                 : '';
 
             html += `
-                <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 px-3 py-2 border-bottom producto-row" data-producto-id="${producto.id}">
-                    <div style="width: 110px;">${codigo}</div>
-                    <div class="flex-grow-1">
+                <div class="d-flex flex-column d-md-grid producto-grid gap-2 px-3 py-2 border-bottom producto-row" data-producto-id="${producto.id}">
+                    <div>${codigo}</div>
+                    <div>
                         <div class="fw-semibold mb-1" style="font-size: 14px;">${escapeHtml(producto.nombre)}</div>
                         ${descripcion}
                     </div>
-                    <div style="width: 180px;">
+                    <div>
                         <span class="badge rounded-pill text-primary bg-primary-subtle" style="font-size: 10px; padding: 3px 10px;">
                             ${escapeHtml(producto.categoria)}
                         </span>
                     </div>
-${unidad}
-                    <div style="width: 100px;">
+                    <div>
                         <button type="button"
                             class="badge border-0 rounded-pill ${producto.activo ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle'}"
                             style="font-size: 10px; padding: 3px 10px; cursor: pointer;"
@@ -113,7 +102,7 @@ ${unidad}
                             ${producto.activo ? 'Activo' : 'Inactivo'}
                         </button>
                     </div>
-                    <div class="text-end" style="width: 60px;">
+                    <div class="text-end">
                         <a
                             href="${SHOW_BASE}/${producto.id}"
                             class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"

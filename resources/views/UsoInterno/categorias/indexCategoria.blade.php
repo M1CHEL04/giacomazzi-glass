@@ -33,10 +33,11 @@
             </div>
         </div>
 
-        <div class="d-none d-md-flex align-items-center text-uppercase small fw-semibold text-secondary border-bottom px-3 py-2" style="font-size: 11px;">
-            <div class="flex-grow-1">Nombre</div>
-            <div style="width: 140px;">Estado</div>
-            <div class="text-end" style="width: 60px;">Acciones</div>
+        <div class="d-none d-md-grid producto-grid categoria-grid gap-2 text-uppercase small fw-semibold text-secondary border-bottom px-3 py-2" style="font-size: 11px;">
+            <div>Nombre</div>
+            <div>Foto hero</div>
+            <div>Estado</div>
+            <div class="text-end">Acciones</div>
         </div>
 
         <div class="d-flex flex-column" id="categorias-list">
@@ -47,17 +48,20 @@
             ? $estadoRaw
             : in_array($estadoRaw, [1, '1', 'activo', 'activa', 'ACTIVO', 'ACTIVA'], true);
             @endphp
-            <div class="d-flex flex-column flex-md-row align-items-md-center gap-2 px-3 py-2 border-bottom category-row" data-category-id="{{ $categoria->id }}">
-                <div class="flex-grow-1">
+            <div class="d-flex flex-column d-md-grid producto-grid categoria-grid gap-2 px-3 py-2 border-bottom category-row" data-category-id="{{ $categoria->id }}">
+                <div>
                     <div class="fw-semibold mb-1 category-name" style="font-size: 14px;">{{ $categoria->nombre }}</div>
                     <div class="small text-secondary" style="font-size: 12px;">{{ $categoria->descripcion ?? ($categoria->productos_count . ' productos asignados') }}</div>
                 </div>
-                <div class="d-flex align-items-center" style="width: 140px;">
+                <div>
+                    <span class="badge rounded-pill {{ $categoria->imagen_hero ? 'text-success bg-success-subtle' : 'text-warning-emphasis bg-warning-subtle' }}" style="font-size: 10px; padding: 3px 10px;">{{ $categoria->imagen_hero ? 'Con foto' : 'Sin foto' }}</span>
+                </div>
+                <div>
                     <span class="badge rounded-pill {{ $isActive ? 'text-success bg-success-subtle' : 'text-danger bg-danger-subtle' }}" style="font-size: 10px; padding: 3px 10px;">
                         {{ $isActive ? 'Activa' : 'Inactiva' }}
                     </span>
                 </div>
-                <div class="text-end" style="width: 60px;">
+                <div class="text-end">
                     <a
                         href="{{ route('uso-interno.categorias.edit', $categoria) }}"
                         class="text-secondary text-decoration-none p-1 d-inline-flex rounded hover-bg-light"

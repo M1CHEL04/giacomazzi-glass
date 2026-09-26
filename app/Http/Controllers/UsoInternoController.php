@@ -36,11 +36,21 @@ class UsoInternoController extends Controller
         $totalEspeciales   = ProductoEspecial::count();
         $especialesActivos = ProductoEspecial::where('activo', true)->count();
 
-        $totalCategorias   = Categoria::count();
-        $categoriasActivas = Categoria::where('activo', true)->count();
-
         // Sin imagen: cuenta los dos tipos, porque en los dos es un problema.
-        $productosSinImagen = Producto::doesntHave('imagenes')->count();
+        $listaSinImagen = Producto::doesntHave('imagenes')
+            ->with('categoria:id,nombre')
+            ->orderBy('nombre')
+            ->get(['id', 'nombre', 'codigo', 'es_especial', 'categoria_id']);
+        $productosSinImagen = $listaSinImagen->count();
+
+        // Para el modal: línea → categoría → productos.
+        $porCategoria = fn($lista) => $lista
+            ->groupBy(fn($p) => $p->categoria->nombre ?? 'Sin categoría')
+            ->sortKeys();
+        $sinImagenPorLinea = [
+            'Línea estándar' => $porCategoria($listaSinImagen->where('es_especial', false)),
+            'Línea adapta'   => $porCategoria($listaSinImagen->where('es_especial', true)),
+        ];
 
         $productosPorCategoria = Categoria::withCount('productos')
             ->orderByDesc('productos_count')
@@ -80,9 +90,8 @@ class UsoInternoController extends Controller
             'productosInactivos',
             'totalEspeciales',
             'especialesActivos',
-            'totalCategorias',
-            'categoriasActivas',
             'productosSinImagen',
+            'sinImagenPorLinea',
             'productosPorCategoria',
             'totalConsultas',
             'consultasMes',
@@ -310,7 +319,7 @@ class UsoInternoController extends Controller
             $activo      = $request->input('activo');
 
             $productos = Producto::estandar()
-                ->with(['categoria', 'unidad'])
+                ->with('categoria')
                 ->when($search, fn($q) => $q->where(function ($q) use ($search) {
                     $q->where('nombre', 'like', '%' . $search . '%')
                         ->orWhere('codigo', 'like', '%' . $search . '%');
@@ -331,7 +340,6 @@ class UsoInternoController extends Controller
                         'codigo'      => $p->codigo,
                         'descripcion' => $p->descripcion,
                         'categoria'   => $p->categoria ? $p->categoria->nombre : '—',
-                        'unidad'      => $p->unidad ? $p->unidad->nombre : '—',
                         'activo'      => (bool) $p->activo,
                     ]),
                     'pagination' => [

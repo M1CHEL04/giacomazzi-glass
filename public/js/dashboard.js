@@ -14,6 +14,9 @@
         var scroll = chart.querySelector('.dash-chart-scroll');
         if (!scroll) return;
 
+        // Arranca mostrando el último mes; los anteriores quedan a la izquierda.
+        scroll.scrollLeft = scroll.scrollWidth;
+
         var tip = document.createElement('div');
         tip.className = 'dash-chart-tip';
         tip.setAttribute('role', 'status');

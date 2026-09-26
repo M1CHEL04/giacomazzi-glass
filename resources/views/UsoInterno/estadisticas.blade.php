@@ -15,39 +15,44 @@
                 <span class="stat-card-icon"><x-heroicon-o-cube /></span>
                 <div class="stat-card-body">
                     <span class="stat-card-value">{{ $totalProductos }}</span>
-                    <span class="stat-card-label">Productos de catálogo</span>
+                    <span class="stat-card-label">Productos línea estandar</span>
                     <span class="stat-card-meta">{{ $productosActivos }} activos · {{ $productosInactivos }} inactivos</span>
-                    {{-- Los especiales van acá y no en un quinto tile: con cinco,
-                         uno queda solo en una segunda fila. --}}
-                    <span class="stat-card-meta">
-                        + {{ $totalEspeciales }} a medida ({{ $especialesActivos }} {{ $especialesActivos === 1 ? 'activo' : 'activos' }})
-                    </span>
                 </div>
             </div>
         </div>
 
         <div class="col-6 col-lg-3">
             <div class="stat-card">
-                <span class="stat-card-icon"><x-heroicon-o-squares-2x2 /></span>
+                <span class="stat-card-icon"><x-heroicon-o-sparkles /></span>
                 <div class="stat-card-body">
-                    <span class="stat-card-value">{{ $totalCategorias }}</span>
-                    <span class="stat-card-label">Categorías</span>
-                    <span class="stat-card-meta">{{ $categoriasActivas }} activas</span>
+                    <span class="stat-card-value">{{ $totalEspeciales }}</span>
+                    <span class="stat-card-label">Productos línea adapta</span>
+                    <span class="stat-card-meta">{{ $especialesActivos }} activos · {{ $totalEspeciales - $especialesActivos }} inactivos</span>
                 </div>
             </div>
         </div>
 
         <div class="col-6 col-lg-3">
-            <div class="stat-card {{ $productosSinImagen > 0 ? 'stat-card--warn' : '' }}">
+            @if($productosSinImagen > 0)
+            <button type="button" class="stat-card stat-card--warn stat-card--action"
+                data-bs-toggle="modal" data-bs-target="#modalSinImagen">
                 <span class="stat-card-icon"><x-heroicon-o-photo /></span>
-                <div class="stat-card-body">
+                <span class="stat-card-body">
                     <span class="stat-card-value">{{ $productosSinImagen }}</span>
                     <span class="stat-card-label">Productos sin imagen</span>
-                    <span class="stat-card-meta">
-                        {{ $productosSinImagen > 0 ? 'Requieren carga de foto' : 'Todo el catálogo con imagen' }}
-                    </span>
+                    <span class="stat-card-meta">Ver lista</span>
+                </span>
+            </button>
+            @else
+            <div class="stat-card">
+                <span class="stat-card-icon"><x-heroicon-o-photo /></span>
+                <div class="stat-card-body">
+                    <span class="stat-card-value">0</span>
+                    <span class="stat-card-label">Productos sin imagen</span>
+                    <span class="stat-card-meta">Todo el catálogo con imagen</span>
                 </div>
             </div>
+            @endif
         </div>
 
         <div class="col-6 col-lg-3">
@@ -131,6 +136,52 @@
     </div>
 
 </div>
+
+@if($productosSinImagen > 0)
+<div class="modal fade" id="modalSinImagen" tabindex="-1" aria-labelledby="modalSinImagenLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:540px;">
+        <div class="modal-content border-0 rounded-3">
+            <div class="modal-header border-0 align-items-start pb-2">
+                <div class="flex-grow-1">
+                    <h2 class="internal-import-result-title m-0" id="modalSinImagenLabel">
+                        {{ $productosSinImagen === 1 ? '1 producto sin imagen' : $productosSinImagen . ' productos sin imagen' }}
+                    </h2>
+                    <div class="internal-import-result-sub">Tocá un producto para ir a cargarle la foto.</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body pt-1 d-flex flex-column gap-4">
+                @foreach($sinImagenPorLinea as $linea => $categorias)
+                <section>
+                    <h3 class="internal-import-section">
+                        {{ $linea }} <span class="internal-import-count">{{ $categorias->sum->count() }}</span>
+                    </h3>
+
+                    @forelse($categorias as $categoria => $productos)
+                    <h4 class="sin-imagen-cat">{{ $categoria }}</h4>
+                    <ul class="internal-import-created list-unstyled m-0">
+                        @foreach($productos as $p)
+                        <li>
+                            <a class="internal-import-created-item text-decoration-none"
+                                href="{{ $p->es_especial ? route('uso-interno.especiales.edit', $p->id) : route('uso-interno.productos.edit', $p->id) }}">
+                                @if($p->codigo)
+                                <code class="internal-import-error-code">{{ $p->codigo }}</code>
+                                @endif
+                                <span class="internal-import-created-name" title="{{ $p->nombre }}">{{ $p->nombre }}</span>
+                            </a>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @empty
+                    <div class="sin-imagen-vacio">Todos los productos tienen imagen.</div>
+                    @endforelse
+                </section>
+                @endforeach
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @section('script')
